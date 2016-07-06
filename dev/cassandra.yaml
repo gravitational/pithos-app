@@ -1,0 +1,42 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: pithos
+  labels:
+    pithos: cassandra
+spec:
+  template:
+    metadata:
+      labels:
+        pithos: cassandra
+    spec:
+      nodeSelector:
+        pithos-role: node
+      hostNetwork: true
+      containers:
+        - command:
+            - /run.sh
+          env:
+            - name: MAX_HEAP_SIZE
+              value: 512M
+            - name: HEAP_NEWSIZE
+              value: 100M
+          image: apiserver:5000/cassandra:0.0.1
+          name: cassandra
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9042
+              name: cql
+            - containerPort: 9160
+              name: thrift
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/cassandra/data
+            - name: cassandra-cfg
+              mountPath: /etc/cassandra
+      volumes:
+        - name: data
+          emptyDir: {}
+        - name: cassandra-cfg
+          configMap:
+            name: cassandra-cfg
