@@ -10,10 +10,6 @@ all: images
 images:
 	cd images && $(MAKE) -f Makefile VERSION=$(VER)
 
-.PHONY: clean
-clean:
-	cd images && $(MAKE) -f Makefile clean
-
 .PHONY: dev-push
 dev-push: images
 	for container in $(CONTAINERS); do \

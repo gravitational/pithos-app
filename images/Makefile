@@ -27,7 +27,3 @@ cassandra:
 pithos:
 	cd pithos && $(MAKE) TAG=$(PITHOS_TAG)
 
-.PHONY: clean
-clean:
-	-rm bootstrap/pithosboot
-
