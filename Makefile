@@ -25,11 +25,11 @@ dev-deploy: dev-push
 	-kubectl label nodes -l role=node pithos-role=node
 	kubectl create configmap cassandra-cfg --from-file=resources/cassandra-cfg
 	kubectl create configmap pithos-cfg --from-file=resources/pithos-cfg
-	kubectl create -f resources/pithos.yaml
+	kubectl create -f dev/pithos.yaml
 
 .PHONY: dev-clean
 dev-clean:
-	-kubectl delete -f resources/pithos.yaml
+	-kubectl delete -f dev/pithos.yaml
 	-kubectl delete configmap cassandra-cfg pithos-cfg
 	-kubectl label nodes -l pithos-role=node pithos-role-
 
