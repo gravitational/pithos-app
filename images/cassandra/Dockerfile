@@ -29,12 +29,9 @@ RUN gpg --keyserver pgp.mit.edu --recv-keys F758CE318D77295D && \
   apt-get update && \
   apt-get -qq -y install procps cassandra openjdk-8-jre-headless && \
   chmod a+rx /run.sh && \
-  mkdir -p /cassandra_data/data && \
-  mv /logback.xml /etc/cassandra/ && \
-  mv /cassandra.yaml /etc/cassandra/ && \
-  chown -R cassandra: /etc/cassandra /cassandra_data /run.sh \
-    /kubernetes-cassandra.jar && \
-  chmod o+w -R /etc/cassandra /cassandra_data && \
+  mkdir -p /var/lib/cassandra/data && \
+  chown -R cassandra: /etc/cassandra /var/lib/cassandra/data /run.sh  /kubernetes-cassandra.jar && \
+  chmod o+w -R /etc/cassandra /var/lib/cassandra/data && \
   rm -rf \
         doc \
         man \
@@ -54,7 +51,7 @@ RUN gpg --keyserver pgp.mit.edu --recv-keys F758CE318D77295D && \
         /tmp/*
 
 
-VOLUME ["/cassandra_data/data"]
+VOLUME ["/var/lib/cassandra/data"]
 
 # 7000: intra-node communication
 # 7001: TLS intra-node communication
