@@ -15,8 +15,6 @@
 FROM quay.io/gravitational/debian-grande:0.0.1
 
 COPY cassandra.list /etc/apt/sources.list.d/cassandra.list
-COPY run.sh /run.sh
-COPY kubernetes-cassandra.jar /kubernetes-cassandra.jar
 
 RUN gpg --keyserver pgp.mit.edu --recv-keys F758CE318D77295D && \
   gpg --export --armor F758CE318D77295D | apt-key add - && \
@@ -26,10 +24,6 @@ RUN gpg --keyserver pgp.mit.edu --recv-keys F758CE318D77295D && \
   gpg --export --armor 0353B12C | apt-key add - && \
   apt-get update && \
   apt-get -qq -y install procps cassandra openjdk-8-jre-headless && \
-  chmod a+rx /run.sh && \
-  mkdir -p /cassandra_data/data && \
-  chown -R cassandra: /etc/cassandra /cassandra_data /run.sh /kubernetes-cassandra.jar && \
-  chmod o+w -R /etc/cassandra /cassandra_data && \
   rm -rf \
         doc \
         man \
@@ -48,13 +42,15 @@ RUN gpg --keyserver pgp.mit.edu --recv-keys F758CE318D77295D && \
         /usr/share/man/ \
         /tmp/*
 
+COPY run.sh /run.sh
+COPY kubernetes-cassandra.jar /kubernetes-cassandra.jar
+
+RUN chmod a+rx /run.sh
 
 VOLUME ["/cassandra_data"]
 
 EXPOSE 7000 7001 7199 9042
 
 RUN test -f /cleanup.sh && sh /cleanup.sh
-
-USER cassandra
 
 CMD /run.sh

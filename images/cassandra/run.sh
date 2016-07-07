@@ -67,4 +67,4 @@ echo CASSANDRA_BROADCAST_ADDRESS ${POD_IP}
 echo CASSANDRA_BROADCAST_RPC_ADDRESS ${POD_IP}
 
 export CLASSPATH=/kubernetes-cassandra.jar
-dumb-init cassandra -f
+dumb-init cassandra -f -R
