@@ -16,7 +16,7 @@
 #
 # indicates
 service:
-  host: '127.0.0.1'
+  host: '0.0.0.0'
   port: 8080
 
 
@@ -40,7 +40,7 @@ options:
   multipart-upload: true
   masterkey-provisioning: true
   masterkey-access: true
-  default-region: 'CH-GV1'
+  default-region: 'G1'
 
 
 ## keystore configuration
@@ -78,7 +78,7 @@ keystore:
 #
 # The default provider relies on cassandra.
 bucketstore:
-  default-region: 'CH-GV1'
+  default-region: 'G1'
   cluster: 'localhost'
   keyspace: 'storage'
 
@@ -96,7 +96,7 @@ bucketstore:
 # rely on cassandra.
 #
 regions:
-  CH-GV1:
+  G1:
     metastore:
       cluster: 'localhost'
       keyspace: 'storage'

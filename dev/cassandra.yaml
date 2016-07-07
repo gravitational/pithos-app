@@ -8,19 +8,31 @@ spec:
   ports:
     - port: 9042
   selector:
-    pithos: cassandra
+    pithos: node
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pithos
+  labels:
+    app: pithos
+spec:
+  ports:
+    - port: 8080
+  selector:
+    pithos: node
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
   name: pithos
   labels:
-    pithos: cassandra
+    pithos: node
 spec:
   template:
     metadata:
       labels:
-        pithos: cassandra
+        pithos: node
     spec:
       nodeSelector:
         pithos-role: node
@@ -28,6 +40,7 @@ spec:
       containers:
         - image: apiserver:5000/pithos:0.0.1
           name: pithos
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
               name: pithos
@@ -36,6 +49,7 @@ spec:
               mountPath: /etc/pithos
         - image: apiserver:5000/cassandra:0.0.1
           name: cassandra
+          imagePullPolicy: Always
           env:
             - name: MAX_HEAP_SIZE
               value: 512M

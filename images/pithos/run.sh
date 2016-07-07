@@ -2,4 +2,4 @@
 
 set -e
 
-java -jar /pithos.jar -f /etc/pithos/config.yaml
+dumb-init java -jar /pithos.jar -f /etc/pithos/config.yaml

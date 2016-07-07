@@ -16,8 +16,6 @@ FROM quay.io/gravitational/debian-grande:0.0.1
 
 COPY cassandra.list /etc/apt/sources.list.d/cassandra.list
 COPY run.sh /run.sh
-COPY cassandra.yaml /cassandra.yaml
-COPY logback.xml /logback.xml
 COPY kubernetes-cassandra.jar /kubernetes-cassandra.jar
 
 RUN gpg --keyserver pgp.mit.edu --recv-keys F758CE318D77295D && \

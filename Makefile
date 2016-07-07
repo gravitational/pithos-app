@@ -1,6 +1,6 @@
 VER:=0.0.1
 PACKAGE:=gravitational.io/pithos-app:$(VER)
-CONTAINERS:=pithos-bootstrap:$(VER) pithos-uninstall:$(VER) cassandra:$(VER)
+CONTAINERS:=pithos-bootstrap:$(VER) pithos-uninstall:$(VER) cassandra:$(VER) pithos:$(VER)
 LOCAL_WORK_DIR:=/var/lib/gravity/opscenter
 
 .PHONY: all
@@ -34,7 +34,7 @@ dev-deploy: dev-push
 .PHONY: dev-clean
 dev-clean:
 	-kubectl delete -f dev/cassandra.yaml
-	-kubectl delete configmap cassandra-cfg
+	-kubectl delete configmap cassandra-cfg pithos-cfg
 	-kubectl label nodes -l pithos-role=node pithos-role-
 
 .PHONY: vendor-import

@@ -9,7 +9,7 @@ PITHOS_TAG:=pithos:$(VERSION)
 CASSANDRA_TAG:=cassandra:$(VERSION)
 
 .PHONY: images
-images: bootstrap uninstall cassandra
+images: bootstrap uninstall cassandra pithos
 
 .PHONY: bootstrap
 bootstrap:
