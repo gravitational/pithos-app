@@ -27,9 +27,9 @@ RUN gpg --keyserver pgp.mit.edu --recv-keys F758CE318D77295D && \
   apt-get update && \
   apt-get -qq -y install procps cassandra openjdk-8-jre-headless && \
   chmod a+rx /run.sh && \
-  mkdir -p /var/lib/cassandra/data && \
-  chown -R cassandra: /etc/cassandra /var/lib/cassandra/data /run.sh  /kubernetes-cassandra.jar && \
-  chmod o+w -R /etc/cassandra /var/lib/cassandra/data && \
+  mkdir -p /cassandra_data/data && \
+  chown -R cassandra: /etc/cassandra /cassandra_data /run.sh /kubernetes-cassandra.jar && \
+  chmod o+w -R /etc/cassandra /cassandra_data && \
   rm -rf \
         doc \
         man \
@@ -49,14 +49,11 @@ RUN gpg --keyserver pgp.mit.edu --recv-keys F758CE318D77295D && \
         /tmp/*
 
 
-VOLUME ["/var/lib/cassandra/data"]
+VOLUME ["/cassandra_data"]
 
-# 7000: intra-node communication
-# 7001: TLS intra-node communication
-# 7199: JMX
-# 9042: CQL
-# 9160: thrift service not included cause it is going away
 EXPOSE 7000 7001 7199 9042
+
+RUN test -f /cleanup.sh && sh /cleanup.sh
 
 USER cassandra
 

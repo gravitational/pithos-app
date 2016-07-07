@@ -12,13 +12,13 @@ installer:
       variables:
         devices:
           - device: vdb
-            mb: 8000
+            mb: 10000
   servers:
     master:
       cpu:
         min_count: 1
       ram:
-        min_total_mb: 2000
+        min_total_mb: 4000
     node:
       cpu:
         min_count: 1
@@ -27,11 +27,15 @@ installer:
       labels:
         role: node
       ram:
-        min_total_mb: 2000
+        min_total_mb: 4000
       directories:
         - name: /var/lib/gravity
           min_total_mb: 4000
           fs_types: ["xfs", "btrfs"]
+      mounts:
+        - source: /cassandra_data
+          destination: /cassandra_data
+          create_if_missing: true
 hooks:
   install:
     spec:

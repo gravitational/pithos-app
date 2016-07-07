@@ -38,7 +38,7 @@ spec:
         pithos-role: node
       hostNetwork: true
       containers:
-        - image: apiserver:5000/pithos:0.0.1
+        - image: pithos:0.0.1
           name: pithos
           imagePullPolicy: Always
           ports:
@@ -47,7 +47,7 @@ spec:
           volumeMounts:
             - name: pithos-cfg
               mountPath: /etc/pithos
-        - image: apiserver:5000/cassandra:0.0.1
+        - image: cassandra:0.0.1
           name: cassandra
           imagePullPolicy: Always
           env:
@@ -74,12 +74,13 @@ spec:
               name: cql
           volumeMounts:
             - name: data
-              mountPath: /var/lib/cassandra/data
+              mountPath: /cassandra_data
             - name: cassandra-cfg
               mountPath: /etc/cassandra
       volumes:
         - name: data
-          emptyDir: {}
+          hostPath:
+            path: /cassandra_data
         - name: cassandra-cfg
           configMap:
             name: cassandra-cfg

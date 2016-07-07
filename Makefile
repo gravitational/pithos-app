@@ -29,16 +29,16 @@ dev-deploy: dev-push
 	-kubectl label nodes -l role=node pithos-role=node
 	kubectl create configmap cassandra-cfg --from-file=resources/cassandra-cfg
 	kubectl create configmap pithos-cfg --from-file=resources/pithos-cfg
-	kubectl create -f dev/cassandra.yaml
+	kubectl create -f resources/pithos.yaml
 
 .PHONY: dev-clean
 dev-clean:
-	-kubectl delete -f dev/cassandra.yaml
+	-kubectl delete -f resources/pithos.yaml
 	-kubectl delete configmap cassandra-cfg pithos-cfg
 	-kubectl label nodes -l pithos-role=node pithos-role-
 
-.PHONY: vendor-import
-vendor-import:
+.PHONY: import
+import: images
 	-gravity app --state-dir=$(LOCAL_WORK_DIR) delete $(PACKAGE) --force
 	gravity app import --debug --vendor --glob=**/*.yaml --registry-url=apiserver:5000 --state-dir=$(LOCAL_WORK_DIR) .
 
