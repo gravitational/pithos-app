@@ -1,5 +1,5 @@
 FROM quay.io/gravitational/debian-tall:latest
 
-ADD bootstrap.sh /bootstrap.sh
+ADD pithosboot /pithosboot
 
-CMD ["/bootstrap.sh"]
+CMD ["/pithosboot"]

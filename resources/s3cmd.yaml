@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+    name: s3cmd
+spec:
+  containers:
+    - name: s3cmd
+      image: s3cmd:0.0.1
+      imagePullPolicy: Always
+

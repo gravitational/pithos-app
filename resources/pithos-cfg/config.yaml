@@ -27,14 +27,12 @@ logging:
   console: true
   files:
     - "/tmp/pithos.log"
-# overrides:
-#   io.exo.pithos: debug
 
 
 ## global options
 ## --------------
 options:
-  service-uri: 's3.example.com'
+  service-uri: 's3.gravitational.io'
   reporting: true
   server-side-encryption: true
   multipart-upload: true
@@ -54,17 +52,13 @@ options:
 # being defined inline.
 keystore:
   keys:
-    AKIAIOSFODNN7EXAMPLE:
-# The master key allows provisinning operations
-# when the masterkey-provisioning feature is
-# set to true and will allow access to all
-# buckets when masterkey-access is set to true
+    C28D2EE399E1A4CBC295D677:
       master: true
-      tenant: 'pyr@spootnik.org'
-      secret: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
-    BKIAIOSFODNN7EXAMPLE:
-      tenant: 'exoscale'
-      secret: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
+      tenant: 'ops@gravitational.io'
+      secret: '4C22FFEA7A6C9F3AAFD223B30628F0EA1D50318C2F6F173F'
+    CE9ED4F33A988422E7FA5DF1:
+      tenant: 'pithos'
+      secret: '1D8943238E6BC13E9030DF912FD047C4176C7758778E0E90'
 
 
 ## bucketstore configuration
