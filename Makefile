@@ -38,3 +38,6 @@ import: images
 	-gravity app --state-dir=$(LOCAL_WORK_DIR) delete $(PACKAGE) --force
 	gravity app import --debug --vendor --glob=**/*.yaml --ignore=dev --ignore=cassandra-cfg --ignore=pithos-cfg --registry-url=apiserver:5000 --state-dir=$(LOCAL_WORK_DIR) .
 
+.PHONY: clean
+clean:
+	rm images/bootstrap/pithosboot

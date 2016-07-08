@@ -34,7 +34,7 @@ func bootCluster() error {
 		return trace.Wrap(err)
 	}
 
-	label := "stolon-role=node"
+	label := "pithos-role=node"
 
 	for _, node := range nodes.Items {
 		log.Infof("labeling node: %s with: %s", node.Metadata.Name, label)
