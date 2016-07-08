@@ -40,14 +40,15 @@ RUN gpg --keyserver pgp.mit.edu --recv-keys F758CE318D77295D && \
         /usr/share/doc/ \
         /usr/share/doc-base/ \
         /usr/share/man/ \
-        /tmp/*
+        /tmp/* \
+        /etc/cassandra/*
 
 COPY run.sh /run.sh
 COPY kubernetes-cassandra.jar /kubernetes-cassandra.jar
 
 RUN chmod a+rx /run.sh
 
-VOLUME ["/cassandra_data"]
+VOLUME /cassandra_data /etc/cassandra
 
 EXPOSE 7000 7001 7199 9042
 
