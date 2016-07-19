@@ -1,7 +1,9 @@
-VER:=0.0.1
-PACKAGE:=gravitational.io/pithos-app:$(VER)
-CONTAINERS:=pithos-bootstrap:$(VER) pithos-uninstall:$(VER) cassandra:$(VER) pithos:$(VER)
-LOCAL_WORK_DIR:=/var/lib/gravity/opscenter
+VER := 0.0.2
+REPOSITORY := gravitational.io
+NAME := pithos-app
+OPS_URL ?= https://opscenter.localhost.localdomain:33009
+
+CONTAINERS := pithos-bootstrap:$(VER) pithos-uninstall:$(VER) cassandra:$(VER) pithos:$(VER)
 
 .PHONY: all
 all: images
@@ -35,8 +37,8 @@ dev-clean:
 
 .PHONY: import
 import: images
-	-gravity app --state-dir=$(LOCAL_WORK_DIR) delete $(PACKAGE) --force
-	gravity app import --debug --vendor --glob=**/*.yaml --ignore=dev --ignore=cassandra-cfg --ignore=pithos-cfg --registry-url=apiserver:5000 --state-dir=$(LOCAL_WORK_DIR) .
+	-gravity app delete --ops-url=$(OPS_URL) $(REPOSITORY)/$(NAME):$(VER) --force --insecure
+	gravity app import --vendor --glob=**/*.yaml --ignore=dev --ignore=cassandra-cfg --ignore=pithos-cfg --registry-url=apiserver:5000 --ops-url=$(OPS_URL) --repository=$(REPOSITORY) --name=$(NAME) --version=$(VER) --insecure .
 
 .PHONY: clean
 clean:
