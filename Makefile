@@ -38,7 +38,7 @@ dev-clean:
 .PHONY: import
 import: images
 	-gravity app delete --ops-url=$(OPS_URL) $(REPOSITORY)/$(NAME):$(VER) --force --insecure
-	gravity app import --vendor --glob=**/*.yaml --ignore=dev --ignore=cassandra-cfg --ignore=pithos-cfg --registry-url=apiserver:5000 --ops-url=$(OPS_URL) --repository=$(REPOSITORY) --name=$(NAME) --version=$(VER) --insecure .
+	gravity app import --vendor --glob=**/*.yaml --ignore=dev --ignore=cassandra-cfg --ignore=pithos-cfg --registry-url=apiserver:5000 --ops-url=$(OPS_URL) --repository=$(REPOSITORY) --name=$(NAME) --version=$(VER) --rewrite-version=latest:$(VER) --insecure .
 
 .PHONY: clean
 clean:

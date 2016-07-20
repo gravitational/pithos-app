@@ -1,7 +1,7 @@
 .PHONY: all
 all: images
 
-VERSION ?= 0.0.1
+VERSION ?= 0.0.2
 
 BOOTSTRAP_TAG:=pithos-bootstrap:$(VERSION)
 UNINSTALL_TAG:=pithos-uninstall:$(VERSION)

@@ -5,6 +5,6 @@ metadata:
 spec:
   containers:
     - name: s3cmd
-      image: s3cmd:0.0.1
+      image: s3cmd:latest
       imagePullPolicy: Always
 
