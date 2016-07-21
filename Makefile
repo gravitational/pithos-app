@@ -6,7 +6,7 @@ OPS_URL ?= https://opscenter.localhost.localdomain:33009
 CONTAINERS := pithos-bootstrap:$(VER) pithos-uninstall:$(VER) cassandra:$(VER) pithos:$(VER)
 
 .PHONY: all
-all: images
+all: clean images
 
 .PHONY: images
 images:
