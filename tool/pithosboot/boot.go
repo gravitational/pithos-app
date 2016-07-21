@@ -41,10 +41,5 @@ func bootCluster() error {
 		}
 	}
 
-	err = createPithosConfig()
-	if err != nil {
-		return trace.Wrap(err)
-	}
-
 	return nil
 }

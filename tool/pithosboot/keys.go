@@ -59,7 +59,7 @@ func randomHex(length int) (string, error) {
 	if err != nil {
 		return "", trace.Wrap(err)
 	}
-	return string(fmt.Sprintf("%x", sha256.Sum256(data))[length]), nil
+	return fmt.Sprintf("%x", sha256.Sum256(data))[:length], nil
 }
 
 func createPithosConfig() error {
@@ -113,10 +113,10 @@ func createPithosConfig() error {
 	}
 
 	keyMap := map[string]string{
-		"master_key":    masterKey.Key,
-		"master_secret": masterKey.Secret,
-		"tenant_key":    tenantKey.Key,
-		"tenant_secret": tenantKey.Secret,
+		"master.key":    masterKey.Key,
+		"master.secret": masterKey.Secret,
+		"tenant.key":    tenantKey.Key,
+		"tenant.secret": tenantKey.Secret,
 	}
 
 	out, err = rigging.CreateSecretFromMap("pithos-keys", keyMap)
