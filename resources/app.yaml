@@ -44,6 +44,9 @@ hooks:
       metadata:
         name: pithos-app-install
       spec:
+        volumes:
+          - name: temp
+            emptyDir: {}
         template:
           metadata:
             name: pithos-app-install
@@ -52,6 +55,10 @@ hooks:
             containers:
               - name: bootstrap
                 image: pithos-bootstrap:latest
+                volumeMounts:
+                  - name: temp
+                    mountPath: /tmp
+
   uninstall:
     spec:
       apiVersion: batch/v1
