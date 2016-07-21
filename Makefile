@@ -36,7 +36,7 @@ dev-clean:
 	-kubectl label nodes -l pithos-role=node pithos-role-
 
 .PHONY: import
-import: images
+import: clean images
 	-gravity app delete --ops-url=$(OPS_URL) $(REPOSITORY)/$(NAME):$(VER) --force --insecure
 	gravity app import --vendor --glob=**/*.yaml --ignore=dev --ignore=cassandra-cfg --ignore=pithos-cfg --registry-url=apiserver:5000 --ops-url=$(OPS_URL) --repository=$(REPOSITORY) --name=$(NAME) --version=$(VER) --rewrite-version=latest:$(VER) --insecure .
 
