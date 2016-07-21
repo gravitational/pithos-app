@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	log "github.com/Sirupsen/logrus"
@@ -50,7 +51,7 @@ func generateKeyAndSecret() (key string, secret string, err error) {
 	if err != nil {
 		return key, secret, trace.Wrap(err)
 	}
-	return key, secret, nil
+	return strings.ToUpper(key), strings.ToUpper(secret), nil
 }
 
 func randomHex(length int) (string, error) {
