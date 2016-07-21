@@ -1,8 +1,6 @@
 .PHONY: all
 all: images
 
-VERSION ?= 0.0.3
-
 BOOTSTRAP_TAG:=pithos-bootstrap:$(VERSION)
 UNINSTALL_TAG:=pithos-uninstall:$(VERSION)
 PITHOS_TAG:=pithos:$(VERSION)
@@ -10,6 +8,10 @@ CASSANDRA_TAG:=cassandra:$(VERSION)
 
 .PHONY: images
 images: bootstrap uninstall cassandra pithos
+	docker tag $(BOOTSTRAP_TAG) pithos-bootstrap:latest
+	docker tag $(UNINSTALL_TAG) pithos-uninstall:latest
+	docker tag $(PITHOS_TAG) pithos:latest
+	docker tag $(CASSANDRA_TAG) cassandra:latest
 
 PITHOSBOOT_BINS:=bootstrap/pithosboot
 $(PITHOSBOOT_BINS):
