@@ -52,13 +52,12 @@ options:
 # being defined inline.
 keystore:
   keys:
-    C28D2EE399E1A4CBC295D677:
-      master: true
-      tenant: 'ops@gravitational.io'
-      secret: '4C22FFEA7A6C9F3AAFD223B30628F0EA1D50318C2F6F173F'
-    CE9ED4F33A988422E7FA5DF1:
-      tenant: 'pithos'
-      secret: '1D8943238E6BC13E9030DF912FD047C4176C7758778E0E90'
+{{range .Keys}}
+    {{.Key}}:
+      master: {{.Master}}
+      tenant: '{{.Tenant}}'
+      secret: '{{.Secret}}'
+{{end}}
 
 
 ## bucketstore configuration
