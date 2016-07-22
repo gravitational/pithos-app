@@ -1,0 +1,19 @@
+{
+    "CN": "s3.gravitational.io",
+    "hosts": [
+        "s3.gravitational.io"
+    ],
+    "key": {
+        "algo": "rsa",
+        "size": 2048
+    },
+    "names": [
+        {
+            "C": "US",
+            "ST": "CA",
+            "L": "San Francisco",
+            "O": "Gravitational Inc."
+        }
+    ]
+}
+
