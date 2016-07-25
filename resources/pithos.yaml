@@ -102,4 +102,4 @@ spec:
             name: pithos-cfg
         - name: pithos-ssl
           secret:
-            name: pithos-ssl
+            secretName: pithos-ssl
