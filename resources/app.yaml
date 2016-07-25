@@ -3,9 +3,9 @@ kind: Application
 metadata:
   repository: gravitational.io
   name: pithos-app
-  resourceVersion: 0.0.4
+  resourceVersion: 0.0.1
   namespace: default
-base: gravitational.io/k8s-aws:1.3.0-5
+base: gravitational.io/k8s-aws:0.0.30-f51c84c.130
 installer:
   provisioners:
     virsh:

@@ -1,4 +1,4 @@
-VER := 0.0.4
+VER := 0.0.5
 REPOSITORY := gravitational.io
 NAME := pithos-app
 OPS_URL ?= https://opscenter.localhost.localdomain:33009
@@ -8,7 +8,8 @@ CONTAINERS := pithos-bootstrap:$(VER) pithos-uninstall:$(VER) cassandra:$(VER) p
 IMPORT_IMAGE_FLAGS := --set-image=pithos-bootstrap:$(VER) \
 	--set-image=pithos-uninstall:$(VER) \
 	--set-image=cassandra:$(VER) \
-	--set-image=pithos:$(VER)
+	--set-image=pithos:$(VER) \
+	--set-dep=gravitational.io/k8s-onprem:$$(gravity app list --ops-url=$(OPS_URL) --insecure|grep k8s-onprem|awk '{print $$3}'|cut -d: -f2|cut -d, -f1)
 
 IMPORT_OPTIONS := --vendor \
 		--ops-url=$(OPS_URL) \
