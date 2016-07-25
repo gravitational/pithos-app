@@ -3,12 +3,13 @@ REPOSITORY := gravitational.io
 NAME := pithos-app
 OPS_URL ?= https://opscenter.localhost.localdomain:33009
 
-CONTAINERS := pithos-bootstrap:$(VER) pithos-uninstall:$(VER) cassandra:$(VER) pithos:$(VER)
+CONTAINERS := pithos-bootstrap:$(VER) pithos-uninstall:$(VER) cassandra:$(VER) pithos:$(VER) pithos-proxy:$(VER)
 
 IMPORT_IMAGE_FLAGS := --set-image=pithos-bootstrap:$(VER) \
 	--set-image=pithos-uninstall:$(VER) \
 	--set-image=cassandra:$(VER) \
 	--set-image=pithos:$(VER) \
+	--set-image=pithos-proxy:$(VER) \
 	--set-dep=gravitational.io/k8s-onprem:$$(gravity app list --ops-url=$(OPS_URL) --insecure|grep k8s-onprem|awk '{print $$3}'|cut -d: -f2|cut -d, -f1)
 
 IMPORT_OPTIONS := --vendor \
@@ -30,29 +31,6 @@ all: clean images
 .PHONY: images
 images:
 	cd images && $(MAKE) -f Makefile VERSION=$(VER)
-
-.PHONY: dev-push
-dev-push: images
-	for container in $(CONTAINERS); do \
-		docker tag $$container apiserver:5000/$$container ;\
-		docker push apiserver:5000/$$container ;\
-	done
-
-.PHONY: dev-redeploy
-dev-redeploy: dev-clean dev-deploy
-
-.PHONY: dev-deploy
-dev-deploy: dev-push
-	-kubectl label nodes -l role=node pithos-role=node
-	kubectl create configmap cassandra-cfg --from-file=resources/cassandra-cfg
-	kubectl create configmap pithos-cfg --from-file=resources/pithos-cfg
-	kubectl create -f dev/pithos.yaml
-
-.PHONY: dev-clean
-dev-clean:
-	-kubectl delete -f dev/pithos.yaml
-	-kubectl delete configmap cassandra-cfg pithos-cfg
-	-kubectl label nodes -l pithos-role=node pithos-role-
 
 .PHONY: import
 import: clean images
