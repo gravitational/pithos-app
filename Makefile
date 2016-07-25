@@ -40,3 +40,27 @@ import: clean images
 .PHONY: clean
 clean:
 	-rm images/bootstrap/pithosboot
+
+.PHONY: dev-push
+dev-push: images
+	for container in $(CONTAINERS); do \
+		docker tag $$container apiserver:5000/$$container ;\
+		docker push apiserver:5000/$$container ;\
+	done
+
+.PHONY: dev-redeploy
+dev-redeploy: dev-clean dev-deploy
+
+.PHONY: dev-deploy
+dev-deploy: dev-push
+	-kubectl label nodes -l role=node pithos-role=node
+	kubectl create configmap cassandra-cfg --from-file=resources/cassandra-cfg
+	kubectl create configmap pithos-cfg --from-file=resources/pithos-cfg
+	kubectl create -f resources/pithos.yaml
+
+.PHONY: dev-clean
+dev-clean:
+	   -kubectl delete -f resources/pithos.yaml
+	   -kubectl delete configmap cassandra-cfg pithos-cfg
+	   -kubectl label nodes -l pithos-role=node pithos-role-
+
