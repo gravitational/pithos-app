@@ -16,18 +16,18 @@ installer:
   servers:
     master:
       cpu:
-        min_count: 1
+        min_count: 2
       ram:
-        min_total_mb: 4000
+        min_total_mb: 8000
     node:
       cpu:
-        min_count: 1
+        min_count: 2
+      ram:
+        min_total_mb: 8000
       min_count: 2
       description: "pithos server"
       labels:
         role: node
-      ram:
-        min_total_mb: 4000
       directories:
         - name: /var/lib/gravity
           min_total_mb: 4000
