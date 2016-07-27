@@ -14,10 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -e
-
 POD_IP=$(getent ahosts ${HOSTNAME} | awk 'NR==1{print $1}')
-
 CFG=/etc/cassandra/cassandra.yaml
 CASSANDRA_RPC_ADDRESS="${CASSANDRA_RPC_ADDRESS:-0.0.0.0}"
 CASSANDRA_NUM_TOKENS="${CASSANDRA_NUM_TOKENS:-32}"
@@ -68,3 +65,4 @@ echo CASSANDRA_BROADCAST_RPC_ADDRESS ${POD_IP}
 
 export CLASSPATH=/kubernetes-cassandra.jar
 dumb-init cassandra -f -R
+

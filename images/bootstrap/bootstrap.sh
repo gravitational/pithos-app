@@ -9,3 +9,5 @@ kubectl create secret generic pithos-ca --from-file=ca.pem=ca.pem --from-file=ca
 kubectl create secret generic pithos-ssl --from-file=server-csr.json=server-csr.json --from-file=server-key.pem=server-key.pem --from-file=server.csr=server.csr --from-file=server.pem=server.pem
 
 /pithosboot
+
+sleep 10000

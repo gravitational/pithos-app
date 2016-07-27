@@ -8,7 +8,8 @@ spec:
   ports:
     - port: 9042
   selector:
-    pithos: node
+    app: pithos
+    pithos-role: cassandra
 ---
 apiVersion: v1
 kind: Service
@@ -24,44 +25,110 @@ spec:
     - port: 443
       name: https
   selector:
-    pithos: node
+    app: pithos
+    pithos-role: proxy
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pithos-internal
+  labels:
+    app: pithos
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      name: http
+  selector:
+    app: pithos
+    pithos-role: pithos
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: pithos
+  labels:
+    app: pithos
+    pithos-role: pithos
+spec:
+  replicas: 1
+  selector:
+    app: pithos
+    pithos-role: pithos
+  template:
+    metadata:
+      labels:
+        app: pithos
+        pithos-role: pithos
+    spec:
+      containers:
+      - image: pithos:latest
+        name: pithos
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 8080
+            name: pithos
+        volumeMounts:
+          - name: pithos-cfg
+            mountPath: /etc/pithos
+      volumes:
+        - name: pithos-cfg
+          configMap:
+            name: pithos-cfg
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: pithos-proxy
+  labels:
+    app: pithos
+    pithos-role: proxy
+spec:
+  replicas: 1
+  selector:
+    app: pithos
+    pithos-role: proxy
+  template:
+    metadata:
+      labels:
+        app: pithos
+        pithos-role: proxy
+    spec:
+      containers:
+      - image: pithos-proxy:latest
+        name: proxy
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 80
+            name: http
+          - containerPort: 443
+            name: https
+        volumeMounts:
+          - name: pithos-ssl
+            mountPath: /etc/pithos-ssl
+      volumes:
+        - name: pithos-ssl
+          secret:
+            secretName: pithos-ssl
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: pithos
+  name: cassandra
   labels:
-    pithos: node
+    app: pithos
+    pithos-role: cassandra
 spec:
   template:
     metadata:
       labels:
-        pithos: node
+        app: pithos
+        pithos-role: cassandra
     spec:
       nodeSelector:
         pithos-role: node
       hostNetwork: true
       containers:
-        - image: pithos-proxy:latest
-          name: proxy
-          imagePullPolicy: Always
-          ports:
-            - containerPort: 80
-              name: http
-            - containerPort: 443
-              name: https
-          volumeMounts:
-            - name: pithos-ssl
-              mountPath: /etc/pithos-ssl
-        - image: pithos:latest
-          name: pithos
-          imagePullPolicy: Always
-          ports:
-            - containerPort: 8080
-              name: pithos
-          volumeMounts:
-            - name: pithos-cfg
-              mountPath: /etc/pithos
         - image: cassandra:latest
           name: cassandra
           imagePullPolicy: Always
@@ -99,9 +166,3 @@ spec:
         - name: cassandra-cfg
           configMap:
             name: cassandra-cfg
-        - name: pithos-cfg
-          configMap:
-            name: pithos-cfg
-        - name: pithos-ssl
-          secret:
-            secretName: pithos-ssl
