@@ -17,8 +17,12 @@ metadata:
   labels:
     app: pithos
 spec:
+  type: NodePort
   ports:
-    - port: 8080
+    - port: 80
+      name: http
+    - port: 443
+      name: https
   selector:
     pithos: node
 ---
@@ -38,6 +42,17 @@ spec:
         pithos-role: node
       hostNetwork: true
       containers:
+        - image: apiserver:5000/pithos-proxy:latest
+          name: proxy
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+              name: http
+            - containerPort: 443
+              name: https
+          volumeMounts:
+            - name: pithos-ssl
+              mountPath: /etc/pithos-ssl
         - image: apiserver:5000/pithos:latest
           name: pithos
           imagePullPolicy: Always
@@ -87,3 +102,6 @@ spec:
         - name: pithos-cfg
           configMap:
             name: pithos-cfg
+        - name: pithos-ssl
+          secret:
+            secretName: pithos-ssl
