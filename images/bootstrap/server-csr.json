@@ -1,6 +1,7 @@
 {
-    "CN": "s3.gravitational.io",
+    "CN": "*.s3.gravitational.io",
     "hosts": [
+        "*.s3.gravitational.io",
         "s3.gravitational.io"
     ],
     "key": {
