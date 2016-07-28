@@ -46,39 +46,6 @@ spec:
 apiVersion: v1
 kind: ReplicationController
 metadata:
-  name: pithos
-  labels:
-    app: pithos
-    pithos-role: pithos
-spec:
-  replicas: 1
-  selector:
-    app: pithos
-    pithos-role: pithos
-  template:
-    metadata:
-      labels:
-        app: pithos
-        pithos-role: pithos
-    spec:
-      containers:
-      - image: pithos:latest
-        name: pithos
-        imagePullPolicy: Always
-        ports:
-          - containerPort: 8080
-            name: pithos
-        volumeMounts:
-          - name: pithos-cfg
-            mountPath: /etc/pithos
-      volumes:
-        - name: pithos-cfg
-          configMap:
-            name: pithos-cfg
----
-apiVersion: v1
-kind: ReplicationController
-metadata:
   name: pithos-proxy
   labels:
     app: pithos

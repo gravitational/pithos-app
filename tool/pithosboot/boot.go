@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/gravitational/rigging"
 	"github.com/gravitational/trace"
@@ -32,13 +34,30 @@ func bootCluster() error {
 	}
 
 	label := "pithos-role=node"
-
 	for _, node := range nodes.Items {
 		log.Infof("labeling node: %s with: %s", node.Metadata.Name, label)
 		_, err = rigging.LabelNode(node.Metadata.Name, label)
 		if err != nil {
 			return trace.Wrap(err)
 		}
+	}
+
+	log.Infof("initializing pithos")
+	out, err = rigging.CreateFromFile("/var/lib/gravity/resources/pithos-initialize.yaml")
+	if err != nil {
+		return trace.Wrap(err)
+	}
+
+	log.Infof("waiting for pithos to be initialized")
+	err = rigging.WaitForJobSuccess("pithos-initialize", 2*time.Minute)
+	if err != nil {
+		return trace.Wrap(err)
+	}
+
+	log.Infof("creating pithos replication controller")
+	out, err = rigging.CreateFromFile("/var/lib/gravity/resources/pithos-rc.yaml")
+	if err != nil {
+		return trace.Wrap(err)
 	}
 
 	return nil
