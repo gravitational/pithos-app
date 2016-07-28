@@ -33,7 +33,7 @@ images:
 	cd images && $(MAKE) -f Makefile VERSION=$(VER)
 
 .PHONY: import
-import: clean images
+import: images
 	-gravity app delete --ops-url=$(OPS_URL) $(REPOSITORY)/$(NAME):$(VER) --force --insecure
 	gravity app import $(IMPORT_OPTIONS) .
 
@@ -60,7 +60,6 @@ dev-deploy: dev-push
 
 .PHONY: dev-clean
 dev-clean:
-	   -kubectl delete -f resources/pithos.yaml
-	   -kubectl delete configmap cassandra-cfg pithos-cfg
-	   -kubectl label nodes -l pithos-role=node pithos-role-
-
+	-kubectl delete -f resources/pithos.yaml
+	-kubectl delete configmap cassandra-cfg pithos-cfg
+	-kubectl label nodes -l pithos-role=node pithos-role-
