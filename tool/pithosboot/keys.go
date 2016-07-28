@@ -43,11 +43,11 @@ func generateAccessKey(tenant string, master bool) (*AccessKey, error) {
 }
 
 func generateKeyAndSecret() (key string, secret string, err error) {
-	key, err = randomHex(24)
+	key, err = randomHex(20)
 	if err != nil {
 		return key, secret, trace.Wrap(err)
 	}
-	secret, err = randomHex(48)
+	secret, err = randomHex(40)
 	if err != nil {
 		return key, secret, trace.Wrap(err)
 	}
