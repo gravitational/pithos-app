@@ -10,4 +10,3 @@ kubectl create secret generic pithos-ssl --from-file=server-csr.json=server-csr.
 
 /pithosboot
 
-sleep 10000
