@@ -11,7 +11,6 @@ IMPORT_IMAGE_FLAGS := --set-image=pithos-bootstrap:$(VER) \
 	--set-image=pithos:$(VER) \
 	--set-dep=gravitational.io/k8s-onprem:$$(gravity app list --ops-url=$(OPS_URL) --insecure|grep -m 1 k8s-onprem|awk '{print $$3}'|cut -d: -f2|cut -d, -f1)
 
-
 IMPORT_OPTIONS := --vendor \
 		--ops-url=$(OPS_URL) \
 		--insecure \
