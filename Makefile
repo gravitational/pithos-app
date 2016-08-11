@@ -24,6 +24,9 @@ IMPORT_OPTIONS := --vendor \
 		--registry-url=apiserver:5000 \
 		$(IMPORT_IMAGE_FLAGS)
 
+BUILD_DIR := build
+TARBALL := $(BUILD_DIR)/pithos-app.tar.gz
+
 .PHONY: all
 all: clean images
 
@@ -35,6 +38,15 @@ images:
 import: images
 	-gravity app delete --ops-url=$(OPS_URL) $(REPOSITORY)/$(NAME):$(VER) --force --insecure
 	gravity app import $(IMPORT_OPTIONS) .
+
+.PHONY: export
+export: $(TARBALL)
+
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
+
+$(TARBALL): import $(BUILD_DIR)
+	gravity package export $(REPOSITORY)/$(NAME):$(VER) $(TARBALL)
 
 .PHONY: clean
 clean:
