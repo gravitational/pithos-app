@@ -49,7 +49,7 @@ func bootCluster() error {
 	}
 
 	log.Infof("waiting for pithos to be initialized")
-	err = rigging.WaitForJobSuccess("pithos-initialize", 2*time.Minute)
+	err = rigging.WaitForJobSuccess("pithos-initialize", 10*time.Minute)
 	if err != nil {
 		return trace.Wrap(err)
 	}
