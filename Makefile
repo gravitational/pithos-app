@@ -1,4 +1,4 @@
-VER := 0.0.7
+VER := 0.0.8
 REPOSITORY := gravitational.io
 NAME := pithos-app
 OPS_URL ?= https://opscenter.localhost.localdomain:33009
