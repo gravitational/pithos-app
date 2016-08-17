@@ -14,20 +14,16 @@ installer:
           - device: vdc
             mb: 6144
   servers:
-    master:
-      cpu:
-        min_count: 2
-      ram:
-        min_total_mb: 8000
     node:
       cpu:
         min_count: 2
       ram:
         min_total_mb: 8000
-      min_count: 2
+      min_count: 3
       description: "pithos server"
       labels:
         role: node
+        pithos-role: node
       directories:
         - name: /var/lib/gravity
           min_total_mb: 4000
