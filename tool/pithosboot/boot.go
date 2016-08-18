@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strings"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -11,40 +12,27 @@ import (
 func bootCluster() error {
 	log.Infof("creating ConfigMap/cassandra-cfg")
 	out, err := rigging.CreateConfigMapFromPath("cassandra-cfg", "/var/lib/gravity/resources/cassandra-cfg")
-	if err != nil {
+	if err != nil && !strings.Contains(string(out), "already exists") {
 		log.Errorf("%s", string(out))
 		return trace.Wrap(err)
 	}
 
 	err = createPithosConfig()
-	if err != nil {
+	if err != nil && !strings.Contains(string(out), "already exists") {
 		log.Errorf("%s", string(out))
 		return trace.Wrap(err)
 	}
 
 	log.Infof("creating pithos services + daemonset")
 	out, err = rigging.CreateFromFile("/var/lib/gravity/resources/pithos.yaml")
-	if err != nil {
+	if err != nil && !strings.Contains(string(out), "already exists") {
 		return trace.Wrap(err)
-	}
-
-	nodes, err := rigging.NodesMatchingLabel("role=node")
-	if err != nil {
-		return trace.Wrap(err)
-	}
-
-	label := "pithos-role=node"
-	for _, node := range nodes.Items {
-		log.Infof("labeling node: %s with: %s", node.Metadata.Name, label)
-		_, err = rigging.LabelNode(node.Metadata.Name, label)
-		if err != nil {
-			return trace.Wrap(err)
-		}
 	}
 
 	log.Infof("initializing pithos")
 	out, err = rigging.CreateFromFile("/var/lib/gravity/resources/pithos-initialize.yaml")
-	if err != nil {
+
+	if err != nil && !strings.Contains(string(out), "already exists") {
 		return trace.Wrap(err)
 	}
 
@@ -56,7 +44,7 @@ func bootCluster() error {
 
 	log.Infof("creating pithos replication controller")
 	out, err = rigging.CreateFromFile("/var/lib/gravity/resources/pithos-rc.yaml")
-	if err != nil {
+	if err != nil && !strings.Contains(string(out), "already exists") {
 		return trace.Wrap(err)
 	}
 
