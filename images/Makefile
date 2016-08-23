@@ -1,11 +1,13 @@
+VERSION ?= latest
+
+BOOTSTRAP_TAG := pithos-bootstrap:$(VERSION)
+UNINSTALL_TAG := pithos-uninstall:$(VERSION)
+PITHOS_TAG := pithos:$(VERSION)
+CASSANDRA_TAG := cassandra:$(VERSION)
+PROXY_TAG := pithos-proxy:$(VERSION)
+
 .PHONY: all
 all: images
-
-BOOTSTRAP_TAG:=pithos-bootstrap:$(VERSION)
-UNINSTALL_TAG:=pithos-uninstall:$(VERSION)
-PITHOS_TAG:=pithos:$(VERSION)
-CASSANDRA_TAG:=cassandra:$(VERSION)
-PROXY_TAG:=pithos-proxy:$(VERSION)
 
 .PHONY: images
 images: bootstrap uninstall cassandra pithos proxy
@@ -15,13 +17,16 @@ images: bootstrap uninstall cassandra pithos proxy
 	docker tag $(CASSANDRA_TAG) cassandra:latest
 	docker tag $(PROXY_TAG) pithos-proxy:latest
 
-PITHOSBOOT_BINS:=bootstrap/pithosboot
-$(PITHOSBOOT_BINS):
+BOOTSTRAP_BINS := bootstrap/bin
+$(BOOTSTRAP_BINS):
+	mkdir -p $(BOOTSTRAP_BINS)
 	cd ../tool/pithosboot && make clean build
-	cp ../tool/pithosboot/bin/pithosboot bootstrap/pithosboot
+	cp ../tool/pithosboot/bin/pithosboot bootstrap/bin/pithosboot
+	wget https://pkg.cfssl.org/R1.2/cfssl_linux-amd64 -O bootstrap/bin/cfssl
+	wget https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64 -O bootstrap/bin/cfssljson
 
 .PHONY: bootstrap
-bootstrap: $(PITHOSBOOT_BINS)
+bootstrap: $(BOOTSTRAP_BINS)
 	docker build -t $(BOOTSTRAP_TAG) $(PWD)/bootstrap
 
 .PHONY: uninstall
@@ -40,3 +45,6 @@ proxy:
 pithos:
 	cd pithos && $(MAKE) TAG=$(PITHOS_TAG)
 
+,PHONY: clean
+clean:
+	-rm -rf $(BOOTSTRAP_BINS)

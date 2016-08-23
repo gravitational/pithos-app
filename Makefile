@@ -1,9 +1,13 @@
-VER := 0.0.9
+VER ?= 0.0.9
 REPOSITORY := gravitational.io
 NAME := pithos-app
 OPS_URL ?= https://opscenter.localhost.localdomain:33009
 
-CONTAINERS := pithos-bootstrap:$(VER) pithos-uninstall:$(VER) cassandra:$(VER) pithos:$(VER) pithos-proxy:$(VER)
+CONTAINERS := pithos-bootstrap:$(VER) \
+	pithos-uninstall:$(VER) \
+	cassandra:$(VER) \
+	pithos:$(VER) \
+	pithos-proxy:$(VER)
 
 IMPORT_IMAGE_FLAGS := --set-image=pithos-bootstrap:$(VER) \
 	--set-image=pithos-uninstall:$(VER) \
@@ -50,7 +54,7 @@ $(TARBALL): import $(BUILD_DIR)
 
 .PHONY: clean
 clean:
-	-rm images/bootstrap/pithosboot
+	$(MAKE) -C images clean
 
 .PHONY: dev-push
 dev-push: images
