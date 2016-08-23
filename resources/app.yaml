@@ -15,11 +15,11 @@ installer:
             mb: 6144
   servers:
     node:
+      min_count: 3
       cpu:
         min_count: 2
       ram:
         min_total_mb: 8000
-      min_count: 3
       description: "pithos server"
       labels:
         role: node
@@ -53,7 +53,6 @@ hooks:
                 volumeMounts:
                   - name: temp
                     mountPath: /tmp
-
   uninstall:
     spec:
       apiVersion: batch/v1
