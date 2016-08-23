@@ -22,8 +22,8 @@ installer:
         min_total_mb: 8000
       description: "pithos server"
       labels:
-        role: node
-        pithos-role: node
+        role: "node"
+        pithos-role: "node"
       directories:
         - name: /var/lib/gravity
           min_total_mb: 4000
