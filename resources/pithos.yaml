@@ -7,6 +7,7 @@ metadata:
 spec:
   ports:
     - port: 9042
+      nodePort: 32000
   selector:
     app: pithos
     pithos-role: cassandra
@@ -21,6 +22,7 @@ spec:
   type: NodePort
   ports:
     - port: 443
+      nodePort: 32002
       name: https
   selector:
     app: pithos
@@ -36,6 +38,7 @@ spec:
   type: NodePort
   ports:
     - port: 8080
+      nodePort: 32001
       name: http
   selector:
     app: pithos
