@@ -7,7 +7,6 @@ metadata:
 spec:
   ports:
     - port: 9042
-      nodePort: 32000
   selector:
     app: pithos
     pithos-role: cassandra
