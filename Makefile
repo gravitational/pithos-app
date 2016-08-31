@@ -1,4 +1,4 @@
-VER ?= 0.1.1
+VER ?= $(shell git describe --tags)
 REPOSITORY := gravitational.io
 NAME := pithos-app
 OPS_URL ?= https://opscenter.localhost.localdomain:33009
