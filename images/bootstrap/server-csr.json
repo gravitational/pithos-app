@@ -1,8 +1,9 @@
 {
-    "CN": "*.s3.gravitational.io",
+    "CN": "pithos.default.svc.cluster.local",
     "hosts": [
-        "*.s3.gravitational.io",
-        "s3.gravitational.io"
+        "*.pithos.default.svc.cluster.local",
+        "pithos.default.svc.cluster.local",
+        "pithos"
     ],
     "key": {
         "algo": "rsa",
