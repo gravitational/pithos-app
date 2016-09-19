@@ -25,7 +25,7 @@ installer:
         pithos-role: "node"
       directories:
         - name: /var/lib/gravity
-          min_total_mb: 4000
+          min_total_mb: 15000
       mounts:
         - source: /cassandra_data
           destination: /cassandra_data
@@ -43,13 +43,6 @@ installer:
   flavors:
     title: "Select a flavor"
     items:
-      - name: "single"
-        description: "1 node"
-        threshold:
-          value: 1
-          label: "1"
-        profiles:
-          node: 1
       - name: "triple"
         description: "3 nodes"
         threshold:
