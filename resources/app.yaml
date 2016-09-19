@@ -43,13 +43,6 @@ installer:
   flavors:
     title: "Select a flavor"
     items:
-      - name: "single"
-        description: "1 node"
-        threshold:
-          value: 1
-          label: "1"
-        profiles:
-          node: 1
       - name: "triple"
         description: "3 nodes"
         threshold:
