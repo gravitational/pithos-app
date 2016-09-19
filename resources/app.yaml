@@ -25,7 +25,7 @@ installer:
         pithos-role: "node"
       directories:
         - name: /var/lib/gravity
-          min_total_mb: 4000
+          min_total_mb: 15000
       mounts:
         - source: /cassandra_data
           destination: /cassandra_data
