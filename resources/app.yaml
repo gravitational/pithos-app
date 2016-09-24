@@ -11,8 +11,10 @@ installer:
     virsh:
       variables:
         devices:
+          - device: vdb
+            mb: 30000
           - device: vdc
-            mb: 8000
+            mb: 30000
   servers:
     node:
       cpu:
