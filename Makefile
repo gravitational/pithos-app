@@ -25,6 +25,12 @@ IMPORT_OPTIONS := --vendor \
 		--ignore=dev \
 		--ignore=cassandra-cfg \
 		--ignore=pithos-cfg \
+		--exclude="build" \
+		--exclude="gravity.log" \
+		--exclude="images" \
+		--exclude="Makefile" \
+		--exclude="tool" \
+		--exclude=".git" \
 		--registry-url=apiserver:5000 \
 		$(IMPORT_IMAGE_FLAGS)
 
