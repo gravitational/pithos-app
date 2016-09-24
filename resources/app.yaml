@@ -12,7 +12,7 @@ installer:
       variables:
         devices:
           - device: vdc
-            mb: 6144
+            mb: 8000
   servers:
     node:
       cpu:
