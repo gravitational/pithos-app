@@ -71,12 +71,12 @@ spec:
           - containerPort: 443
             name: https
         volumeMounts:
-          - name: pithos-ssl
-            mountPath: /etc/pithos-ssl
+          - name: cluster-default-ssl
+            mountPath: /etc/cluster-ssl
       volumes:
-        - name: pithos-ssl
+        - name: cluster-default-ssl
           secret:
-            secretName: pithos-ssl
+            secretName: cluster-default-ssl
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
