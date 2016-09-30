@@ -1,7 +1,7 @@
 {
     "CN": "pithos.default.svc.cluster.local",
     "hosts": [
-        "*.pithos.default.svc.cluster.local",
+        "pithos.default.svc",
         "pithos.default.svc.cluster.local",
         "pithos"
     ],
