@@ -1,7 +1,7 @@
 {
-    "CN": "*.default.svc",
+    "CN": "*.kube-system.svc",
     "hosts": [
-        "*.default.svc"
+        "*.kube-system.svc"
     ],
     "key": {
         "algo": "rsa",
@@ -16,4 +16,3 @@
         }
     ]
 }
-
