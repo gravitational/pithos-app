@@ -5,9 +5,9 @@ cd /root/cfssl
 cfssl gencert -initca ca-csr.json|cfssljson -bare ca -
 
 kubectl create secret generic cluster-ca \
-   --from-file=ca.pem=ca.pem \
-   --from-file=ca-key=ca-key.pem \
-   --from-file=ca.csr=ca.csr
+	--from-file=ca.pem=ca.pem \
+	--from-file=ca-key=ca-key.pem \
+	--from-file=ca.csr=ca.csr
 
 cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json \
 	-profile=server default-server-csr.json | cfssljson -bare default-server
