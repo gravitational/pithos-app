@@ -29,7 +29,8 @@ installer:
         - name: /var/lib/gravity
           min_total_mb: 15000
       mounts:
-        - source: /cassandra_data
+        - name: cassandra-data
+          source: /cassandra_data
           destination: /cassandra_data
           create_if_missing: true
       instance_types:
