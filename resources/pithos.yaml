@@ -129,7 +129,7 @@ spec:
       volumes:
         - name: data
           hostPath:
-            path: /cassandra_data
+            path: /var/lib/data/pithos
         - name: cassandra-cfg
           configMap:
             name: cassandra-cfg
