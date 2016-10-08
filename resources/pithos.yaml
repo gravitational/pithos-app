@@ -64,7 +64,6 @@ spec:
       containers:
       - image: pithos-proxy:latest
         name: proxy
-        imagePullPolicy: Always
         ports:
           - containerPort: 80
             name: http

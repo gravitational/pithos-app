@@ -19,7 +19,6 @@ spec:
       containers:
       - image: pithos:latest
         name: pithos
-        imagePullPolicy: Always
         ports:
           - containerPort: 8080
             name: pithos

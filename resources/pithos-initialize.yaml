@@ -11,7 +11,6 @@ spec:
       containers:
         - image: pithos:latest
           name: pithos-initialize
-          imagePullPolicy: Always
           command: ["/initialize.sh"]
           volumeMounts:
             - name: pithos-cfg
