@@ -15,15 +15,23 @@
 package rigging
 
 import (
+	"encoding/json"
+
 	"github.com/gravitational/trace"
 )
 
-// CreateConfigMapFromPath creates a Kubernetes ConfigMap of the supplied name, from the file or directory supplied as an argument.
-func CreateConfigMapFromPath(name string, path string) ([]byte, error) {
-	cmd := KubeCommand("create", "configmap", name, "--from-file="+path)
-	out, err := cmd.CombinedOutput()
+func GetAllNodes() (*NodeList, error) {
+	cmd := KubeCommand("get", "nodes", "-o", "json")
+	out, err := cmd.Output()
 	if err != nil {
-		return out, trace.Wrap(err)
+		return nil, trace.Wrap(err)
 	}
-	return out, nil
+
+	var nodes NodeList
+	err = json.Unmarshal(out, &nodes)
+	if err != nil {
+		return nil, trace.Wrap(err)
+	}
+
+	return &nodes, nil
 }
