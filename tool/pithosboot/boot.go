@@ -24,13 +24,13 @@ func bootCluster() error {
 	}
 
 	log.Infof("creating pithos services + daemonset")
-	out, err = rigging.CreateFromFile("/var/lib/gravity/resources/pithos.yaml")
+	out, err = rigging.FromFile(rigging.ActionCreate, "/var/lib/gravity/resources/pithos.yaml")
 	if err != nil && !strings.Contains(string(out), "already exists") {
 		return trace.Wrap(err)
 	}
 
 	log.Infof("initializing pithos")
-	out, err = rigging.CreateFromFile("/var/lib/gravity/resources/pithos-initialize.yaml")
+	out, err = rigging.FromFile(rigging.ActionCreate, "/var/lib/gravity/resources/pithos-initialize.yaml")
 
 	if err != nil && !strings.Contains(string(out), "already exists") {
 		return trace.Wrap(err)
@@ -43,7 +43,7 @@ func bootCluster() error {
 	}
 
 	log.Infof("creating pithos replication controller")
-	out, err = rigging.CreateFromFile("/var/lib/gravity/resources/pithos-rc.yaml")
+	out, err = rigging.FromFile(rigging.ActionCreate, "/var/lib/gravity/resources/pithos-rc.yaml")
 	if err != nil && !strings.Contains(string(out), "already exists") {
 		return trace.Wrap(err)
 	}

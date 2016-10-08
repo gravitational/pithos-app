@@ -74,6 +74,10 @@ bucketstore:
   default-region: 'G1'
   cluster: 'cassandra.default.svc.cluster.local'
   keyspace: 'storage'
+  hints:
+    replication:
+      class: SimpleStrategy
+      replication_factor: {{ .ReplicationFactor }}
 
 
 ## regions
@@ -99,3 +103,7 @@ regions:
         keyspace: 'storage'
         max-chunk: '128k'
         max-block-chunks: 1024
+        hints:
+          replication:
+            class: SimpleStrategy
+            replication_factor: {{ .ReplicationFactor }}
