@@ -20,6 +20,8 @@ RUN gpg --keyserver pgp.mit.edu --recv-keys F758CE318D77295D && \
   gpg --export --armor F758CE318D77295D | apt-key add - && \
   gpg --keyserver pgp.mit.edu --recv-keys 2B5C1B00 && \
   gpg --export --armor 2B5C1B00 | apt-key add - && \
+  gpg --keyserver pgp.mit.edu --recv-keys A278B781FE4B2BDA && \
+  gpg --export --armor A278B781FE4B2BDA | apt-key add - && \
   gpg --keyserver pgp.mit.edu --recv-keys 0353B12C && \
   gpg --export --armor 0353B12C | apt-key add - && \
   apt-get update && \
