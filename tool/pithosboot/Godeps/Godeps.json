@@ -1,7 +1,7 @@
 {
 	"ImportPath": "github.com/gravitational/pithos-app/tool/pithosboot",
 	"GoVersion": "go1.5",
-	"GodepVersion": "v62",
+	"GodepVersion": "v74",
 	"Deps": [
 		{
 			"ImportPath": "github.com/Sirupsen/logrus",
@@ -10,7 +10,7 @@
 		},
 		{
 			"ImportPath": "github.com/gravitational/rigging",
-			"Rev": "05c7e58259eb58e7d88924500e998568bb4e1d91"
+			"Rev": "81303d407207723025951142c1e238c59080e496"
 		},
 		{
 			"ImportPath": "github.com/gravitational/trace",
@@ -23,6 +23,10 @@
 		{
 			"ImportPath": "golang.org/x/sys/unix",
 			"Rev": "442cd600860ce722f6615730eb008a37a87b13ee"
+		},
+		{
+			"ImportPath": "golang.org/x/net/context",
+			"Rev": "c2528b2dd8352441850638a8bb678c2ad056fd3e"
 		}
 	]
 }

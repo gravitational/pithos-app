@@ -16,8 +16,9 @@ import (
 	"github.com/gravitational/trace"
 )
 
-type AccessKeyList struct {
-	Keys []AccessKey
+type PithosConfigParams struct {
+	ReplicationFactor int
+	Keys              []AccessKey
 }
 
 type AccessKey struct {
@@ -63,24 +64,43 @@ func randomHex(length int) (string, error) {
 	return fmt.Sprintf("%x", sha256.Sum256(data))[:length], nil
 }
 
+func determineReplicationFactor() (int, error) {
+	nodes, err := rigging.NodesMatchingLabel("pithos-role=node")
+	if err != nil {
+		return 0, trace.Wrap(err)
+	}
+
+	if len(nodes.Items) >= 3 {
+		return 3, nil
+	} else {
+		return 1, nil
+	}
+}
+
 func createPithosConfig() error {
 	log.Infof("creating ConfigMap/pithos-cfg")
 
-	keys := AccessKeyList{
-		Keys: []AccessKey{},
+	replicas, err := determineReplicationFactor()
+	if err != nil {
+		return trace.Wrap(err)
+	}
+
+	cfg := PithosConfigParams{
+		Keys:              []AccessKey{},
+		ReplicationFactor: replicas,
 	}
 
 	masterKey, err := generateAccessKey("ops@gravitational.io", true)
 	if err != nil {
 		return trace.Wrap(err)
 	}
-	keys.Keys = append(keys.Keys, *masterKey)
+	cfg.Keys = append(cfg.Keys, *masterKey)
 
 	tenantKey, err := generateAccessKey("pithos", false)
 	if err != nil {
 		return trace.Wrap(err)
 	}
-	keys.Keys = append(keys.Keys, *tenantKey)
+	cfg.Keys = append(cfg.Keys, *tenantKey)
 
 	templateFile := "/var/lib/gravity/resources/pithos-cfg/config.yaml.template"
 
@@ -97,7 +117,7 @@ func createPithosConfig() error {
 	defer os.RemoveAll(dir)
 
 	buffer := &bytes.Buffer{}
-	err = configTemplate.Execute(buffer, keys)
+	err = configTemplate.Execute(buffer, cfg)
 	if err != nil {
 		return trace.Wrap(err)
 	}

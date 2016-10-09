@@ -9,12 +9,18 @@ base: gravitational.io/k8s-aws:0.0.0+latest
 installer:
   provisioners:
     virsh:
+      commands:
+        - 'sudo hostname {{ .server.hostname }}'
+        - 'echo $(netstat -rn | grep UG | awk ''{print $2}'') {{ .variables.system.teleport_proxy_address }} | sudo tee -a /etc/hosts'
+        - 'sudo mkfs.ext4 /dev/vdc'
+        - 'sudo mkdir -p /var/lib/data/pithos && sudo mount /dev/vdc /var/lib/data/pithos'
+        - 'curl --tlsv1.2 {{if .variables.system.devmode}}--insecure{{end}} "{{ .variables.system.ops_url }}/{{ .variables.system.token }}/auto?docker_device=vdb&mount=pithos-data:/var/lib/data/pithos" | sudo bash'
       variables:
         devices:
           - device: vdb
-            mb: 30000
+            mb: 20000
           - device: vdc
-            mb: 30000
+            mb: 20000
   servers:
     node:
       cpu:
