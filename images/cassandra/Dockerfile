@@ -46,9 +46,12 @@ RUN gpg --keyserver pgp.mit.edu --recv-keys F758CE318D77295D && \
         /etc/cassandra/*
 
 COPY run.sh /run.sh
+COPY initialize.sh /initialize.sh
+COPY init.cql /init.cql
 COPY kubernetes-cassandra.jar /kubernetes-cassandra.jar
 
 RUN chmod a+rx /run.sh
+RUN chmod a+rx /initialize.sh
 
 VOLUME /cassandra_data /etc/cassandra
 
