@@ -1,4 +1,4 @@
-CREATE KEYSPACE storage WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'}  AND durable_writes = true;
+CREATE KEYSPACE storage WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 'REPLICATION_FACTOR'}  AND durable_writes = true;
 
 CREATE TABLE storage.inode_blocks (
     inode uuid,

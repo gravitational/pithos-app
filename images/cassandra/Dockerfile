@@ -14,6 +14,10 @@
 
 FROM quay.io/gravitational/debian-grande:0.0.1
 
+ENV DEBIAN_FRONTEND=noninteractive \
+    TERM=xterm \
+    KUBECTL_VERSION=1.3.8
+
 COPY cassandra.list /etc/apt/sources.list.d/cassandra.list
 
 RUN gpg --keyserver pgp.mit.edu --recv-keys F758CE318D77295D && \
@@ -25,7 +29,7 @@ RUN gpg --keyserver pgp.mit.edu --recv-keys F758CE318D77295D && \
   gpg --keyserver pgp.mit.edu --recv-keys 0353B12C && \
   gpg --export --armor 0353B12C | apt-key add - && \
   apt-get update && \
-  apt-get -qq -y install procps cassandra openjdk-8-jre-headless && \
+  apt-get -qq -y install procps cassandra openjdk-8-jre-headless curl && \
   rm -rf \
         doc \
         man \
@@ -52,6 +56,10 @@ COPY kubernetes-cassandra.jar /kubernetes-cassandra.jar
 
 RUN chmod a+rx /run.sh
 RUN chmod a+rx /initialize.sh
+
+RUN curl -sSL https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl && \
+    chmod +x /usr/local/bin/kubectl && \
+    kubectl version --client
 
 VOLUME /cassandra_data /etc/cassandra
 
