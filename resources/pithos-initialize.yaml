@@ -9,13 +9,6 @@ spec:
     spec:
       restartPolicy: OnFailure
       containers:
-        - image: pithos:latest
+        - image: cassandra:latest
           name: pithos-initialize
           command: ["/initialize.sh"]
-          volumeMounts:
-            - name: pithos-cfg
-              mountPath: /etc/pithos
-      volumes:
-        - name: pithos-cfg
-          configMap:
-            name: pithos-cfg
