@@ -102,8 +102,10 @@ resource "aws_security_group" "cluster" {
 
 resource "aws_instance" "app_node" {
   # CentOS 7 (Enhanced Networking / lvm2)
-  ami                         = "ami-366be821"
-  instance_type               = "m4.2xlarge"
+  ami = "ami-366be821"
+
+  # This instance type has two ephemeral devices
+  instance_type               = "c3.2xlarge"
   associate_public_ip_address = true
   source_dest_check           = "false"
   ebs_optimized               = true
@@ -125,6 +127,7 @@ set -xe
 
 umount /dev/xvdb
 umount /dev/xvdc
+
 mkfs.ext4 /dev/xvdb
 mkfs.ext4 /dev/xvdc
 mkfs.ext4 /dev/xvdf
@@ -184,8 +187,10 @@ EOF
 
 resource "aws_instance" "load_node" {
   # CentOS 7 (Enhanced Networking / lvm2)
-  ami                         = "ami-366be821"
-  instance_type               = "m4.2xlarge"
+  ami = "ami-366be821"
+
+  # Need for the same placement_group
+  instance_type               = "c3.2xlarge"
   associate_public_ip_address = true
   source_dest_check           = "false"
   ebs_optimized               = true
