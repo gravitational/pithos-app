@@ -39,7 +39,7 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - port: 8080
+    - port: 18080
       nodePort: 32001
       name: http
   selector:
