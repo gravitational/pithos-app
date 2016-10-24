@@ -10,12 +10,15 @@ spec:
   selector:
     app: pithos
     pithos-role: pithos
+  nodeSelector:
+    pithos-role: node
   template:
     metadata:
       labels:
         app: pithos
         pithos-role: pithos
     spec:
+      hostNetwork: true
       containers:
       - image: pithos:latest
         name: pithos
