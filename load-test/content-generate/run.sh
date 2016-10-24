@@ -64,6 +64,15 @@ generate_objects() {
 	bash "$SCRIPT_DIR/s3.sh" "s3api" "create-bucket" "--bucket" "100Mb" &
 	bash "$SCRIPT_DIR/s3.sh" "s3api" "create-bucket" "--bucket" "1Gb" &
 	wait
+
+	bash "$SCRIPT_DIR/s3.sh" "s3" "cp" "$temp_dir/1Kb" "s3://1Kb" &
+	bash "$SCRIPT_DIR/s3.sh" "s3" "cp" "$temp_dir/10Kb" "s3://10Kb" &
+	bash "$SCRIPT_DIR/s3.sh" "s3" "cp" "$temp_dir/100Kb" "s3://100Kb" &
+	bash "$SCRIPT_DIR/s3.sh" "s3" "cp" "$temp_dir/1Mb" "s3://1Mb" &
+	bash "$SCRIPT_DIR/s3.sh" "s3" "cp" "$temp_dir/10Mb" "s3://10Mb" &
+	bash "$SCRIPT_DIR/s3.sh" "s3" "cp" "$temp_dir/100Mb" "s3://100Mb" &
+	bash "$SCRIPT_DIR/s3.sh" "s3" "cp" "$temp_dir/1Gb" "s3://1Gb" &
+	wait
 }
 
 main() {
@@ -74,8 +83,8 @@ main() {
 
 	dump_environment_variables
 	check_prerequisites
-
 	setup_cluster_ca
+	generate_objects
 }
 
 main

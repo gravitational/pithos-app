@@ -57,8 +57,8 @@ main() {
 	readonly AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:?$(usage)}
 
 	# Parse args
-	readonly arg_action="${1:?$(usage)}"
-	readonly arg_action="${arg_action//-/_}"
+	local arg_action="${1:?$(usage)}"
+	local arg_action="${arg_action//-/_}"
 	shift || :
 
 	# Sanity checks
