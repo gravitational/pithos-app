@@ -350,7 +350,7 @@ storage_port: 7000
 
 # SSL port, for encrypted communication.  Unused unless enabled in
 # encryption_options
-ssl_storage_port: 7001
+ssl_storage_port: 7011
 
 # Address or interface to bind to and tell other Cassandra nodes to connect to.
 # You _must_ change this if you want multiple nodes to be able to communicate!
@@ -726,27 +726,27 @@ request_scheduler_id: keyspace
 # http://download.oracle.com/javase/6/docs/technotes/guides/security/jsse/JSSERefGuide.html#CreateKeystore
 #
 server_encryption_options:
-    internode_encryption: none
-    keystore: conf/.keystore
+    internode_encryption: all
+    keystore: /etc/ssl/cassandra/keystore
     keystore_password: cassandra
-    truststore: conf/.truststore
+    truststore: /etc/ssl/cassandra/sbx.truststore
     truststore_password: cassandra
     # More advanced defaults below:
     # protocol: TLS
     # algorithm: SunX509
     # store_type: JKS
     # cipher_suites: [TLS_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_256_CBC_SHA,TLS_DHE_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA]
-    # require_client_auth: false
+    require_client_auth: true
 
 # enable or disable client/server encryption.
 client_encryption_options:
     enabled: false
-    keystore: conf/.keystore
+    keystore: /etc/ssl/cassandra/keystore
     keystore_password: cassandra
-    # require_client_auth: false
+    require_client_auth: true
     # Set trustore and truststore_password if require_client_auth is true
-    # truststore: conf/.truststore
-    # truststore_password: cassandra
+    truststore: /etc/ssl/cassandra/sbx.truststore
+    truststore_password: cassandra
     # More advanced defaults below:
     # protocol: TLS
     # algorithm: SunX509

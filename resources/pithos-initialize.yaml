@@ -8,7 +8,15 @@ spec:
       name: pithos-initialize
     spec:
       restartPolicy: OnFailure
+      hostNetwork: true
       containers:
         - image: cassandra:latest
           name: pithos-initialize
           command: ["/initialize.sh"]
+          volumeMounts:
+            - name: cassandra-ssl
+              mountPath: /etc/ssl/cassandra
+      volumes:
+        - name: cassandra-ssl
+          secret:
+            secretName: cassandra-ssl

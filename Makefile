@@ -40,6 +40,10 @@ TARBALL := $(BUILD_DIR)/pithos-app.tar.gz
 .PHONY: all
 all: clean images
 
+.PHONY: what-version
+what-version:
+	@echo $(VER)
+
 .PHONY: images
 images:
 	cd images && $(MAKE) -f Makefile VERSION=$(VER)

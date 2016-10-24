@@ -7,6 +7,9 @@ metadata:
 spec:
   ports:
     - port: 9042
+      name: cql
+    - port: 9160
+      name: rpc
   selector:
     app: pithos
     pithos-role: cassandra
@@ -114,17 +117,25 @@ spec:
           ports:
             - containerPort: 7000
               name: intra-node
-            - containerPort: 7001
+            - containerPort: 7011
               name: tls-intra-node
             - containerPort: 7199
               name: jmx
             - containerPort: 9042
               name: cql
+            - containerPort: 9160
+              name: rpc
           volumeMounts:
             - name: data
               mountPath: /cassandra_data
             - name: cassandra-cfg
               mountPath: /etc/cassandra
+            - name: cluster-ca
+              mountPath: /etc/ssl/cluster-ca
+            - name: cluster-default-ssl
+              mountPath: /etc/ssl/cluster-default
+            - name: cassandra-ssl
+              mountPath: /etc/ssl/cassandra
       volumes:
         - name: data
           hostPath:
@@ -132,3 +143,12 @@ spec:
         - name: cassandra-cfg
           configMap:
             name: cassandra-cfg
+        - name: cluster-ca
+          secret:
+            secretName: cluster-ca
+        - name: cluster-default-ssl
+          secret:
+            secretName: cluster-default-ssl
+        - name: cassandra-ssl
+          secret:
+            secretName: cassandra-ssl

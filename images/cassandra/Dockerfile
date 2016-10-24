@@ -53,6 +53,7 @@ COPY run.sh /run.sh
 COPY initialize.sh /initialize.sh
 COPY init.cql /init.cql
 COPY kubernetes-cassandra.jar /kubernetes-cassandra.jar
+COPY cqlshrc /root/.cqlshrc
 
 RUN chmod a+rx /run.sh
 RUN chmod a+rx /initialize.sh
@@ -63,7 +64,7 @@ RUN curl -sSL https://storage.googleapis.com/kubernetes-release/release/v${KUBEC
 
 VOLUME /cassandra_data /etc/cassandra
 
-EXPOSE 7000 7001 7199 9042
+EXPOSE 7000 7001 7011 7199 9042
 
 RUN test -f /cleanup.sh && sh /cleanup.sh
 

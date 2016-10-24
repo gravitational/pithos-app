@@ -1,0 +1,13 @@
+[connection]
+hostname = cassandra.default.svc
+port = 9042
+factory = cqlshlib.ssl.ssl_transport_factory
+
+[ssl]
+certfile = /etc/ssl/cassandra/cassandra-node.pem
+validate = true
+userkey = /etc/ssl/cassandra/cassandra-node.pem
+usercert = /etc/ssl/cassandra/cassandra-node.pem
+
+[certfiles]
+cassandra.default.svc = /etc/ssl/cassandra/cassandra-node.pem
