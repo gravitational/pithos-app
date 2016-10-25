@@ -1,4 +1,21 @@
 apiVersion: v1
+kind: Service
+metadata:
+  name: pithos
+  labels:
+    app: pithos
+spec:
+  type: NodePort
+  ports:
+    - port: 443
+      targetPort: 18443
+      nodePort: 32002
+      name: https
+  selector:
+    app: pithos
+    pithos-role: pithos
+---
+apiVersion: v1
 kind: ReplicationController
 metadata:
   name: pithos
@@ -20,6 +37,14 @@ spec:
       nodeSelector:
         pithos-role: node
       containers:
+      - image: pithos-proxy:latest
+        name: proxy
+        ports:
+          - containerPort: 18443
+            name: https
+        volumeMounts:
+          - name: cluster-default-ssl
+            mountPath: /etc/cluster-ssl
       - image: pithos:latest
         name: pithos
         ports:
@@ -32,3 +57,6 @@ spec:
         - name: pithos-cfg
           configMap:
             name: pithos-cfg
+        - name: cluster-default-ssl
+          secret:
+            secretName: cluster-default-ssl

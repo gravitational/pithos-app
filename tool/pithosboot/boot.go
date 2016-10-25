@@ -23,8 +23,8 @@ func bootCluster() error {
 		return trace.Wrap(err)
 	}
 
-	log.Infof("creating pithos services + daemonset")
-	out, err = rigging.FromFile(rigging.ActionCreate, "/var/lib/gravity/resources/pithos.yaml")
+	log.Infof("creating cassandra services + daemonset")
+	out, err = rigging.FromFile(rigging.ActionCreate, "/var/lib/gravity/resources/cassandra.yaml")
 	if err != nil && !strings.Contains(string(out), "already exists") {
 		return trace.Wrap(err)
 	}
