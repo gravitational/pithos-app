@@ -16,11 +16,14 @@ spec:
         app: pithos
         pithos-role: pithos
     spec:
+      hostNetwork: true
+      nodeSelector:
+        pithos-role: node
       containers:
       - image: pithos:latest
         name: pithos
         ports:
-          - containerPort: 8080
+          - containerPort: 18080
             name: pithos
         volumeMounts:
           - name: pithos-cfg
