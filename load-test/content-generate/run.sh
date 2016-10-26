@@ -47,32 +47,29 @@ generate_objects() {
 	local temp_dir=
 
 	temp_dir=$(mktemp --directory)
-	dd if=/dev/urandom of="$temp_dir/1Kb" bs=1K count=1 &
-	dd if=/dev/urandom of="$temp_dir/10Kb" bs=1024 count=10 &
-	dd if=/dev/urandom of="$temp_dir/100Kb" bs=1024 count=100 &
-	dd if=/dev/urandom of="$temp_dir/1Mb" bs=1024 count=1024 &
-	dd if=/dev/urandom of="$temp_dir/10Mb" count=10 bs=1048576 &
-	dd if=/dev/urandom of="$temp_dir/100Mb" count=100 bs=1048576 &
-	dd if=/dev/urandom of="$temp_dir/1Gb" bs=1048576 count=1024 &
-	wait
+	dd if=/dev/urandom of="$temp_dir/1Kb" bs=1K count=1
+	dd if=/dev/urandom of="$temp_dir/10Kb" bs=1024 count=10
+	dd if=/dev/urandom of="$temp_dir/100Kb" bs=1024 count=100
+	dd if=/dev/urandom of="$temp_dir/1Mb" bs=1024 count=1024
+	dd if=/dev/urandom of="$temp_dir/10Mb" count=10 bs=1048576
+	dd if=/dev/urandom of="$temp_dir/100Mb" count=100 bs=1048576
+	dd if=/dev/urandom of="$temp_dir/1Gb" bs=1048576 count=1024
 
-	bash "$SCRIPT_DIR/s3.sh" "s3api" "create-bucket" "--bucket" "1Kb" &
-	bash "$SCRIPT_DIR/s3.sh" "s3api" "create-bucket" "--bucket" "10Kb" &
-	bash "$SCRIPT_DIR/s3.sh" "s3api" "create-bucket" "--bucket" "100Kb" &
-	bash "$SCRIPT_DIR/s3.sh" "s3api" "create-bucket" "--bucket" "1Mb" &
-	bash "$SCRIPT_DIR/s3.sh" "s3api" "create-bucket" "--bucket" "10Mb" &
-	bash "$SCRIPT_DIR/s3.sh" "s3api" "create-bucket" "--bucket" "100Mb" &
-	bash "$SCRIPT_DIR/s3.sh" "s3api" "create-bucket" "--bucket" "1Gb" &
-	wait
+	bash "$SCRIPT_DIR/s3.sh" "s3api" "create-bucket" "--bucket" "1Kb"
+	bash "$SCRIPT_DIR/s3.sh" "s3api" "create-bucket" "--bucket" "10Kb"
+	bash "$SCRIPT_DIR/s3.sh" "s3api" "create-bucket" "--bucket" "100Kb"
+	bash "$SCRIPT_DIR/s3.sh" "s3api" "create-bucket" "--bucket" "1Mb"
+	bash "$SCRIPT_DIR/s3.sh" "s3api" "create-bucket" "--bucket" "10Mb"
+	bash "$SCRIPT_DIR/s3.sh" "s3api" "create-bucket" "--bucket" "100Mb"
+	bash "$SCRIPT_DIR/s3.sh" "s3api" "create-bucket" "--bucket" "1Gb"
 
-	bash "$SCRIPT_DIR/s3.sh" "s3" "cp" "$temp_dir/1Kb" "s3://1Kb" &
-	bash "$SCRIPT_DIR/s3.sh" "s3" "cp" "$temp_dir/10Kb" "s3://10Kb" &
-	bash "$SCRIPT_DIR/s3.sh" "s3" "cp" "$temp_dir/100Kb" "s3://100Kb" &
-	bash "$SCRIPT_DIR/s3.sh" "s3" "cp" "$temp_dir/1Mb" "s3://1Mb" &
-	bash "$SCRIPT_DIR/s3.sh" "s3" "cp" "$temp_dir/10Mb" "s3://10Mb" &
-	bash "$SCRIPT_DIR/s3.sh" "s3" "cp" "$temp_dir/100Mb" "s3://100Mb" &
-	bash "$SCRIPT_DIR/s3.sh" "s3" "cp" "$temp_dir/1Gb" "s3://1Gb" &
-	wait
+	bash "$SCRIPT_DIR/s3.sh" "s3" "cp" "$temp_dir/1Kb" "s3://1Kb"
+	bash "$SCRIPT_DIR/s3.sh" "s3" "cp" "$temp_dir/10Kb" "s3://10Kb"
+	bash "$SCRIPT_DIR/s3.sh" "s3" "cp" "$temp_dir/100Kb" "s3://100Kb"
+	bash "$SCRIPT_DIR/s3.sh" "s3" "cp" "$temp_dir/1Mb" "s3://1Mb"
+	bash "$SCRIPT_DIR/s3.sh" "s3" "cp" "$temp_dir/10Mb" "s3://10Mb"
+	bash "$SCRIPT_DIR/s3.sh" "s3" "cp" "$temp_dir/100Mb" "s3://100Mb"
+	bash "$SCRIPT_DIR/s3.sh" "s3" "cp" "$temp_dir/1Gb" "s3://1Gb"
 }
 
 main() {

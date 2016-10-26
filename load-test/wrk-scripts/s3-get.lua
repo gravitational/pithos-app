@@ -20,10 +20,10 @@ request = function()
   f:close()
 
   -- setup headers for an authorized request
-  headers["Content-Type"] = header_content_type
+  headers["Host"] = header_content_type
   headers["Date"] = header_date
   headers["Authorization"] = header_auth_token
 
   -- return the authorized request
-  return wrk.format("GET", path, headers, body)
+  return wrk.format("HEAD", path, headers, body)
 end
