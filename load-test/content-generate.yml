@@ -12,8 +12,7 @@ spec:
         primary: "yes"
       containers:
         - name: pithos-content-generate
-          image: pithos-content-generate:testing
-          command: ["sleep", "infinity"]
+          image: pithos-content-generate:latest
           env:
             - name: AWS_S3_ENDPOINT_URL
               value: "https://pithos.default.svc"
