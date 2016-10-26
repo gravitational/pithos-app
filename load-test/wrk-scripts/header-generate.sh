@@ -15,19 +15,28 @@ main() {
 	readonly AWS_S3_ENDPOINT_URL=${AWS_S3_ENDPOINT_URL:-"s3.amazonaws.com"}
 
 	# Args
-	local usage="$0 <bucket-name> <object-name>"
-	local bucket=${1:?$usage}
-	local object=${2:?$usage}
+	local usage="$0 <method GET|POST> <bucket-name> <object-name>"
+	local method=${1:?$usage}
+	local bucket=${2:?$usage}
+	local object=${3:?$usage}
 
 	local resource="/${bucket}/${object}"
 
-	get_signature <<-EOF
-			GET
+	if [[ "$method" == "GET" ]]; then
+		get_signature <<-EOF
+				GET
 
 
-			S3_DATE
-			${resource}
-EOF
+				S3_DATE
+				${resource}
+		EOF
+	elif [[ "$method" == "POST" ]]; then
+		echo "TBD"
+		exit 1
+	else
+		echo "Unsupported HTTP method \"$method\"."
+		exit 2
+	fi
 }
 
 get_signature() {

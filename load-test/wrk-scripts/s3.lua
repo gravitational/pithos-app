@@ -1,4 +1,15 @@
 local headers = {}
+local method = ""
+local bucket = ""
+local object = ""
+
+-- parse args
+init = function(args)
+    method = args[1]
+    bucket = args[2]
+    object = args[3]
+end
+
 -- create authorized request using wrk.format function
 -- refer: https://github.com/wg/wrk/blob/master/SCRIPTING
 request = function()
@@ -6,11 +17,10 @@ request = function()
   -- unless timestamp and content are exactly the same
 
   -- setup API path
-  path = "/1Kb/1Kb"
+  path = string.format("/%s/%s", bucket, object)
 
   -- command to generate auth headers
-  -- NOTE: same body payload is used as above, BUT we have type it again since here it needs some escaping
-  cmd = 'bash header-generate.sh'
+  cmd = string.format("bash header-generate.sh %s %s %s", method, bucket, object)
 
   -- parse command output into variables
   local f = io.popen(cmd, 'r')
@@ -24,6 +34,8 @@ request = function()
   headers["Date"] = header_date
   headers["Authorization"] = header_auth_token
 
+  local req = wrk.format(method, path, headers, body)
+
   -- return the authorized request
-  return wrk.format("HEAD", path, headers, body)
+  return req
 end
