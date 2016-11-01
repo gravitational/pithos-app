@@ -5,17 +5,19 @@ UNINSTALL_TAG := pithos-uninstall:$(VERSION)
 PITHOS_TAG := pithos:$(VERSION)
 CASSANDRA_TAG := cassandra:$(VERSION)
 PROXY_TAG := pithos-proxy:$(VERSION)
+TEST_CONTENT_TAG := pithos-test-content:$(VERSION)
 
 .PHONY: all
 all: images
 
 .PHONY: images
-images: bootstrap uninstall cassandra pithos proxy
+images: bootstrap uninstall cassandra pithos proxy test-content
 	docker tag $(BOOTSTRAP_TAG) pithos-bootstrap:latest
 	docker tag $(UNINSTALL_TAG) pithos-uninstall:latest
 	docker tag $(PITHOS_TAG) pithos:latest
 	docker tag $(CASSANDRA_TAG) cassandra:latest
 	docker tag $(PROXY_TAG) pithos-proxy:latest
+	docker tag $(TEST_CONTENT_TAG) pithos-test-content:latest
 
 BOOTSTRAP_BINS := bootstrap/bin
 $(BOOTSTRAP_BINS):
@@ -44,6 +46,10 @@ proxy:
 .PHONY: pithos
 pithos:
 	cd pithos && $(MAKE) TAG=$(PITHOS_TAG)
+
+.PHONY: test-content
+test-content:
+	docker build -t $(TEST_CONTENT_TAG) $(PWD)/test-content
 
 ,PHONY: clean
 clean:

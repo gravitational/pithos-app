@@ -1,18 +1,16 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: pithos-content-generate
+  name: pithos-test-content
 spec:
   template:
     metadata:
-      name: pithos-content-generate
+      name: pithos-test-content
     spec:
       restartPolicy: Never
-      nodeSelector:
-        primary: "yes"
       containers:
-        - name: pithos-content-generate
-          image: pithos-content-generate:latest
+        - name: pithos-test-content
+          image: pithos-test-content:latest
           env:
             - name: AWS_S3_ENDPOINT_URL
               value: "https://pithos.default.svc"

@@ -20,8 +20,8 @@ RUN curl -sSL https://storage.googleapis.com/kubernetes-release/release/v${KUBEC
     chmod +x /usr/local/bin/kubectl && \
     kubectl version --client
 
-RUN mkdir -p /opt/gravitational/pithos/content-generate
-WORKDIR /opt/gravitational/pithos/content-generate
-COPY . /opt/gravitational/pithos/content-generate
+RUN mkdir -p /opt/gravitational/pithos/test-content
+WORKDIR /opt/gravitational/pithos/test-content
+COPY . /opt/gravitational/pithos/test-content
 
 CMD ["bash", "run.sh"]

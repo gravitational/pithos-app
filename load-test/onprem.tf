@@ -123,10 +123,10 @@ resource "aws_instance" "app_node" {
   user_data = <<EOF
 #!/bin/bash
 
-set -xe
+set -euo pipefail
 
-umount /dev/xvdb
-umount /dev/xvdc
+umount /dev/xvdb || true
+umount /dev/xvdc || true
 
 mkfs.ext4 /dev/xvdb
 mkfs.ext4 /dev/xvdc
