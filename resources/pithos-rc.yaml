@@ -15,8 +15,8 @@ spec:
     app: pithos
     pithos-role: pithos
 ---
-apiVersion: v1
-kind: ReplicationController
+apiVersion: extensions/v1beta1
+kind: Deployment
 metadata:
   name: pithos
   labels:
@@ -24,9 +24,6 @@ metadata:
     pithos-role: pithos
 spec:
   replicas: 1
-  selector:
-    app: pithos
-    pithos-role: pithos
   template:
     metadata:
       labels:
