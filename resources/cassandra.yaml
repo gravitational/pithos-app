@@ -10,6 +10,8 @@ spec:
       name: cql
     - port: 9160
       name: rpc
+    - port: 7199
+      name: jmx
   selector:
     app: pithos
     pithos-role: cassandra
@@ -40,6 +42,8 @@ spec:
               value: 512M
             - name: HEAP_NEWSIZE
               value: 100M
+            - name: LOCAL_JMX
+              value: "no"
             - name: POD_NAMESPACE
               valueFrom:
                 fieldRef:
@@ -86,3 +90,29 @@ spec:
         - name: cassandra-ssl
           secret:
             secretName: cassandra-ssl
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: cassandra-cron
+  labels:
+    app: pithos
+    pithos-role: cassandra-cron
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: pithos
+        pithos-role: cassandra-cron
+    spec:
+      nodeSelector:
+        pithos-role: node
+      containers:
+      - image: cassandra:latest
+        name: cassandra-cron
+        command: ["/usr/sbin/start-cron.sh"]
+        imagePullPolicy: Always
+        env:
+          - name: CRON_SCHEDULE
+            value: "15 2 * * *"
