@@ -29,7 +29,7 @@ RUN gpg --keyserver pgp.mit.edu --recv-keys F758CE318D77295D && \
   gpg --keyserver pgp.mit.edu --recv-keys 0353B12C && \
   gpg --export --armor 0353B12C | apt-key add - && \
   apt-get update && \
-  apt-get -qq -y install procps cassandra openjdk-8-jre-headless curl && \
+  apt-get -qq -y install procps cassandra openjdk-8-jre-headless curl cron && \
   rm -rf \
         doc \
         man \
@@ -54,13 +54,17 @@ COPY initialize.sh /initialize.sh
 COPY init.cql /init.cql
 COPY kubernetes-cassandra.jar /kubernetes-cassandra.jar
 COPY cqlshrc /root/.cqlshrc
+COPY start-cron.sh /usr/sbin
 
 RUN chmod a+rx /run.sh
 RUN chmod a+rx /initialize.sh
+RUN chmod a+rx /usr/sbin/start-cron.sh
 
 RUN curl -sSL https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl && \
     chmod +x /usr/local/bin/kubectl && \
     kubectl version --client
+
+RUN mkfifo --mode 0666 /var/log/cron.log
 
 VOLUME /cassandra_data /etc/cassandra
 
