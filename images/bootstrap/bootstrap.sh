@@ -25,7 +25,7 @@ cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json \
 cp kube-system-server.pem kube-system-server-with-chain.pem
 cat ca.pem >> kube-system-server-with-chain.pem
 
-kubectl create secret generic cluster-default-ssl \
+kubectl create secret generic cluster-kube-system-ssl \
 	--from-file=default-server.pem=default-server.pem \
 	--from-file=kube-system-server-with-chain.pem=kube-system-server-with-chain.pem \
 	--from-file=default-server-key.pem=default-server-key.pem \
