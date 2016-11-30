@@ -22,8 +22,6 @@ $(BOOTSTRAP_BINS):
 	mkdir -p $(BOOTSTRAP_BINS)
 	cd ../tool/pithosboot && make clean build
 	cp ../tool/pithosboot/bin/pithosboot bootstrap/bin/pithosboot
-	wget https://pkg.cfssl.org/R1.2/cfssl_linux-amd64 -O bootstrap/bin/cfssl
-	wget https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64 -O bootstrap/bin/cfssljson
 
 .PHONY: bootstrap
 bootstrap: $(BOOTSTRAP_BINS)
