@@ -9,4 +9,4 @@ fi
 
 sed -i 's/REPLICATION_FACTOR/'"${REPLICATION_FACTOR}"'/g' /init.cql
 
-cqlsh -f /init.cql cassandra.default.svc
+cqlsh -f /init.cql cassandra.default.svc.cluster.local
