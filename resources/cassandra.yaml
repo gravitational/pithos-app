@@ -42,8 +42,8 @@ spec:
               value: 512M
             - name: HEAP_NEWSIZE
               value: 100M
-            - name: LOCAL_JMX
-              value: "no"
+            - name: CASSANDRA_OPEN_JMX
+              value: "true"
             - name: POD_NAMESPACE
               valueFrom:
                 fieldRef:

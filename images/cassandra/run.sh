@@ -14,14 +14,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-POD_IP=$(getent ahosts ${HOSTNAME} | awk 'NR==1{print $1}')
-CFG=/etc/cassandra/cassandra.yaml
+CONF_DIR=/etc/cassandra
+CFG=$CONF_DIR/cassandra.yaml
+
 CASSANDRA_RPC_ADDRESS="${CASSANDRA_RPC_ADDRESS:-0.0.0.0}"
 CASSANDRA_NUM_TOKENS="${CASSANDRA_NUM_TOKENS:-32}"
 CASSANDRA_CLUSTER_NAME="${CASSANDRA_CLUSTER_NAME:='Pithos Cluster'}"
 CASSANDRA_LISTEN_ADDRESS=${POD_IP}
 CASSANDRA_BROADCAST_ADDRESS=${POD_IP}
 CASSANDRA_BROADCAST_RPC_ADDRESS=${POD_IP}
+
+# Turn off JMX auth
+CASSANDRA_OPEN_JMX="${CASSANDRA_OPEN_JMX:-false}"
 
 # TODO what else needs to be modified
 
@@ -49,10 +53,17 @@ done
 #  echo "rack=$RACK" >> $CONFIG/cassandra-rackdc.properties
 #fi
 
+sed -ri 's/- seeds:.*/- seeds: "'"$POD_IP"'"/' $CFG
+
 #
 # see if this is needed
-#echo "JVM_OPTS=\"\$JVM_OPTS -Djava.rmi.server.hostname=$IP\"" >> $CASSANDRA_CONFIG/cassandra-env.sh
-#
+echo "JVM_OPTS=\"\$JVM_OPTS -Djava.rmi.server.hostname=$POD_IP\"" >> $CONF_DIR/cassandra-env.sh
+
+if [[ $CASSANDRA_OPEN_JMX == 'true' ]]; then
+  export LOCAL_JMX=no
+  sed -ri 's/ -Dcom\.sun\.management\.jmxremote\.authenticate=true/ -Dcom\.sun\.management\.jmxremote\.authenticate=false/' $CONF_DIR/cassandra-env.sh
+  sed -ri 's/ -Dcom\.sun\.management\.jmxremote\.password\.file=\/etc\/cassandra\/jmxremote\.password//' $CONF_DIR/cassandra-env.sh
+fi
 
 # FIXME create README for these args
 echo "Starting Cassandra on $POD_IP"
