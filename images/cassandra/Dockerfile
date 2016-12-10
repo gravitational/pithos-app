@@ -29,7 +29,7 @@ RUN gpg --keyserver pgp.mit.edu --recv-keys F758CE318D77295D && \
   gpg --keyserver pgp.mit.edu --recv-keys 0353B12C && \
   gpg --export --armor 0353B12C | apt-key add - && \
   apt-get update && \
-  apt-get -qq -y install procps cassandra openjdk-8-jre-headless curl cron && \
+  apt-get -qq -y install procps libjemalloc1 cassandra openjdk-8-jre-headless curl cron && \
   rm -rf \
         doc \
         man \
