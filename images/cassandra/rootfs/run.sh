@@ -76,5 +76,5 @@ echo CASSANDRA_BROADCAST_ADDRESS ${POD_IP}
 echo CASSANDRA_BROADCAST_RPC_ADDRESS ${POD_IP}
 
 export CLASSPATH=/kubernetes-cassandra.jar
-/usr/bin/telegraf -quiet 2>&1 &
+/usr/bin/telegraf --quiet --config /etc/telegraf/telegraf-node.conf 2>&1 &
 cassandra -f -R

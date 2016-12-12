@@ -94,24 +94,24 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: cassandra-cron
+  name: cassandra-utils
   labels:
     app: pithos
-    pithos-role: cassandra-cron
+    pithos-role: cassandra-utils
 spec:
   replicas: 1
   template:
     metadata:
       labels:
         app: pithos
-        pithos-role: cassandra-cron
+        pithos-role: cassandra-utils
     spec:
       nodeSelector:
         pithos-role: node
       containers:
       - image: cassandra:latest
-        name: cassandra-cron
-        command: ["/usr/sbin/start-cron.sh"]
+        name: cassandra-utils
+        command: ["/usr/sbin/start-utils.sh"]
         imagePullPolicy: Always
         env:
           - name: CRON_SCHEDULE
