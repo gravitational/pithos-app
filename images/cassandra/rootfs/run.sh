@@ -58,6 +58,7 @@ sed -ri 's/- seeds:.*/- seeds: "'"$POD_IP"'"/' $CFG
 #
 # see if this is needed
 echo "JVM_OPTS=\"\$JVM_OPTS -Djava.rmi.server.hostname=$POD_IP\"" >> $CONF_DIR/cassandra-env.sh
+echo "JVM_OPTS=\"\$JVM_OPTS -javaagent:/jolokia-jvm-agent.jar\"" >> $CONF_DIR/cassandra-env.sh
 
 if [[ $CASSANDRA_OPEN_JMX == 'true' ]]; then
   export LOCAL_JMX=no
@@ -75,4 +76,5 @@ echo CASSANDRA_BROADCAST_ADDRESS ${POD_IP}
 echo CASSANDRA_BROADCAST_RPC_ADDRESS ${POD_IP}
 
 export CLASSPATH=/kubernetes-cassandra.jar
-dumb-init cassandra -f -R
+/usr/bin/telegraf --quiet --config /etc/telegraf/telegraf-node.conf 2>&1 &
+cassandra -f -R
