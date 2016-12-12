@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/dumb-init /bin/bash
 
 # Copyright 2014 The Kubernetes Authors All rights reserved.
 #
@@ -58,6 +58,7 @@ sed -ri 's/- seeds:.*/- seeds: "'"$POD_IP"'"/' $CFG
 #
 # see if this is needed
 echo "JVM_OPTS=\"\$JVM_OPTS -Djava.rmi.server.hostname=$POD_IP\"" >> $CONF_DIR/cassandra-env.sh
+echo "JVM_OPTS=\"\$JVM_OPTS -javaagent:/jolokia-jvm-agent.jar\"" >> $CONF_DIR/cassandra-env.sh
 
 if [[ $CASSANDRA_OPEN_JMX == 'true' ]]; then
   export LOCAL_JMX=no
@@ -75,4 +76,4 @@ echo CASSANDRA_BROADCAST_ADDRESS ${POD_IP}
 echo CASSANDRA_BROADCAST_RPC_ADDRESS ${POD_IP}
 
 export CLASSPATH=/kubernetes-cassandra.jar
-dumb-init cassandra -f -R
+cassandra -f -R && telegraf

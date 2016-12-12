@@ -16,7 +16,8 @@ FROM quay.io/gravitational/debian-grande:0.0.1
 
 ENV DEBIAN_FRONTEND=noninteractive \
     TERM=xterm \
-    KUBECTL_VERSION=1.3.8
+    KUBECTL_VERSION=1.3.8 \
+    TELEGRAF_VERSION=1.1.1
 
 COPY cassandra.list /etc/apt/sources.list.d/cassandra.list
 
@@ -30,6 +31,9 @@ RUN gpg --keyserver pgp.mit.edu --recv-keys F758CE318D77295D && \
   gpg --export --armor 0353B12C | apt-key add - && \
   apt-get update && \
   apt-get -qq -y install procps libjemalloc1 cassandra openjdk-8-jre-headless curl cron && \
+  curl -sSL https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl && \
+  curl -sSL https://dl.influxdata.com/telegraf/releases/telegraf-${TELEGRAF_VERSION}_linux_amd64.tar.gz -o /telegraf.tar.gz && \
+  tar xzf /telegraf.tar.gz --strip-components=2 && \
   rm -rf \
         doc \
         man \
@@ -47,22 +51,23 @@ RUN gpg --keyserver pgp.mit.edu --recv-keys F758CE318D77295D && \
         /usr/share/doc-base/ \
         /usr/share/man/ \
         /tmp/* \
+        /telegraf.tar.gz \
+        /etc/telegraf/* \
         /etc/cassandra/*
 
 COPY run.sh /run.sh
 COPY initialize.sh /initialize.sh
 COPY init.cql /init.cql
 COPY kubernetes-cassandra.jar /kubernetes-cassandra.jar
+COPY jolokia-jvm-agent.jar /jolokia-jvm-agent.jar
 COPY cqlshrc /root/.cqlshrc
 COPY start-cron.sh /usr/sbin
+COPY telegraf.conf /etc/telegraf/
 
 RUN chmod a+rx /run.sh
 RUN chmod a+rx /initialize.sh
 RUN chmod a+rx /usr/sbin/start-cron.sh
-
-RUN curl -sSL https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl && \
-    chmod +x /usr/local/bin/kubectl && \
-    kubectl version --client
+RUN chmod a+rx /usr/local/bin/kubectl
 
 RUN mkfifo --mode 0666 /var/log/cron.log
 
