@@ -111,7 +111,7 @@ spec:
       containers:
       - image: cassandra:latest
         name: cassandra-utils
-        command: ["/usr/sbin/start-utils.sh"]
+        command: ["/usr/bin/dumb-init", "/usr/sbin/start-utils.sh"]
         imagePullPolicy: Always
         env:
           - name: CRON_SCHEDULE

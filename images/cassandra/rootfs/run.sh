@@ -1,4 +1,4 @@
-#!/usr/bin/dumb-init /bin/bash
+#!/bin/bash
 
 # Copyright 2014 The Kubernetes Authors All rights reserved.
 #

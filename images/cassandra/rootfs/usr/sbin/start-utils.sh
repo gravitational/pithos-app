@@ -1,4 +1,4 @@
-#!/usr/bin/dumb-init /bin/bash
+#!/bin/bash
 
 if [ "x$CRON_SCHEDULE" = "x" ]; then
     CRON_SCHEDULE='0 0 * * *'

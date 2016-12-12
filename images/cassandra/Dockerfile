@@ -71,4 +71,4 @@ EXPOSE 7000 7001 7011 7199 9042
 
 RUN test -f /cleanup.sh && sh /cleanup.sh
 
-CMD /run.sh
+ENTRYPOINT ["/usr/bin/dumb-init", "/run.sh"]
