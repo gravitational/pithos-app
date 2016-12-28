@@ -9,13 +9,15 @@ CONTAINERS := pithos-bootstrap:$(VER) \
 	pithos-uninstall:$(VER) \
 	cassandra:$(VER) \
 	pithos:$(VER) \
-	pithos-proxy:$(VER)
+	pithos-proxy:$(VER) \
+	pithos-test-content:$(VER)
 
 IMPORT_IMAGE_FLAGS := --set-image=pithos-bootstrap:$(VER) \
 	--set-image=pithos-uninstall:$(VER) \
 	--set-image=cassandra:$(VER) \
 	--set-image=pithos:$(VER) \
 	--set-image=pithos-proxy:$(VER) \
+	--set-image=pithos-test-content:$(VER)
 
 IMPORT_OPTIONS := --vendor \
 		--ops-url=$(OPS_URL) \
@@ -33,6 +35,7 @@ IMPORT_OPTIONS := --vendor \
 		--exclude="Makefile" \
 		--exclude="tool" \
 		--exclude=".git" \
+		--exclude="load-test" \
 		--registry-url=apiserver:5000 \
 		$(IMPORT_IMAGE_FLAGS)
 
@@ -90,3 +93,8 @@ dev-clean:
 	-kubectl delete -f resources/pithos.yaml
 	-kubectl delete configmap cassandra-cfg pithos-cfg
 	-kubectl label nodes -l pithos-role=node pithos-role-
+
+.PHONY: dev-test-content
+dev-test-content:
+	-kubectl delete -f resources/test-content.yaml
+	kubectl create -f resources/test-content.yaml

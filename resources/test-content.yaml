@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pithos-test-content
+spec:
+  template:
+    metadata:
+      name: pithos-test-content
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: pithos-test-content
+          image: pithos-test-content:latest
+          env:
+            - name: AWS_S3_ENDPOINT_URL
+              value: "https://pithos.default.svc"
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: pithos-keys
+                  key: master.key
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: pithos-keys
+                  key: master.secret
