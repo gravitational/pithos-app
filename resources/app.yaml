@@ -93,6 +93,44 @@ hooks:
                 volumeMounts:
                   - name: temp
                     mountPath: /tmp
+  update:
+    spec:
+      apiVersion: batch/v1
+      kind: Job
+      metadata:
+        name: pithos-app-update
+      spec:
+        template:
+          metadata:
+            name: pithos-app-update
+          spec:
+            parallelism: 1
+            completions: 1
+            activeDeadlineSeconds: 120
+            restartPolicy: Never
+            containers:
+              - name: bootstrap
+                image: pithos-hook:latest
+                args: ["update"]
+  rollback:
+    spec:
+      apiVersion: batch/v1
+      kind: Job
+      metadata:
+        name: pithos-app-rollback
+      spec:
+        template:
+          metadata:
+            name: pithos-app-rollback
+          spec:
+            parallelism: 1
+            completions: 1
+            activeDeadlineSeconds: 120
+            restartPolicy: Never
+            containers:
+              - name: bootstrap
+                image: pithos-hook:latest
+                args: ["rollback"]
   uninstall:
     spec:
       apiVersion: batch/v1

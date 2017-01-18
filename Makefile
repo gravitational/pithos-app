@@ -1,28 +1,30 @@
-VER ?= $(shell git describe --long --tags --always|awk -F'[.-]' '{print $$1 "." $$2 "." $$4}')
+export VERSION ?= $(shell git describe --long --tags --always|awk -F'[.-]' '{print $$1 "." $$2 "." $$4}')
 REPOSITORY := gravitational.io
 NAME := pithos-app
 OPS_URL ?= https://opscenter.localhost.localdomain:33009
 
 EXTRA_GRAVITY_OPTIONS ?=
 
-CONTAINERS := pithos-bootstrap:$(VER) \
-	pithos-uninstall:$(VER) \
-	cassandra:$(VER) \
-	pithos:$(VER) \
-	pithos-proxy:$(VER)
+CONTAINERS := pithos-bootstrap:$(VERSION) \
+	pithos-uninstall:$(VERSION) \
+	cassandra:$(VERSION) \
+	pithos:$(VERSION) \
+	pithos-proxy:$(VERSION) \
+	pithos-hook:$(VERSION)
 
-IMPORT_IMAGE_FLAGS := --set-image=pithos-bootstrap:$(VER) \
-	--set-image=pithos-uninstall:$(VER) \
-	--set-image=cassandra:$(VER) \
-	--set-image=pithos:$(VER) \
-	--set-image=pithos-proxy:$(VER) \
+IMPORT_IMAGE_FLAGS := --set-image=pithos-bootstrap:$(VERSION) \
+	--set-image=pithos-uninstall:$(VERSION) \
+	--set-image=cassandra:$(VERSION) \
+	--set-image=pithos:$(VERSION) \
+	--set-image=pithos-proxy:$(VERSION) \
+	--set-image=pithos-hook:$(VERSION)
 
 IMPORT_OPTIONS := --vendor \
 		--ops-url=$(OPS_URL) \
 		--insecure \
 		--repository=$(REPOSITORY) \
 		--name=$(NAME) \
-		--version=$(VER) \
+		--version=$(VERSION) \
 		--glob=**/*.yaml \
 		--ignore=dev \
 		--ignore=cassandra-cfg \
@@ -44,15 +46,15 @@ all: clean images
 
 .PHONY: what-version
 what-version:
-	@echo $(VER)
+	@echo $(VERSION)
 
 .PHONY: images
 images:
-	cd images && $(MAKE) -f Makefile VERSION=$(VER)
+	cd images && $(MAKE) -f Makefile VERSION=$(VERSION)
 
 .PHONY: import
 import: images
-	-gravity app delete --ops-url=$(OPS_URL) $(REPOSITORY)/$(NAME):$(VER) --force --insecure $(EXTRA_GRAVITY_OPTIONS)
+	-gravity app delete --ops-url=$(OPS_URL) $(REPOSITORY)/$(NAME):$(VERSION) --force --insecure $(EXTRA_GRAVITY_OPTIONS)
 	gravity app import $(IMPORT_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) .
 
 .PHONY: export
@@ -62,7 +64,7 @@ $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
 $(TARBALL): import $(BUILD_DIR)
-	gravity package export $(REPOSITORY)/$(NAME):$(VER) $(TARBALL) $(EXTRA_GRAVITY_OPTIONS)
+	gravity package export $(REPOSITORY)/$(NAME):$(VERSION) $(TARBALL) $(EXTRA_GRAVITY_OPTIONS)
 
 .PHONY: clean
 clean:

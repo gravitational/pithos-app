@@ -5,17 +5,19 @@ UNINSTALL_TAG := pithos-uninstall:$(VERSION)
 PITHOS_TAG := pithos:$(VERSION)
 CASSANDRA_TAG := cassandra:$(VERSION)
 PROXY_TAG := pithos-proxy:$(VERSION)
+HOOK_TAG := pithos-hook:$(VERSION)
 
 .PHONY: all
 all: images
 
 .PHONY: images
-images: bootstrap uninstall cassandra pithos proxy
+images: bootstrap uninstall cassandra pithos proxy hook
 	docker tag $(BOOTSTRAP_TAG) pithos-bootstrap:latest
 	docker tag $(UNINSTALL_TAG) pithos-uninstall:latest
 	docker tag $(PITHOS_TAG) pithos:latest
 	docker tag $(CASSANDRA_TAG) cassandra:latest
 	docker tag $(PROXY_TAG) pithos-proxy:latest
+	docker tag $(HOOK_TAG) pithos-hook:latest
 
 BOOTSTRAP_BINS := bootstrap/bin
 $(BOOTSTRAP_BINS):
@@ -43,6 +45,14 @@ proxy:
 pithos:
 	cd pithos && $(MAKE) TAG=$(PITHOS_TAG)
 
-,PHONY: clean
+.PHONY: hook
+hook:
+	$(eval CHANGESET = $(shell echo $$VERSION | sed -e 's/[\.]//g'))
+	if [ -z "$(CHANGESET)" ]; then \
+		echo "CHANGESET is not set"; exit 1; \
+	fi;
+	docker build --build-arg CHANGESET=pithos-$(CHANGESET) --pull -t $(HOOK_TAG) $(PWD)/hook
+
+.PHONY: clean
 clean:
 	-rm -rf $(BOOTSTRAP_BINS)
