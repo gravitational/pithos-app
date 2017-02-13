@@ -8,7 +8,7 @@ if [ $1 = "update" ]; then
     echo "Starting update, changeset: $RIG_CHANGESET"
     rig cs delete --force -c cs/$RIG_CHANGESET
 
-    echo "Ensuring cluster name"
+	echo "Ensuring cluster name"
 	kubectl create -f /var/lib/gravity/resources/rename-cassandra.yaml
 
 	pods=$(kubectl get po -l app=pithos-rename -ojsonpath='{.items[*].metadata.name}' 2> /dev/null)
