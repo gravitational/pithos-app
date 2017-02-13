@@ -46,6 +46,8 @@ spec:
               value: 100M
             - name: CASSANDRA_OPEN_JMX
               value: "true"
+            - name: CASSANDRA_CLUSTER_NAME
+              value: Pithos Cluster
             - name: POD_NAMESPACE
               valueFrom:
                 fieldRef:
