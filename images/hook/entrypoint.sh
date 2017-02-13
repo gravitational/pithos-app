@@ -35,6 +35,7 @@ if [ $1 = "update" ]; then
     echo "Creating or updating resources"
 	kubectl delete configmap/cassandra-cfg
 	kubectl create configmap cassandra-cfg --from-file=/var/lib/gravity/resources/cassandra-cfg
+	kubectl delete replicationcontroller pithos
 
     rig upsert -f /var/lib/gravity/resources/cassandra.yaml --debug
     rig upsert -f /var/lib/gravity/resources/pithos-rc.yaml --debug
