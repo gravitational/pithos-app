@@ -5,7 +5,7 @@ metadata:
   name: pithos-app
   resourceVersion: 0.0.1
   namespace: default
-base: gravitational.io/k8s-aws:0.0.0+latest
+base: gravitational.io/k8s-onprem:0.0.0+latest
 dependencies:
   apps:
     - gravitational.io/cluster-ssl-app:0.0.0+latest
@@ -21,7 +21,7 @@ installer:
       variables:
         devices:
           - device: vdb
-            mb: 20000
+            mb: 50000
           - device: vdc
             mb: 20000
   servers:

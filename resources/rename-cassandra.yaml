@@ -1,0 +1,46 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: cassandra-rename
+  namespace: default
+  labels:
+    app: pithos-rename
+    pithos-role: cassandra
+spec:
+  template:
+    metadata:
+      labels:
+        app: pithos-rename
+        pithos-role: cassandra
+    spec:
+      nodeSelector:
+        pithos-role: node
+      hostNetwork: true
+      containers:
+        - image: cassandra:latest
+          name: cassandra
+          imagePullPolicy: Always
+          command: ["/rename.sh"]
+          env:
+          volumeMounts:
+            - name: cassandra-cfg
+              mountPath: /etc/cassandra
+            - name: cluster-ca
+              mountPath: /etc/ssl/cluster-ca
+            - name: cluster-default-ssl
+              mountPath: /etc/ssl/cluster-default
+            - name: cassandra-ssl
+              mountPath: /etc/ssl/cassandra
+      volumes:
+        - name: cassandra-cfg
+          configMap:
+            name: cassandra-cfg
+        - name: cluster-ca
+          secret:
+            secretName: cluster-ca
+        - name: cluster-default-ssl
+          secret:
+            secretName: cluster-default-ssl
+        - name: cassandra-ssl
+          secret:
+            secretName: cassandra-ssl
