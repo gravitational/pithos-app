@@ -30,7 +30,8 @@ RUN gpg --keyserver pgp.mit.edu --recv-keys F758CE318D77295D && \
   gpg --keyserver pgp.mit.edu --recv-keys 0353B12C && \
   gpg --export --armor 0353B12C | apt-key add - && \
   apt-get update && \
-  apt-get -qq -y install procps libjemalloc1 cassandra openjdk-8-jre-headless curl cron gawk && \
+  apt-get -y install -t jessie-backports ca-certificates-java openjdk-8-jre-headless && \
+  apt-get -y install procps cassandra curl libjemalloc1 cron gawk && \
   curl -sSL https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl && \
   curl -sSL https://dl.influxdata.com/telegraf/releases/telegraf-${TELEGRAF_VERSION}_linux_amd64.tar.gz -o /telegraf.tar.gz && \
   tar xzf /telegraf.tar.gz --strip-components=2 && \
