@@ -43,7 +43,7 @@ func bootCluster() error {
 	}
 
 	log.Infof("creating pithos replication controller")
-	out, err = rigging.FromFile(rigging.ActionCreate, "/var/lib/gravity/resources/pithos-rc.yaml")
+	out, err = rigging.FromFile(rigging.ActionCreate, "/var/lib/gravity/resources/pithos.yaml")
 	if err != nil && !strings.Contains(string(out), "already exists") {
 		return trace.Wrap(err)
 	}
