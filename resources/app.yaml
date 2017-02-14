@@ -21,7 +21,7 @@ installer:
       variables:
         devices:
           - device: vdb
-            mb: 20000
+            mb: 50000
           - device: vdc
             mb: 20000
   servers:
