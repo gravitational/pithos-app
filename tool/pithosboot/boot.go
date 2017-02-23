@@ -17,6 +17,13 @@ func bootCluster() error {
 		return trace.Wrap(err)
 	}
 
+	log.Infof("creating ConfigMap/monitoring-cfg")
+	out, err = rigging.CreateConfigMapFromPath("monitoring-cfg", "/var/lib/gravity/resources/monitoring-cfg")
+	if err != nil && !strings.Contains(string(out), "already exists") {
+		log.Errorf("%s", string(out))
+		return trace.Wrap(err)
+	}
+
 	err = createPithosConfig()
 	if err != nil && !strings.Contains(string(out), "already exists") {
 		log.Errorf("%s", string(out))

@@ -14,67 +14,72 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-CONF_DIR=/etc/cassandra
-CFG=$CONF_DIR/cassandra.yaml
+if [[ $CASSANDRA_MONITORING == 'true' ]]
+then
+    echo CASSANDRA_MONITORING $CASSANDRA_MONITORING
+    /usr/bin/telegraf --quiet --config /etc/telegraf/telegraf-node.conf 2>&1
+else
+    CONF_DIR=/etc/cassandra
+    CFG=$CONF_DIR/cassandra.yaml
 
-CASSANDRA_RPC_ADDRESS="${CASSANDRA_RPC_ADDRESS:-0.0.0.0}"
-CASSANDRA_NUM_TOKENS="${CASSANDRA_NUM_TOKENS:-32}"
-CASSANDRA_CLUSTER_NAME="${CASSANDRA_CLUSTER_NAME:='Pithos Cluster'}"
-CASSANDRA_LISTEN_ADDRESS=${POD_IP}
-CASSANDRA_BROADCAST_ADDRESS=${POD_IP}
-CASSANDRA_BROADCAST_RPC_ADDRESS=${POD_IP}
+    CASSANDRA_RPC_ADDRESS="${CASSANDRA_RPC_ADDRESS:-0.0.0.0}"
+    CASSANDRA_NUM_TOKENS="${CASSANDRA_NUM_TOKENS:-32}"
+    CASSANDRA_CLUSTER_NAME="${CASSANDRA_CLUSTER_NAME:='Pithos Cluster'}"
+    CASSANDRA_LISTEN_ADDRESS=${POD_IP}
+    CASSANDRA_BROADCAST_ADDRESS=${POD_IP}
+    CASSANDRA_BROADCAST_RPC_ADDRESS=${POD_IP}
 
-# Turn off JMX auth
-CASSANDRA_OPEN_JMX="${CASSANDRA_OPEN_JMX:-false}"
+    # Turn off JMX auth
+    CASSANDRA_OPEN_JMX="${CASSANDRA_OPEN_JMX:-false}"
 
-# TODO what else needs to be modified
+    # TODO what else needs to be modified
 
-for yaml in \
-  broadcast_address \
-	broadcast_rpc_address \
-	cluster_name \
-	listen_address \
-	num_tokens \
-	rpc_address \
-; do
-  var="CASSANDRA_${yaml^^}"
-	val="${!var}"
-	if [ "$val" ]; then
-		sed -ri 's/^(# )?('"$yaml"':).*/\2 '"$val"'/' "$CFG"
-	fi
-done
+    for yaml in \
+        broadcast_address \
+	        broadcast_rpc_address \
+	        cluster_name \
+	        listen_address \
+	        num_tokens \
+	        rpc_address \
+        ; do
+        var="CASSANDRA_${yaml^^}"
+	    val="${!var}"
+	    if [ "$val" ]; then
+		    sed -ri 's/^(# )?('"$yaml"':).*/\2 '"$val"'/' "$CFG"
+	    fi
+    done
 
-# Eventual do snitch $DC && $RACK?
-#if [[ $SNITCH ]]; then
-#  sed -i -e "s/endpoint_snitch: SimpleSnitch/endpoint_snitch: $SNITCH/" $CONFIG/cassandra.yaml
-#fi
-#if [[ $DC && $RACK ]]; then
-#  echo "dc=$DC" > $CONFIG/cassandra-rackdc.properties
-#  echo "rack=$RACK" >> $CONFIG/cassandra-rackdc.properties
-#fi
+    # Eventual do snitch $DC && $RACK?
+    #if [[ $SNITCH ]]; then
+    #  sed -i -e "s/endpoint_snitch: SimpleSnitch/endpoint_snitch: $SNITCH/" $CONFIG/cassandra.yaml
+    #fi
+    #if [[ $DC && $RACK ]]; then
+    #  echo "dc=$DC" > $CONFIG/cassandra-rackdc.properties
+    #  echo "rack=$RACK" >> $CONFIG/cassandra-rackdc.properties
+    #fi
 
-sed -ri 's/- seeds:.*/- seeds: "'"$POD_IP"'"/' $CFG
+    sed -ri 's/- seeds:.*/- seeds: "'"$POD_IP"'"/' $CFG
 
-#
-# see if this is needed
-echo "JVM_OPTS=\"\$JVM_OPTS -Djava.rmi.server.hostname=$POD_IP\"" >> $CONF_DIR/cassandra-env.sh
-echo "JVM_OPTS=\"\$JVM_OPTS -javaagent:/jolokia-jvm-agent.jar\"" >> $CONF_DIR/cassandra-env.sh
+    #
+    # see if this is needed
+    echo "JVM_OPTS=\"\$JVM_OPTS -Djava.rmi.server.hostname=$POD_IP\"" >> $CONF_DIR/cassandra-env.sh
+    echo "JVM_OPTS=\"\$JVM_OPTS -javaagent:/jolokia-jvm-agent.jar\"" >> $CONF_DIR/cassandra-env.sh
 
-if [[ $CASSANDRA_OPEN_JMX == 'true' ]]; then
-  export LOCAL_JMX=no
-  sed -ri 's/ -Dcom\.sun\.management\.jmxremote\.authenticate=true/ -Dcom\.sun\.management\.jmxremote\.authenticate=false/' $CONF_DIR/cassandra-env.sh
-  sed -ri 's/ -Dcom\.sun\.management\.jmxremote\.password\.file=\/etc\/cassandra\/jmxremote\.password//' $CONF_DIR/cassandra-env.sh
+    if [[ $CASSANDRA_OPEN_JMX == 'true' ]]; then
+        export LOCAL_JMX=no
+        sed -ri 's/ -Dcom\.sun\.management\.jmxremote\.authenticate=true/ -Dcom\.sun\.management\.jmxremote\.authenticate=false/' $CONF_DIR/cassandra-env.sh
+        sed -ri 's/ -Dcom\.sun\.management\.jmxremote\.password\.file=\/etc\/cassandra\/jmxremote\.password//' $CONF_DIR/cassandra-env.sh
+    fi
+
+    # FIXME create README for these args
+    echo "Starting Cassandra on $POD_IP"
+    echo CASSANDRA_RPC_ADDRESS ${CASSANDRA_RPC_ADDRESS}
+    echo CASSANDRA_NUM_TOKENS ${CASSANDRA_NUM_TOKENS}
+    echo CASSANDRA_CLUSTER_NAME ${CASSANDRA_CLUSTER_NAME}
+    echo CASSANDRA_LISTEN_ADDRESS ${POD_IP}
+    echo CASSANDRA_BROADCAST_ADDRESS ${POD_IP}
+    echo CASSANDRA_BROADCAST_RPC_ADDRESS ${POD_IP}
+
+    export CLASSPATH=/kubernetes-cassandra.jar
+    cassandra -f -R
 fi
-
-# FIXME create README for these args
-echo "Starting Cassandra on $POD_IP"
-echo CASSANDRA_RPC_ADDRESS ${CASSANDRA_RPC_ADDRESS}
-echo CASSANDRA_NUM_TOKENS ${CASSANDRA_NUM_TOKENS}
-echo CASSANDRA_CLUSTER_NAME ${CASSANDRA_CLUSTER_NAME}
-echo CASSANDRA_LISTEN_ADDRESS ${POD_IP}
-echo CASSANDRA_BROADCAST_ADDRESS ${POD_IP}
-echo CASSANDRA_BROADCAST_RPC_ADDRESS ${POD_IP}
-
-export CLASSPATH=/kubernetes-cassandra.jar
-/usr/bin/telegraf --quiet --config /etc/telegraf/telegraf-node.conf 2>&1 &
-cassandra -f -R
