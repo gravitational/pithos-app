@@ -78,6 +78,15 @@ spec:
               mountPath: /etc/ssl/cluster-default
             - name: cassandra-ssl
               mountPath: /etc/ssl/cassandra
+        - image: cassandra:latest
+          name: cassandra-monitoring
+          imagePullPolicy: Always
+          env:
+            - name: CASSANDRA_MONITORING
+              value: "true"
+          volumeMounts:
+            - name: monitoring-cfg
+              mountPath: /etc/telegraf
       volumes:
         - name: data
           hostPath:
@@ -94,6 +103,9 @@ spec:
         - name: cassandra-ssl
           secret:
             secretName: cassandra-ssl
+        - name: monitoring-cfg
+          configMap:
+            name: monitoring-cfg
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -121,3 +133,10 @@ spec:
         env:
           - name: CRON_SCHEDULE
             value: "15 2 * * *"
+        volumeMounts:
+          - name: monitoring-cfg
+            mountPath: /etc/telegraf
+      volumes:
+        - name: monitoring-cfg
+          configMap:
+            name: monitoring-cfg
