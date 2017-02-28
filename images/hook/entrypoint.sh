@@ -46,6 +46,16 @@ if [ $1 = "update" ]; then
 elif [ $1 = "rollback" ]; then
     echo "Reverting changeset $RIG_CHANGESET"
     rig revert
+
+    kubectl get ds/cassandra -o yaml > /tmp/cassandra-ds.yaml
+    if ! grep -q 'CASSANDRA_CLUSTER_NAME' /tmp/cassandra-ds.yaml
+    then
+        echo "Set CASSANDRA_CLUSTER_NAME env variable"
+        sed -i '0,/env:/s//env:\n        - name: CASSANDRA_CLUSTER_NAME\n          value: Pithos Cluster/' /tmp/cassandra-ds.yaml
+        kubectl replace -f /tmp/cassandra-ds.yaml
+        // Hack, because of "https://github.com/kubernetes/kubernetes/issues/29199"
+        kubectl delete po -l 'pithos-role=cassandra'
+    fi
 else
     echo "Missing argument, should be either 'update' or 'rollback'"
 fi
