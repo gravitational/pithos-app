@@ -32,7 +32,6 @@ spec:
         app: pithos
         pithos-role: pithos
     spec:
-      hostNetwork: true
       nodeSelector:
         pithos-role: node
       containers:
