@@ -78,7 +78,7 @@ nodeProfiles:
 
 hooks:
   install:
-		job: |
+    job: |
       apiVersion: batch/v1
       kind: Job
       metadata:
