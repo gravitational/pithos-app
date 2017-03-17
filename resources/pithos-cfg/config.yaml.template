@@ -72,7 +72,7 @@ keystore:
 # The default provider relies on cassandra.
 bucketstore:
   default-region: 'G1'
-  cluster: 'localhost'
+  cluster: 'cassandra.default.svc.cluster.local'
   keyspace: 'storage'
   hints:
     replication:
@@ -95,11 +95,11 @@ bucketstore:
 regions:
   G1:
     metastore:
-      cluster: 'localhost'
+      cluster: 'cassandra.default.svc.cluster.local'
       keyspace: 'storage'
     storage-classes:
       standard:
-        cluster: 'localhost'
+        cluster: 'cassandra.default.svc.cluster.local'
         keyspace: 'storage'
         max-chunk: '128k'
         max-block-chunks: 1024

@@ -1,51 +1,71 @@
-apiVersion: v1
-kind: Application
+apiVersion: bundle.gravitational.io/v2
+kind: Bundle
 metadata:
-  repository: gravitational.io
   name: pithos-app
   resourceVersion: 0.0.1
   namespace: default
-base: gravitational.io/k8s-onprem:0.0.0+latest
+
 dependencies:
   apps:
     - gravitational.io/cluster-ssl-app:0.0.0+latest
+
+systemOptions:
+  docker:
+    storageDriver: overlay
+  runtime:
+    version: "0.0.0+latest"
+
 installer:
-  provisioners:
-    virsh:
-      commands:
-        - 'sudo hostname {{ .server.hostname }}'
-        - 'echo $(netstat -rn | grep UG | awk ''{print $2}'') {{ .variables.system.teleport_proxy_address }} | sudo tee -a /etc/hosts'
-        - 'sudo mkfs.ext4 /dev/vdc'
-        - 'sudo mkdir -p /var/lib/data/pithos && sudo mount /dev/vdc /var/lib/data/pithos'
-        - 'curl --tlsv1.2 {{if .variables.system.devmode}}--insecure{{end}} "{{ .variables.system.ops_url }}/{{ .variables.system.token }}/auto?docker_device=vdb&mount=pithos-data:/var/lib/data/pithos" | sudo bash'
-      variables:
-        devices:
-          - device: vdb
-            mb: 50000
-          - device: vdc
-            mb: 20000
-  servers:
-    node:
+  flavors:
+    prompt: "How many nodes will you need?"
+    default: one
+    items:
+      - name: "one"
+        description: "single node"
+        nodes:
+          - profile: node
+            count: 1
+      - name: "three"
+        description: "three node cluster"
+        nodes:
+          - profile: node
+            count: 3
+      - name: "five"
+        description: "five node cluster"
+        nodes:
+          - profile: node
+            count: 5
+
+nodeProfiles:
+  - name: node
+    description: "pithos data node"
+    labels:
+      role: "node"
+      pithos-role: "node"
+    requirements:
       cpu:
-        min_count: 2
+        min: 2
       ram:
-        min_total_mb: 8000
-      description: "pithos server"
-      labels:
-        role: "node"
-        pithos-role: "node"
-      directories:
-        - name: /var/lib/gravity
-          min_total_mb: 4000
-      mounts:
+        min: "1GB"
+      volumes:
+        - path: /var/lib/gravity
+          capacity: "4GB"
         - name: pithos-data
-          source: /var/lib/data/pithos
-          destination: /var/lib/data/pithos
-          min_total_mb: 4000
-          fs_types: ["ext4", "xfs"]
-          create_if_missing: true
-      instance_types:
-        aws_terraform:
+          path: /var/lib/data/pithos
+          targetPath: /var/lib/data/pithos
+          capacity: "4GB"
+          filesystems: ["ext4", "xfs"]
+      network:
+        minTransferRate: "1MB/s"
+        ports:
+          - protocol: tcp
+            ranges:
+              - "5431-5435"
+              - "5973"
+    expandPolicy: fixed-instance
+    providers:
+      aws:
+        instanceTypes:
           - m3.large
           - m3.xlarge
           - c3.large
@@ -54,30 +74,16 @@ installer:
           - c3.4xlarge
           - i2.xlarge
           - i2.2xlarge
-  flavors:
-    title: "Select a flavor"
-    items:
-      - name: "one"
-        description: "1 node"
-        threshold:
-          value: 1
-          label: "1"
-        profiles:
-          node: 1
-      - name: "three"
-        description: "3 nodes"
-        threshold:
-          value: 3
-          label: "3"
-        profiles:
-          node: 3
+
+
 hooks:
   install:
-    spec:
+    job: |
       apiVersion: batch/v1
       kind: Job
       metadata:
         name: pithos-app-install
+        namespace: default
       spec:
         template:
           metadata:
@@ -94,11 +100,12 @@ hooks:
                   - name: temp
                     mountPath: /tmp
   update:
-    spec:
+    job: |
       apiVersion: batch/v1
       kind: Job
       metadata:
         name: pithos-app-update
+        namespace: default
       spec:
         template:
           metadata:
@@ -113,11 +120,12 @@ hooks:
                 image: pithos-hook:latest
                 args: ["update"]
   rollback:
-    spec:
+    job: |
       apiVersion: batch/v1
       kind: Job
       metadata:
         name: pithos-app-rollback
+        namespace: default
       spec:
         template:
           metadata:
@@ -132,11 +140,12 @@ hooks:
                 image: pithos-hook:latest
                 args: ["rollback"]
   uninstall:
-    spec:
+    job: |
       apiVersion: batch/v1
       kind: Job
       metadata:
         name: pithos-app-uninstall
+        namespace: default
       spec:
         template:
           metadata:

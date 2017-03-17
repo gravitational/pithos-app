@@ -15,7 +15,6 @@ spec:
     spec:
       nodeSelector:
         pithos-role: node
-      hostNetwork: true
       containers:
         - image: cassandra:latest
           name: cassandra
