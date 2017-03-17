@@ -83,6 +83,7 @@ hooks:
       kind: Job
       metadata:
         name: pithos-app-install
+        namespace: default
       spec:
         template:
           metadata:
@@ -104,6 +105,7 @@ hooks:
       kind: Job
       metadata:
         name: pithos-app-update
+        namespace: default
       spec:
         template:
           metadata:
@@ -123,6 +125,7 @@ hooks:
       kind: Job
       metadata:
         name: pithos-app-rollback
+        namespace: default
       spec:
         template:
           metadata:
@@ -142,6 +145,7 @@ hooks:
       kind: Job
       metadata:
         name: pithos-app-uninstall
+        namespace: default
       spec:
         template:
           metadata:
