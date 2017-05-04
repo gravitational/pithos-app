@@ -8,6 +8,7 @@ RUN apt-get update && apt-get -qq -y install openjdk-7-jre-headless && \
     chown -R pithos /run.sh /pithos.jar && \
     chmod +x /run.sh
 
+RUN apt-get -qq -y install curl net-tools
 RUN test -f /cleanup.sh && sh /cleanup.sh
 
 CMD /run.sh
