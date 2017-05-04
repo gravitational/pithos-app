@@ -1,0 +1,28 @@
+version: '2'
+services:
+  cassandra:
+    image: cassandra:3.10
+    ports:
+      - "8500:8500"
+    volumes:
+      - ./data:/var/lib/cassandra
+  pithos:
+    image: pithos:1.1.0
+    ports:
+      - "80:8080"    
+    volumes:
+      - ./pithos:/etc/pithos
+    depends_on:
+      - cassandra
+  registry:
+    image: registry:2.6.1
+    network_mode: "host"
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./registry:/etc/docker/registry
+      - ./registry-data:/var/lib/registry
+
+    
+
+      
