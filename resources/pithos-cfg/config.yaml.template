@@ -98,8 +98,8 @@ regions:
   G1:
     metastore:
       cluster: 'cassandra.default.svc.cluster.local'
-      #username: 'cassandra'
-      #password: '{{ .CassandraPassword }}'
+      username: 'cassandra'
+      password: '{{ .CassandraPassword }}'
       keyspace: 'storage'
     storage-classes:
       standard:
