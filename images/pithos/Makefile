@@ -9,8 +9,8 @@ all: image
 image: $(OUT)
 	docker build -t $(TAG) .
 
-$(OUT):
-	wget https://github.com/exoscale/pithos/releases/download/0.7.5/pithos-0.7.5-standalone.jar -O $(PWD)/$(OUT)
+#$(OUT):
+#	wget https://github.com/exoscale/pithos/releases/download/0.7.5/pithos-0.7.5-standalone.jar -O $(PWD)/$(OUT)
 
 .PHONY: clean
 clean:

@@ -21,13 +21,13 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 COPY cassandra.list /etc/apt/sources.list.d/cassandra.list
 
-RUN gpg --keyserver pool.sks-keyservers.net --recv-keys F758CE318D77295D && \
+RUN gpg --keyserver ha.pool.sks-keyservers.net --recv-keys F758CE318D77295D && \
   gpg --export --armor F758CE318D77295D | apt-key add - && \
-  gpg --keyserver pool.sks-keyservers.net --recv-keys 2B5C1B00 && \
+  gpg --keyserver ha.pool.sks-keyservers.net --recv-keys 2B5C1B00 && \
   gpg --export --armor 2B5C1B00 | apt-key add - && \
-  gpg --keyserver pool.sks-keyservers.net --recv-keys A278B781FE4B2BDA && \
+  gpg --keyserver ha.pool.sks-keyservers.net --recv-keys A278B781FE4B2BDA && \
   gpg --export --armor A278B781FE4B2BDA | apt-key add - && \
-  gpg --keyserver pool.sks-keyservers.net --recv-keys 0353B12C && \
+  gpg --keyserver ha.pool.sks-keyservers.net --recv-keys 0353B12C && \
   gpg --export --armor 0353B12C | apt-key add - && \
   apt-get update && \
   apt-get -y install -t jessie-backports ca-certificates-java openjdk-8-jre-headless && \
