@@ -7,6 +7,9 @@ if [[ $NUM_NODES -gt 2 ]]; then
 	REPLICATION_FACTOR=3
 fi
 
+# change default password, if not already set
+cqlsh -u cassandra -p cassandra -e "ALTER ROLE cassandra WITH PASSWORD='${CASSANDRA_PASSWORD}'" cassandra.default.svc.cluster.local || true
+
 sed -i 's/REPLICATION_FACTOR/'"${REPLICATION_FACTOR}"'/g' /init.cql
 
-cqlsh -f /init.cql cassandra.default.svc.cluster.local
+cqlsh -u cassandra -p "${CASSANDRA_PASSWORD}" -f /init.cql cassandra.default.svc.cluster.local

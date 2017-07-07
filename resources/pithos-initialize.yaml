@@ -12,6 +12,12 @@ spec:
         - image: cassandra:latest
           name: pithos-initialize
           command: ["/initialize.sh"]
+          env:
+            - name: CASSANDRA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cassandra-password
+                  key: cassandra
           volumeMounts:
             - name: cassandra-ssl
               mountPath: /etc/ssl/cassandra

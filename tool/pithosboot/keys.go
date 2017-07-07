@@ -19,6 +19,7 @@ import (
 type PithosConfigParams struct {
 	ReplicationFactor int
 	Keys              []AccessKey
+	CassandraPassword string
 }
 
 type AccessKey struct {
@@ -26,6 +27,11 @@ type AccessKey struct {
 	Master bool
 	Tenant string
 	Secret string
+}
+
+func generateCassandraPassword() (string, error) {
+	_, secret, err := generateKeyAndSecret()
+	return secret, err
 }
 
 func generateAccessKey(tenant string, master bool) (*AccessKey, error) {
@@ -85,9 +91,15 @@ func createPithosConfig() error {
 		return trace.Wrap(err)
 	}
 
+	password, err := generateCassandraPassword()
+	if err != nil {
+		return trace.Wrap(err)
+	}
+
 	cfg := PithosConfigParams{
 		Keys:              []AccessKey{},
 		ReplicationFactor: replicas,
+		CassandraPassword: password,
 	}
 
 	masterKey, err := generateAccessKey("ops@gravitational.io", true)
@@ -141,6 +153,16 @@ func createPithosConfig() error {
 	}
 
 	out, err = rigging.CreateSecretFromMap("pithos-keys", keyMap)
+	if err != nil {
+		log.Errorf("%s", string(out))
+		return trace.Wrap(err)
+	}
+
+	passwordMap := map[string]string{
+		"cassandra": password,
+	}
+
+	out, err = rigging.CreateSecretFromMap("cassandra-password", passwordMap)
 	if err != nil {
 		log.Errorf("%s", string(out))
 		return trace.Wrap(err)
