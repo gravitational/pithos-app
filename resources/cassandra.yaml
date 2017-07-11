@@ -11,8 +11,6 @@ spec:
       name: cql
     - port: 9160
       name: rpc
-    - port: 7199
-      name: jmx
   selector:
     app: pithos
     pithos-role: cassandra
@@ -36,6 +34,13 @@ spec:
       nodeSelector:
         pithos-role: node
       containers:
+        - image: cassandra:latest
+          name: cassandra-utils
+          command: ["/usr/bin/dumb-init", "/usr/sbin/start-utils.sh"]
+          imagePullPolicy: Always
+          env:
+            - name: CRON_SCHEDULE
+              value: "15 2 * * *"
         - image: cassandra:latest
           name: cassandra
           imagePullPolicy: Always
@@ -94,30 +99,3 @@ spec:
         - name: cassandra-ssl
           secret:
             secretName: cassandra-ssl
----
-apiVersion: extensions/v1beta1
-kind: Deployment
-metadata:
-  name: cassandra-utils
-  namespace: default
-  labels:
-    app: pithos
-    pithos-role: cassandra-utils
-spec:
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: pithos
-        pithos-role: cassandra-utils
-    spec:
-      nodeSelector:
-        pithos-role: node
-      containers:
-      - image: cassandra:latest
-        name: cassandra-utils
-        command: ["/usr/bin/dumb-init", "/usr/sbin/start-utils.sh"]
-        imagePullPolicy: Always
-        env:
-          - name: CRON_SCHEDULE
-            value: "15 2 * * *"

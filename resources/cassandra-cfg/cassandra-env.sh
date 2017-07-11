@@ -214,46 +214,11 @@ if [ "x$CASSANDRA_HEAPDUMP_DIR" != "x" ]; then
     JVM_OPTS="$JVM_OPTS -XX:HeapDumpPath=$CASSANDRA_HEAPDUMP_DIR/cassandra-`date +%s`-pid$$.hprof"
 fi
 
-# jmx: metrics and administration interface
-#
-# add this if you're having trouble connecting:
-# JVM_OPTS="$JVM_OPTS -Djava.rmi.server.hostname=<public name>"
-#
-# see
-# https://blogs.oracle.com/jmxetc/entry/troubleshooting_connection_problems_in_jconsole
-# for more on configuring JMX through firewalls, etc. (Short version:
-# get it working with no firewall first.)
-#
-# Cassandra ships with JMX accessible *only* from localhost.
-# To enable remote JMX connections, uncomment lines below
-# with authentication and/or ssl enabled. See https://wiki.apache.org/cassandra/JmxSecurity
-#
-if [ "x$LOCAL_JMX" = "x" ]; then
-    LOCAL_JMX=yes
-fi
-
 # Specifies the default port over which Cassandra will be available for
 # JMX connections.
 # For security reasons, you should not expose this port to the internet.  Firewall it if needed.
 JMX_PORT="7199"
-
-if [ "$LOCAL_JMX" = "yes" ]; then
-  JVM_OPTS="$JVM_OPTS -Dcassandra.jmx.local.port=$JMX_PORT -XX:+DisableExplicitGC"
-else
-  JVM_OPTS="$JVM_OPTS -Dcom.sun.management.jmxremote.port=$JMX_PORT"
-  JVM_OPTS="$JVM_OPTS -Dcom.sun.management.jmxremote.rmi.port=$JMX_PORT"
-  JVM_OPTS="$JVM_OPTS -Dcom.sun.management.jmxremote.ssl=false"
-  JVM_OPTS="$JVM_OPTS -Dcom.sun.management.jmxremote.authenticate=true"
-  JVM_OPTS="$JVM_OPTS -Dcom.sun.management.jmxremote.password.file=/etc/cassandra/jmxremote.password"
-#  JVM_OPTS="$JVM_OPTS -Djavax.net.ssl.keyStore=/path/to/keystore"
-#  JVM_OPTS="$JVM_OPTS -Djavax.net.ssl.keyStorePassword=<keystore-password>"
-#  JVM_OPTS="$JVM_OPTS -Djavax.net.ssl.trustStore=/path/to/truststore"
-#  JVM_OPTS="$JVM_OPTS -Djavax.net.ssl.trustStorePassword=<truststore-password>"
-#  JVM_OPTS="$JVM_OPTS -Dcom.sun.management.jmxremote.ssl.need.client.auth=true"
-#  JVM_OPTS="$JVM_OPTS -Dcom.sun.management.jmxremote.registry.ssl=true"
-#  JVM_OPTS="$JVM_OPTS -Dcom.sun.management.jmxremote.ssl.enabled.protocols=<enabled-protocols>"
-#  JVM_OPTS="$JVM_OPTS -Dcom.sun.management.jmxremote.ssl.enabled.cipher.suites=<enabled-cipher-suites>"
-fi
+JVM_OPTS="$JVM_OPTS -Dcassandra.jmx.local.port=$JMX_PORT -XX:+DisableExplicitGC"
 
 # To use mx4j, an HTML interface for JMX, add mx4j-tools.jar to the lib/
 # directory.
