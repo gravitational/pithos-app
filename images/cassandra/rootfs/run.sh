@@ -24,9 +24,7 @@ CASSANDRA_LISTEN_ADDRESS=${POD_IP}
 CASSANDRA_BROADCAST_ADDRESS=${POD_IP}
 CASSANDRA_BROADCAST_RPC_ADDRESS=${POD_IP}
 
-# Turn on JMX auth
-CASSANDRA_OPEN_JMX=true
-#"${CASSANDRA_OPEN_JMX:-false}"
+CASSANDRA_OPEN_JMX=false
 
 # TODO what else needs to be modified
 
@@ -60,12 +58,6 @@ sed -ri 's/- seeds:.*/- seeds: "'"$POD_IP"'"/' $CFG
 # see if this is needed
 echo "JVM_OPTS=\"\$JVM_OPTS -Djava.rmi.server.hostname=$POD_IP\"" >> $CONF_DIR/cassandra-env.sh
 echo "JVM_OPTS=\"\$JVM_OPTS -javaagent:/jolokia-jvm-agent.jar\"" >> $CONF_DIR/cassandra-env.sh
-
-if [[ $CASSANDRA_OPEN_JMX == 'true' ]]; then
-  export LOCAL_JMX=no
-  sed -ri 's/ -Dcom\.sun\.management\.jmxremote\.authenticate=true/ -Dcom\.sun\.management\.jmxremote\.authenticate=false/' $CONF_DIR/cassandra-env.sh
-  sed -ri 's/ -Dcom\.sun\.management\.jmxremote\.password\.file=\/etc\/cassandra\/jmxremote\.password//' $CONF_DIR/cassandra-env.sh
-fi
 
 # FIXME create README for these args
 echo "Starting Cassandra on $POD_IP"
