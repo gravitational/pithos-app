@@ -9,8 +9,27 @@ if [ $1 = "update" ]; then
     rig cs delete --force -c cs/$RIG_CHANGESET
 
     echo "Creating or updating resources"
+    CASSANDRA_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1 | tr -d '\n')
+    if ! $(kubectl get secret/cassandra-password >> /dev/null)
+    then
+        cat <<EOF > cassandra-secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cassandra-password
+type: Opaque
+data:
+  cassandra: $(echo $CASSANDRA_PASSWORD | base64)
+EOF
+        kubectl create -f cassandra-secret.yaml
+    fi
+
     kubectl get configmap/pithos-cfg -o yaml > pithoscfg.yaml
     sed -i 's/localhost/cassandra.default.svc.cluster.local/' pithoscfg.yaml
+    if ! $(grep 'password' pithoscfg.yaml >> /dev/null)
+    then
+        sed -i -r "s/^(\s*)(cluster.*$)/\1\2\n\1username: 'cassandra'\n\1password: '${CASSANDRA_PASSWORD}'/" pithoscfg.yaml
+    fi
     kubectl apply -f pithoscfg.yaml
 
     kubectl delete configmap/cassandra-cfg
@@ -18,6 +37,7 @@ if [ $1 = "update" ]; then
     rig delete rc/pithos --force
 
     rig upsert -f /var/lib/gravity/resources/cassandra.yaml --debug
+    rig upsert -f /var/lib/gravity/resources/cassandra-password.yaml --debug
     rig upsert -f /var/lib/gravity/resources/pithos.yaml --debug
     echo "Checking status"
     rig status $RIG_CHANGESET --retry-attempts=120 --retry-period=1s --debug
