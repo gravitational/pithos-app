@@ -17,6 +17,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: cassandra-password
+  namespace: default
 type: Opaque
 data:
   cassandra: $(echo $CASSANDRA_PASSWORD | base64)
