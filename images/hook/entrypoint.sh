@@ -49,7 +49,7 @@ elif [ $1 = "rollback" ]; then
     rig revert
 
     kubectl get configmap/pithos-cfg -o yaml > pithoscfg.yaml
-    sed -i 's/cassandra.default.svc.cluster.local/localhost/' pithoscfg.yaml
+    sed -i 's/localhost/cassandra.default.svc.cluster.local/' pithoscfg.yaml
     kubectl apply -f pithoscfg.yaml
 
 else
