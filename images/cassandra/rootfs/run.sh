@@ -76,5 +76,14 @@ echo CASSANDRA_BROADCAST_ADDRESS ${POD_IP}
 echo CASSANDRA_BROADCAST_RPC_ADDRESS ${POD_IP}
 
 export CLASSPATH=/kubernetes-cassandra.jar
+
+# create telegraf user
+curl -XPOST "http://influxdb.kube-system.svc:8086/query?u=root&p=root" \
+         --data-urlencode "q=CREATE USER ${INFLUXDB_TELEGRAF_USERNAME} WITH PASSWORD '${INFLUXDB_TELEGRAF_PASSWORD}'"
+curl -XPOST "http://influxdb.kube-system.svc:8086/query?u=root&p=root" \
+         --data-urlencode "q=GRANT ALL on k8s to ${INFLUXDB_TELEGRAF_USERNAME}"
+sed -i s/superSecurePassword/${INFLUXDB_TELEGRAF_PASSWORD}/ /etc/telegraf/telegraf-node.conf
+sed -i s/username = "telegraf"/username = "${INFLUXDB_TELEGRAF_USERNAME}"/ /etc/telegraf/telegraf-node.conf
+
 /usr/bin/telegraf --quiet --config /etc/telegraf/telegraf-node.conf 2>&1 &
 cassandra -f -R
