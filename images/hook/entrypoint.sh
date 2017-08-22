@@ -15,7 +15,7 @@ if [ $1 = "update" ]; then
 
     kubectl delete configmap/cassandra-cfg
     kubectl create configmap cassandra-cfg --from-file=/var/lib/gravity/resources/cassandra-cfg
-    rig delete rc/pithos --force
+    rig delete deployments/pithos --force
 
     rig upsert -f /var/lib/gravity/resources/cassandra.yaml --debug
     rig upsert -f /var/lib/gravity/resources/pithos.yaml --debug
