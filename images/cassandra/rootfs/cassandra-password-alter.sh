@@ -4,3 +4,4 @@
 printenv
 echo "ALTER ROLE cassandra WITH PASSWORD='${CASSANDRA_PASSWORD}'"
 cqlsh -u cassandra -p cassandra -e "ALTER ROLE cassandra WITH PASSWORD='${CASSANDRA_PASSWORD}'" cassandra.default.svc.cluster.local
+echo $?
