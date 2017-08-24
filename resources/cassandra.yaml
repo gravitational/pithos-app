@@ -45,6 +45,16 @@ spec:
           name: cassandra
           imagePullPolicy: Always
           env:
+            - name: INFLUXDB_TELEGRAF_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: telegraf-influxdb-creds
+                  key: username
+            - name: INFLUXDB_TELEGRAF_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: telegraf-influxdb-creds
+                  key: password
             - name: MAX_HEAP_SIZE
               value: 2048M
             - name: HEAP_NEWSIZE
@@ -99,3 +109,13 @@ spec:
         - name: cassandra-ssl
           secret:
             secretName: cassandra-ssl
+---
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: telegraf-influxdb-creds
+  namespace: default
+data:
+  username: dGVsZWdyYWY=
+  password: c3VwZXJTZWN1cmVQYXNzd29yZA==
