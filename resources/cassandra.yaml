@@ -41,6 +41,16 @@ spec:
           env:
             - name: CRON_SCHEDULE
               value: "15 2 * * *"
+            - name: INFLUXDB_TELEGRAF_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: telegraf-influxdb-creds
+                  key: username
+            - name: INFLUXDB_TELEGRAF_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: telegraf-influxdb-creds
+                  key: password
         - image: cassandra:latest
           name: cassandra
           imagePullPolicy: Always
