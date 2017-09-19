@@ -20,6 +20,7 @@ rules:
     resources:
       - secrets
     resourceNames:
+      - cassandra-ssl
       - cluster-ca
       - cluster-default-ssl
   - apiGroups:

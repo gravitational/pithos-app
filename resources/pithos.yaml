@@ -20,7 +20,6 @@ rules:
     resources:
       - secrets
     resourceNames:
-      - cluster-ca
       - cluster-default-ssl
   - apiGroups:
       -  ""
