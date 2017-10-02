@@ -73,8 +73,6 @@ keystore:
 bucketstore:
   default-region: 'G1'
   cluster: 'cassandra.default.svc.cluster.local'
-  username: 'cassandra'
-  password: '{{ .CassandraPassword }}'
   keyspace: 'storage'
   hints:
     replication:
@@ -98,14 +96,10 @@ regions:
   G1:
     metastore:
       cluster: 'cassandra.default.svc.cluster.local'
-      username: 'cassandra'
-      password: '{{ .CassandraPassword }}'
       keyspace: 'storage'
     storage-classes:
       standard:
         cluster: 'cassandra.default.svc.cluster.local'
-        username: 'cassandra'
-        password: '{{ .CassandraPassword }}'
         keyspace: 'storage'
         max-chunk: '128k'
         max-block-chunks: 1024
