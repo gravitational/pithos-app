@@ -89,14 +89,6 @@ spec:
       nodeSelector:
         pithos-role: node
       containers:
-      - image: pithos-proxy:latest
-        name: proxy
-        ports:
-          - containerPort: 18443
-            name: https
-        volumeMounts:
-          - name: cluster-default-ssl
-            mountPath: /etc/cluster-ssl
       - image: pithos:latest
         name: pithos
         ports:
@@ -105,6 +97,14 @@ spec:
         volumeMounts:
           - name: pithos-cfg
             mountPath: /etc/pithos
+      - image: pithos-proxy:latest
+        name: proxy
+        ports:
+          - containerPort: 18443
+            name: https
+        volumeMounts:
+          - name: cluster-default-ssl
+            mountPath: /etc/cluster-ssl
       volumes:
         - name: pithos-cfg
           configMap:

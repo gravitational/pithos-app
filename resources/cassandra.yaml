@@ -90,23 +90,6 @@ spec:
         pithos-role: node
       containers:
         - image: cassandra:latest
-          name: cassandra-utils
-          command: ["/usr/bin/dumb-init", "/usr/sbin/start-utils.sh"]
-          imagePullPolicy: Always
-          env:
-            - name: CRON_SCHEDULE
-              value: "15 2 * * *"
-            - name: INFLUXDB_TELEGRAF_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: telegraf-influxdb-creds
-                  key: username
-            - name: INFLUXDB_TELEGRAF_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: telegraf-influxdb-creds
-                  key: password
-        - image: cassandra:latest
           name: cassandra
           imagePullPolicy: Always
           env:
@@ -158,6 +141,23 @@ spec:
               mountPath: /etc/ssl/cluster-default
             - name: cassandra-ssl
               mountPath: /etc/ssl/cassandra
+        - image: cassandra:latest
+          name: cassandra-utils
+          command: ["/usr/bin/dumb-init", "/usr/sbin/start-utils.sh"]
+          imagePullPolicy: Always
+          env:
+            - name: CRON_SCHEDULE
+              value: "15 2 * * *"
+            - name: INFLUXDB_TELEGRAF_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: telegraf-influxdb-creds
+                  key: username
+            - name: INFLUXDB_TELEGRAF_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: telegraf-influxdb-creds
+                  key: password
       volumes:
         - name: data
           hostPath:
