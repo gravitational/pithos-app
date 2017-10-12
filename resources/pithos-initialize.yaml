@@ -7,6 +7,8 @@ spec:
     metadata:
       name: pithos-initialize
     spec:
+      securityContext:
+        runAsUser: 0
       restartPolicy: OnFailure
       containers:
         - image: cassandra:latest
