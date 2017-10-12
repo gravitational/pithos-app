@@ -12,6 +12,14 @@ metadata:
   namespace: default
 rules:
   - apiGroups:
+      - extensions
+    resources:
+      - podsecuritypolicies
+    resourceNames:
+      - privileged
+    verbs:
+      - use
+  - apiGroups:
       -  ""
     verbs:
       - get
