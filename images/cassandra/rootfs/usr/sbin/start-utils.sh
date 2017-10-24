@@ -4,7 +4,7 @@ if [ "x$CRON_SCHEDULE" = "x" ]; then
     CRON_SCHEDULE='0 0 * * *'
 fi
 
-echo "$CRON_SCHEDULE "'root nodetool -p 7199 -h localhost repair && nodetool -p 7199 -h localhost compact >> /var/log/cron.log 2>&1' > /etc/cron.d/cassandra
+echo "$CRON_SCHEDULE "'root sleep $[RANDOM%30]m && nodetool -p 7199 -h localhost repair >> /var/log/cron.log 2>&1' > /etc/cron.d/cassandra
 
 # create telegraf user
 curl -XPOST "http://influxdb.kube-system.svc:8086/query?u=root&p=root" \
