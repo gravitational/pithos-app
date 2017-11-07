@@ -105,6 +105,12 @@ spec:
         volumeMounts:
           - name: pithos-cfg
             mountPath: /etc/pithos
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
       - image: pithos-proxy:latest
         name: proxy
         ports:
@@ -113,6 +119,25 @@ spec:
         volumeMounts:
           - name: cluster-default-ssl
             mountPath: /etc/cluster-ssl
+      - image: pithos-healthz:latest
+        name: healthz
+        ports:
+          - containerPort: 8080
+            name: healthz
+        volumeMounts:
+          - name: cluster-ca
+            mountPath: /etc/ssl/cluster-ca
+        env:
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: pithos-keys
+                key: tenant.key
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: pithos-keys
+                key: tenant.secret
       volumes:
         - name: pithos-cfg
           configMap:
@@ -120,3 +145,6 @@ spec:
         - name: cluster-default-ssl
           secret:
             secretName: cluster-default-ssl
+        - name: cluster-ca
+          secret:
+            secretName: cluster-ca
