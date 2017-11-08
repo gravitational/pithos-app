@@ -68,3 +68,4 @@ healthz: $(HEALTHZ_BINS)
 .PHONY: clean
 clean:
 	-rm -rf $(BOOTSTRAP_BINS)
+	-rm -rf $(HEALTHZ_BINS)

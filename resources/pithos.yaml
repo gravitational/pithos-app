@@ -107,7 +107,7 @@ spec:
             mountPath: /etc/pithos
         livenessProbe:
           httpGet:
-            path: /health
+            path: /healthz
             port: 8080
           initialDelaySeconds: 30
           periodSeconds: 10
@@ -121,6 +121,12 @@ spec:
             mountPath: /etc/cluster-ssl
       - image: pithos-healthz:latest
         name: healthz
+        args:
+          - /usr/local/bin/healthz
+          - -access-key
+          - $(AWS_ACCESS_KEY_ID)
+          - -secret-key
+          - $(AWS_SECRET_ACCESS_KEY)
         ports:
           - containerPort: 8080
             name: healthz
