@@ -16,12 +16,8 @@ package main
 
 import (
 	"bytes"
-	"crypto/tls"
-	"crypto/x509"
-	"errors"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
@@ -32,7 +28,6 @@ import (
 )
 
 const (
-	clusterCaPath         = "/etc/ssl/cluster-ca/ca.pem"
 	defaultEndpoint       = "localhost:18080"
 	defaultBucket         = "liveness-check"
 	defaultBucketLocation = "G1"
@@ -102,24 +97,11 @@ func livenessProbe(s3Endpoint, s3Bucket, s3AccessKeyID, s3SecretAccessKey string
 }
 
 func initClient(endpoint, accessKeyID, secretAccessKey string) (*minio.Client, error) {
-	file, err := ioutil.ReadFile(clusterCaPath)
-	if err != nil {
-		return nil, trace.ConvertSystemError(err)
-	}
-
-	roots := x509.NewCertPool()
-	ok := roots.AppendCertsFromPEM(file)
-	if !ok {
-		return nil, errors.New("failed to parse cluster root certificate")
-	}
-	tr := &http.Transport{TLSClientConfig: &tls.Config{RootCAs: roots}}
-
-	client, err := minio.NewV2(endpoint, accessKeyID, secretAccessKey, true)
+	client, err := minio.NewV2(endpoint, accessKeyID, secretAccessKey, false)
 	if err != nil {
 		return nil, trace.Wrap(err)
 	}
 
-	client.SetCustomTransport(tr)
 	return client, nil
 }
 
@@ -143,7 +125,7 @@ func (s3c *s3Config) createObject() error {
 	reader := bytes.NewReader(content)
 
 	t := time.Now()
-	objectName := fmt.Sprintf("test-%v", t.Unix())
+	objectName := fmt.Sprintf("%s-%v", defaultPrefix, t.Unix())
 	_, err := s3c.client.PutObject(s3c.bucket, objectName, reader, "application/octet-stream")
 	if err != nil {
 		return trace.Wrap(err)
