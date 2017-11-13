@@ -152,5 +152,9 @@ func (s3c *s3Config) deleteBucket() error {
 			return trace.Wrap(err)
 		}
 	}
+
+	if err := s3c.client.RemoveBucket(s3c.bucket); err != nil {
+		return trace.Wrap(err)
+	}
 	return nil
 }
