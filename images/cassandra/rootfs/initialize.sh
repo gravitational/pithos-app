@@ -9,4 +9,6 @@ fi
 
 sed -i 's/REPLICATION_FACTOR/'"${REPLICATION_FACTOR}"'/g' /init.cql
 
-cqlsh -f /init.cql cassandra.default.svc.cluster.local
+if ! cqlsh cassandra.default.svc.cluster.local -k storage -e "select * from storage.block"; then
+    cqlsh -f /init.cql cassandra.default.svc.cluster.local
+fi
