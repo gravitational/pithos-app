@@ -5,10 +5,8 @@ all: image
 
 .PHONY: image
 image:
-	docker build -t $(TAG) .
+	docker build --pull -t $(TAG) .
 
 .PHONY: clean
 clean:
 	rm -rf $(OUT)
-
-
