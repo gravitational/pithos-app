@@ -52,7 +52,7 @@ func main() {
 
 	client, err := initClient(*s3Endpoint, *s3AccessKeyID, *s3SecretAccessKey)
 	if err != nil {
-		log.Fatal("failed to create s3 client")
+		log.Fatalf("failed to create s3 client: %v", err)
 	}
 
 	s3Config := &s3Config{
