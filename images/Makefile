@@ -25,7 +25,7 @@ images: bootstrap uninstall cassandra pithos proxy hook healthz
 
 .PHONY: bootstrap-build
 bootstrap-build:
-	$(MAKE) -C $(TOOL_DIR)/bootstrap
+	$(MAKE) -C $(TOOL_DIR)/pithosboot
 
 BOOTSTRAP_BINS := bootstrap/bin
 $(BOOTSTRAP_BINS): bootstrap-build
