@@ -10,14 +10,16 @@ CONTAINERS := pithos-bootstrap:$(VERSION) \
 	cassandra:$(VERSION) \
 	pithos:$(VERSION) \
 	pithos-proxy:$(VERSION) \
-	pithos-hook:$(VERSION)
+	pithos-hook:$(VERSION) \
+	pithos-healthz:$(VERSION)
 
 IMPORT_IMAGE_FLAGS := --set-image=pithos-bootstrap:$(VERSION) \
 	--set-image=pithos-uninstall:$(VERSION) \
 	--set-image=cassandra:$(VERSION) \
 	--set-image=pithos:$(VERSION) \
 	--set-image=pithos-proxy:$(VERSION) \
-	--set-image=pithos-hook:$(VERSION)
+	--set-image=pithos-hook:$(VERSION) \
+	--set-image=pithos-healthz:$(VERSION)
 
 IMPORT_OPTIONS := --vendor \
 		--ops-url=$(OPS_URL) \
@@ -60,7 +62,7 @@ what-version:
 
 .PHONY: images
 images:
-	cd images && $(MAKE) -f Makefile VERSION=$(VERSION)
+	$(MAKE) -C images VERSION=$(VERSION)
 
 .PHONY: import
 import: images
