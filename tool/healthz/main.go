@@ -19,7 +19,6 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/gravitational/trace"
@@ -48,36 +47,33 @@ func main() {
 
 	flag.Parse()
 	if *s3AccessKeyID == "" && *s3SecretAccessKey == "" {
-		log.Fatal("s3AccessKeyID and s3SecretAccessKey is undefined")
-		os.Exit(1)
+		log.Fatal("access-key-id and secret-access-key are required")
 	}
 
-	log.Infof("starting healthz endpoint")
+	client, err := initClient(*s3Endpoint, *s3AccessKeyID, *s3SecretAccessKey)
+	if err != nil {
+		log.Fatal("failed to create s3 client")
+	}
+
+	s3Config := &s3Config{
+		bucket: *s3Bucket,
+		client: client,
+	}
+
+	log.Info("starting healthz endpoint")
 
 	http.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
-		if err := livenessProbe(*s3Endpoint, *s3Bucket, *s3AccessKeyID, *s3SecretAccessKey); err != nil {
+		if err := livenessProbe(s3Config); err != nil {
 			log.Error(err)
 			w.WriteHeader(http.StatusServiceUnavailable)
+		} else {
+			w.WriteHeader(http.StatusOK)
 		}
-		w.WriteHeader(http.StatusOK)
 	})
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
-func livenessProbe(s3Endpoint, s3Bucket, s3AccessKeyID, s3SecretAccessKey string) error {
-	var err error
-	var client *minio.Client
-
-	client, err = initClient(s3Endpoint, s3AccessKeyID, s3SecretAccessKey)
-	if err != nil {
-		return trace.Wrap(err)
-	}
-
-	s3Config := &s3Config{
-		bucket: s3Bucket,
-		client: client,
-	}
-
+func livenessProbe(s3Config *s3Config) error {
 	// verify that can create S3 bucket
 	if err := s3Config.createBucket(); err != nil {
 		return trace.Wrap(err)
