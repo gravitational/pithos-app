@@ -58,8 +58,8 @@ proxy:
 	docker build --pull -t $(PROXY_TAG) $(PWD)/proxy
 
 .PHONY: pithos
-pithos: $(PITHOS_BINS)
-	cd pithos && $(MAKE) TAG=$(PITHOS_TAG)
+pithos:
+	$(MAKE) -C pithos TAG=$(PITHOS_TAG)
 
 .PHONY: hook
 hook:

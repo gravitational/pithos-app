@@ -85,6 +85,7 @@ build-app: images
 .PHONY: clean
 clean:
 	$(MAKE) -C images clean
+	-rm -rf $(BUILD_DIR)
 
 .PHONY: dev-push
 dev-push: images
