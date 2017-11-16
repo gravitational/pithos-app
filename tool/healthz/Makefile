@@ -3,12 +3,12 @@ all: bin/healthz
 
 NOROOT=-u $$(id -u):$$(id -g)
 SRCDIR=/go/src/github.com/gravitational/pithos-app
-DOCKERFLAGS=--rm=true $(NOROOT) -v $(PWD):$(SRCDIR) -w $(SRCDIR)
+DOCKERFLAGS=--rm=true $(NOROOT) -v $(CURDIR):$(SRCDIR) -w $(SRCDIR)
 BUILDIMAGE=golang:1.9
 
 .PHONY: build
 build:
-	docker run $(DOCKERFLAGS) $(BUILDIMAGE) make clean all
+	docker run $(DOCKERFLAGS) $(BUILDIMAGE) make all
 
 bin/healthz: *.go
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -a -installsuffix cgo -o $@ .
