@@ -43,19 +43,19 @@ $(HEALTHZ_BINS): healthz-build
 
 .PHONY: bootstrap
 bootstrap: $(BOOTSTRAP_BINS)
-	docker build --pull -t $(BOOTSTRAP_TAG) $(PWD)/bootstrap
+	docker build --pull -t $(BOOTSTRAP_TAG) bootstrap
 
 .PHONY: uninstall
 uninstall:
-	docker build --pull -t $(UNINSTALL_TAG) $(PWD)/uninstall
+	docker build --pull -t $(UNINSTALL_TAG) uninstall
 
 .PHONY: cassandra
 cassandra:
-	docker build --pull -t $(CASSANDRA_TAG) $(PWD)/cassandra
+	docker build --pull -t $(CASSANDRA_TAG) cassandra
 
 .PHONY: proxy
 proxy:
-	docker build --pull -t $(PROXY_TAG) $(PWD)/proxy
+	docker build --pull -t $(PROXY_TAG) proxy
 
 .PHONY: pithos
 pithos:
@@ -67,11 +67,11 @@ hook:
 	if [ -z "$(CHANGESET)" ]; then \
 		echo "CHANGESET is not set"; exit 1; \
 	fi;
-	docker build --pull --build-arg CHANGESET=pithos-$(CHANGESET) -t $(HOOK_TAG) $(PWD)/hook
+	docker build --pull --build-arg CHANGESET=pithos-$(CHANGESET) -t $(HOOK_TAG) hook
 
 .PHONY: healthz
 healthz: $(HEALTHZ_BINS)
-	docker build --pull -t $(HEALTHZ_TAG) $(PWD)/healthz
+	docker build --pull -t $(HEALTHZ_TAG) healthz
 
 .PHONY: clean
 clean:
