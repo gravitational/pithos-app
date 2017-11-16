@@ -1,6 +1,6 @@
-CREATE KEYSPACE storage WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 'REPLICATION_FACTOR'}  AND durable_writes = true;
+CREATE KEYSPACE IF NOT EXISTS storage WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 'REPLICATION_FACTOR'}  AND durable_writes = true;
 
-CREATE TABLE storage.inode_blocks (
+CREATE TABLE IF NOT EXISTS storage.inode_blocks (
     inode uuid,
     version timeuuid,
     block bigint,
@@ -21,7 +21,7 @@ CREATE TABLE storage.inode_blocks (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE';
 
-CREATE TABLE storage.object (
+CREATE TABLE IF NOT EXISTS storage.object (
     bucket text,
     object text,
     acl text,
@@ -48,9 +48,9 @@ CREATE TABLE storage.object (
     AND min_index_interval = 128
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE';
-CREATE INDEX object_inode ON storage.object (inode);
+CREATE INDEX IF NOT EXISTS object_inode ON storage.object (inode);
 
-CREATE TABLE storage.bucket (
+CREATE TABLE IF NOT EXISTS storage.bucket (
     bucket text PRIMARY KEY,
     acl text,
     cors text,
@@ -74,9 +74,9 @@ CREATE TABLE storage.bucket (
     AND min_index_interval = 128
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE';
-CREATE INDEX bucket_tenant ON storage.bucket (tenant);
+CREATE INDEX IF NOT EXISTS bucket_tenant ON storage.bucket (tenant);
 
-CREATE TABLE storage.upload (
+CREATE TABLE IF NOT EXISTS storage.upload (
     bucket text,
     object text,
     upload uuid,
@@ -103,7 +103,7 @@ CREATE TABLE storage.upload (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE';
 
-CREATE TABLE storage.object_uploads (
+CREATE TABLE IF NOT EXISTS storage.object_uploads (
     bucket text,
     object text,
     upload uuid,
@@ -124,9 +124,9 @@ CREATE TABLE storage.object_uploads (
     AND min_index_interval = 128
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE';
-CREATE INDEX upload_bucket ON storage.object_uploads (bucket);
+CREATE INDEX IF NOT EXISTS upload_bucket ON storage.object_uploads (bucket);
 
-CREATE TABLE storage.block (
+CREATE TABLE IF NOT EXISTS storage.block (
     inode uuid,
     version timeuuid,
     block bigint,
@@ -149,5 +149,3 @@ CREATE TABLE storage.block (
     AND min_index_interval = 128
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE';
-
-

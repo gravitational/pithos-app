@@ -3,8 +3,8 @@ all: bin/pithosboot
 
 NOROOT=-u $$(id -u):$$(id -g)
 SRCDIR=/go/src/github.com/gravitational/pithos-app
-DOCKERFLAGS=--rm=true $(NOROOT) -v $(PWD):$(SRCDIR) -w $(SRCDIR) -e GO15VENDOREXPERIMENT=1
-BUILDIMAGE=golang:1.5.4
+DOCKERFLAGS=--rm=true $(NOROOT) -v $(PWD):$(SRCDIR) -w $(SRCDIR)
+BUILDIMAGE=golang:1.9
 
 .PHONY: build
 build:
@@ -16,5 +16,3 @@ bin/pithosboot: *.go
 .PHONY: clean
 clean:
 	rm -rf bin
-
-

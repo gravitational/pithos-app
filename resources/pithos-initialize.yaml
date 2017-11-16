@@ -17,7 +17,12 @@ spec:
           volumeMounts:
             - name: cassandra-ssl
               mountPath: /etc/ssl/cassandra
+            - name: kubectl
+              mountPath: /usr/local/bin/kubectl
       volumes:
         - name: cassandra-ssl
           secret:
             secretName: cassandra-ssl
+        - name: kubectl
+          hostPath:
+            path: /usr/bin/kubectl

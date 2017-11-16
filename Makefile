@@ -3,6 +3,8 @@ REPOSITORY := gravitational.io
 NAME := pithos-app
 OPS_URL ?= https://opscenter.localhost.localdomain:33009
 
+TOP := $(dir $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST)))
+
 EXTRA_GRAVITY_OPTIONS ?=
 
 CONTAINERS := pithos-bootstrap:$(VERSION) \
@@ -84,7 +86,10 @@ build-app: images
 
 .PHONY: clean
 clean:
-	$(MAKE) -C images clean
+	$(MAKE) -C $(TOP)/images clean
+	$(MAKE) -C $(TOP)/tool/pithosboot clean
+	$(MAKE) -C $(TOP)/tool/healthz clean
+	-rm -rf $(BUILD_DIR)
 
 .PHONY: dev-push
 dev-push: images

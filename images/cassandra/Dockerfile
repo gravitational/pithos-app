@@ -16,7 +16,6 @@ FROM quay.io/gravitational/debian-grande:0.0.1
 
 ENV DEBIAN_FRONTEND=noninteractive \
     TERM=xterm \
-    KUBECTL_VERSION=1.3.8 \
     TELEGRAF_VERSION=1.1.1
 
 COPY cassandra.list /etc/apt/sources.list.d/cassandra.list
@@ -32,7 +31,6 @@ RUN gpg --keyserver ha.pool.sks-keyservers.net --recv-keys F758CE318D77295D && \
   apt-get update && \
   apt-get -y install -t jessie-backports ca-certificates-java openjdk-8-jre-headless && \
   apt-get -y install procps cassandra curl libjemalloc1 cron gawk && \
-  curl -sSL https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl && \
   curl -sSL https://dl.influxdata.com/telegraf/releases/telegraf-${TELEGRAF_VERSION}_linux_amd64.tar.gz -o /telegraf.tar.gz && \
   tar xzf /telegraf.tar.gz --strip-components=2 && \
   rm -rf \
@@ -61,7 +59,6 @@ ADD rootfs/ /
 RUN chmod a+rx /run.sh && \
     chmod a+rx /initialize.sh && \
     chmod a+rx /usr/sbin/start-utils.sh && \
-    chmod a+rx /usr/local/bin/kubectl && \
     chmod a+rx /cassandra-status.sh
 
 RUN mkfifo --mode 0666 /var/log/cron.log
