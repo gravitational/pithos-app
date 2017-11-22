@@ -15,11 +15,8 @@
 package main
 
 import (
-	"bytes"
 	"flag"
-	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/gravitational/trace"
 	minio "github.com/minio/minio-go"
@@ -28,7 +25,6 @@ import (
 
 const (
 	defaultEndpoint       = "localhost:18080"
-	defaultBucket         = "liveness-check"
 	defaultBucketLocation = "G1"
 	defaultPrefix         = "liveness"
 )
@@ -43,7 +39,6 @@ func main() {
 	s3AccessKeyID := flag.String("access-key-id", "", "S3 access key")
 	s3SecretAccessKey := flag.String("secret-access-key", "", "S3 secret key")
 	s3Endpoint := flag.String("endpoint", defaultEndpoint, "S3 endpoint address")
-	s3Bucket := flag.String("bucket", defaultBucket, "S3 Bucket name")
 
 	flag.Parse()
 	if *s3AccessKeyID == "" && *s3SecretAccessKey == "" {
@@ -56,7 +51,6 @@ func main() {
 	}
 
 	s3Config := &s3Config{
-		bucket: *s3Bucket,
 		client: client,
 	}
 
@@ -74,18 +68,8 @@ func main() {
 }
 
 func livenessProbe(s3Config *s3Config) error {
-	// verify that can create S3 bucket
-	if err := s3Config.createBucket(); err != nil {
-		return trace.Wrap(err)
-	}
-
-	// verify that can create S3 object
-	if err := s3Config.createObject(); err != nil {
-		return trace.Wrap(err)
-	}
-
-	// teardown
-	if err := s3Config.deleteBucket(); err != nil {
+	// verify that can read S3 buckets
+	if err := s3Config.listBuckets(); err != nil {
 		return trace.Wrap(err)
 	}
 
@@ -102,53 +86,9 @@ func initClient(endpoint, accessKeyID, secretAccessKey string) (*minio.Client, e
 	return client, nil
 }
 
-func (s3c *s3Config) createBucket() error {
-	found, err := s3c.client.BucketExists(s3c.bucket)
+func (s3c *s3Config) listBuckets() error {
+	_, err := s3c.client.ListBuckets()
 	if err != nil {
-		return trace.Wrap(err)
-	}
-
-	if !found {
-		err = s3c.client.MakeBucket(s3c.bucket, defaultBucketLocation)
-		if err != nil {
-			return trace.Wrap(err)
-		}
-	}
-	return nil
-}
-
-func (s3c *s3Config) createObject() error {
-	var content = []byte("test")
-	reader := bytes.NewReader(content)
-
-	now := time.Now()
-	objectName := fmt.Sprintf("%s-%v", defaultPrefix, now.Unix())
-	_, err := s3c.client.PutObject(s3c.bucket, objectName, reader, "application/octet-stream")
-	if err != nil {
-		return trace.Wrap(err)
-	}
-
-	return nil
-}
-
-func (s3c *s3Config) deleteBucket() error {
-	// Create a done channel to control 'ListObjectsV2' goroutine.
-	doneCh := make(chan struct{})
-	defer close(doneCh)
-
-	recursive := false
-	objectCh := s3c.client.ListObjectsV2(s3c.bucket, defaultPrefix, recursive, doneCh)
-	for object := range objectCh {
-		if object.Err != nil {
-			return trace.Wrap(object.Err)
-		}
-
-		if err := s3c.client.RemoveObject(s3c.bucket, object.Key); err != nil {
-			return trace.Wrap(err)
-		}
-	}
-
-	if err := s3c.client.RemoveBucket(s3c.bucket); err != nil {
 		return trace.Wrap(err)
 	}
 	return nil
