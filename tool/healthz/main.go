@@ -19,6 +19,7 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gravitational/trace"
@@ -81,7 +82,8 @@ func livenessProbe(s3Config *s3Config) error {
 
 	// change object name to be based on time.Now and POD hostname
 	now := time.Now()
-	if hostname, err := os.hostname(); err != nil {
+	hostname, err := os.Hostname()
+	if err != nil {
 		return trace.Wrap(err)
 	}
 	objectName := fmt.Sprintf("%s-%s-%v", defaultPrefix, hostname, now.Unix())
@@ -109,16 +111,21 @@ func initClient(endpoint, accessKeyID, secretAccessKey string) (*minio.Client, e
 	return client, nil
 }
 
-func (s3c *s3Config) bucketExists() error {
+func (s3c *s3Config) bucketExists() (bool, error) {
 	found, err := s3c.client.BucketExists(s3c.bucket)
 	if err != nil {
-		return trace.Wrap(err)
+		return false, trace.Wrap(err)
 	}
-	return found
+	return found, nil
 }
 
 func (s3c *s3Config) createBucket() error {
-	if !s3Config.bucketExists() {
+	bucketFound, err := s3c.bucketExists()
+	if err != nil {
+		return trace.Wrap(err)
+	}
+
+	if !bucketFound {
 		err = s3c.client.MakeBucket(s3c.bucket, defaultBucketLocation)
 		if err != nil {
 			return trace.Wrap(err)
@@ -127,7 +134,7 @@ func (s3c *s3Config) createBucket() error {
 	return nil
 }
 
-func (s3c *s3Config) createObject() error {
+func (s3c *s3Config) createObject(objectName string) error {
 	var content = []byte("test")
 	reader := bytes.NewReader(content)
 
