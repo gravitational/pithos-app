@@ -79,13 +79,20 @@ func livenessProbe(s3Config *s3Config) error {
 		return trace.Wrap(err)
 	}
 
+	// change object name to be based on time.Now and POD hostname
+	now := time.Now()
+	if hostname, err := os.hostname(); err != nil {
+		return trace.Wrap(err)
+	}
+	objectName := fmt.Sprintf("%s-%s-%v", defaultPrefix, hostname, now.Unix())
+
 	// verify that can create S3 object
-	if err := s3Config.createObject(); err != nil {
+	if err := s3Config.createObject(objectName); err != nil {
 		return trace.Wrap(err)
 	}
 
 	// teardown
-	if err := s3Config.deleteBucket(); err != nil {
+	if err := s3Config.deleteObject(objectName); err != nil {
 		return trace.Wrap(err)
 	}
 
@@ -102,13 +109,16 @@ func initClient(endpoint, accessKeyID, secretAccessKey string) (*minio.Client, e
 	return client, nil
 }
 
-func (s3c *s3Config) createBucket() error {
+func (s3c *s3Config) bucketExists() error {
 	found, err := s3c.client.BucketExists(s3c.bucket)
 	if err != nil {
 		return trace.Wrap(err)
 	}
+	return found
+}
 
-	if !found {
+func (s3c *s3Config) createBucket() error {
+	if !s3Config.bucketExists() {
 		err = s3c.client.MakeBucket(s3c.bucket, defaultBucketLocation)
 		if err != nil {
 			return trace.Wrap(err)
@@ -121,8 +131,6 @@ func (s3c *s3Config) createObject() error {
 	var content = []byte("test")
 	reader := bytes.NewReader(content)
 
-	now := time.Now()
-	objectName := fmt.Sprintf("%s-%v", defaultPrefix, now.Unix())
 	_, err := s3c.client.PutObject(s3c.bucket, objectName, reader, "application/octet-stream")
 	if err != nil {
 		return trace.Wrap(err)
@@ -131,24 +139,8 @@ func (s3c *s3Config) createObject() error {
 	return nil
 }
 
-func (s3c *s3Config) deleteBucket() error {
-	// Create a done channel to control 'ListObjectsV2' goroutine.
-	doneCh := make(chan struct{})
-	defer close(doneCh)
-
-	recursive := false
-	objectCh := s3c.client.ListObjectsV2(s3c.bucket, defaultPrefix, recursive, doneCh)
-	for object := range objectCh {
-		if object.Err != nil {
-			return trace.Wrap(object.Err)
-		}
-
-		if err := s3c.client.RemoveObject(s3c.bucket, object.Key); err != nil {
-			return trace.Wrap(err)
-		}
-	}
-
-	if err := s3c.client.RemoveBucket(s3c.bucket); err != nil {
+func (s3c *s3Config) deleteObject(objectName string) error {
+	if err := s3c.client.RemoveObject(s3c.bucket, objectName); err != nil {
 		return trace.Wrap(err)
 	}
 	return nil
