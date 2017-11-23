@@ -19,6 +19,7 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gravitational/trace"
@@ -43,7 +44,13 @@ func main() {
 	s3AccessKeyID := flag.String("access-key-id", "", "S3 access key")
 	s3SecretAccessKey := flag.String("secret-access-key", "", "S3 secret key")
 	s3Endpoint := flag.String("endpoint", defaultEndpoint, "S3 endpoint address")
-	s3Bucket := flag.String("bucket", defaultBucket, "S3 Bucket name")
+	// make the bucket name unique, based on the hostname,
+	// to avoid collisions in multi-nodes clusters
+	hostname, err := os.Hostname()
+	if err != nil {
+		log.Fatalf("failed to retrieve pod hostname: %v", err)
+	}
+	s3Bucket := flag.String("bucket"+hostname, defaultBucket, "S3 Bucket name")
 
 	flag.Parse()
 	if *s3AccessKeyID == "" && *s3SecretAccessKey == "" {
