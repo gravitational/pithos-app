@@ -86,7 +86,8 @@ func livenessProbe(s3Config *s3Config) error {
 	if err != nil {
 		return trace.Wrap(err)
 	}
-	objectName := fmt.Sprintf("%s-%s-%v", defaultPrefix, hostname, now.Unix())
+	objectPrefix := fmt.Sprintf("%s-%s", defaultPrefix, hostname)
+	objectName := fmt.Sprintf("%s-%v", objectPrefix, now.Unix())
 
 	// verify that can create S3 object
 	if err := s3Config.createObject(objectName); err != nil {
@@ -94,7 +95,7 @@ func livenessProbe(s3Config *s3Config) error {
 	}
 
 	// teardown
-	if err := s3Config.deleteObject(objectName); err != nil {
+	if err := s3Config.cleanBucket(objectPrefix); err != nil {
 		return trace.Wrap(err)
 	}
 
@@ -146,9 +147,22 @@ func (s3c *s3Config) createObject(objectName string) error {
 	return nil
 }
 
-func (s3c *s3Config) deleteObject(objectName string) error {
-	if err := s3c.client.RemoveObject(s3c.bucket, objectName); err != nil {
-		return trace.Wrap(err)
+func (s3c *s3Config) cleanBucket(objectPrefix string) error {
+	// Create a done channel to control 'ListObjectsV2' goroutine.
+	doneCh := make(chan struct{})
+	defer close(doneCh)
+
+	recursive := false
+	objectCh := s3c.client.ListObjectsV2(s3c.bucket, objectPrefix, recursive, doneCh)
+	for object := range objectCh {
+		if object.Err != nil {
+			return trace.Wrap(object.Err)
+		}
+
+		if err := s3c.client.RemoveObject(s3c.bucket, object.Key); err != nil {
+			return trace.Wrap(err)
+		}
 	}
+
 	return nil
 }
