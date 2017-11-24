@@ -19,6 +19,7 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gravitational/trace"
@@ -79,13 +80,22 @@ func livenessProbe(s3Config *s3Config) error {
 		return trace.Wrap(err)
 	}
 
+	// change object name to be based on time.Now and POD hostname
+	now := time.Now()
+	hostname, err := os.Hostname()
+	if err != nil {
+		return trace.Wrap(err)
+	}
+	objectPrefix := fmt.Sprintf("%s-%s", defaultPrefix, hostname)
+	objectName := fmt.Sprintf("%s-%v", objectPrefix, now.Unix())
+
 	// verify that can create S3 object
-	if err := s3Config.createObject(); err != nil {
+	if err := s3Config.createObject(objectName); err != nil {
 		return trace.Wrap(err)
 	}
 
 	// teardown
-	if err := s3Config.deleteBucket(); err != nil {
+	if err := s3Config.cleanBucket(objectPrefix); err != nil {
 		return trace.Wrap(err)
 	}
 
@@ -102,13 +112,21 @@ func initClient(endpoint, accessKeyID, secretAccessKey string) (*minio.Client, e
 	return client, nil
 }
 
-func (s3c *s3Config) createBucket() error {
+func (s3c *s3Config) bucketExists() (bool, error) {
 	found, err := s3c.client.BucketExists(s3c.bucket)
+	if err != nil {
+		return false, trace.Wrap(err)
+	}
+	return found, nil
+}
+
+func (s3c *s3Config) createBucket() error {
+	bucketFound, err := s3c.bucketExists()
 	if err != nil {
 		return trace.Wrap(err)
 	}
 
-	if !found {
+	if !bucketFound {
 		err = s3c.client.MakeBucket(s3c.bucket, defaultBucketLocation)
 		if err != nil {
 			return trace.Wrap(err)
@@ -117,12 +135,10 @@ func (s3c *s3Config) createBucket() error {
 	return nil
 }
 
-func (s3c *s3Config) createObject() error {
+func (s3c *s3Config) createObject(objectName string) error {
 	var content = []byte("test")
 	reader := bytes.NewReader(content)
 
-	now := time.Now()
-	objectName := fmt.Sprintf("%s-%v", defaultPrefix, now.Unix())
 	_, err := s3c.client.PutObject(s3c.bucket, objectName, reader, "application/octet-stream")
 	if err != nil {
 		return trace.Wrap(err)
@@ -131,13 +147,13 @@ func (s3c *s3Config) createObject() error {
 	return nil
 }
 
-func (s3c *s3Config) deleteBucket() error {
+func (s3c *s3Config) cleanBucket(objectPrefix string) error {
 	// Create a done channel to control 'ListObjectsV2' goroutine.
 	doneCh := make(chan struct{})
 	defer close(doneCh)
 
 	recursive := false
-	objectCh := s3c.client.ListObjectsV2(s3c.bucket, defaultPrefix, recursive, doneCh)
+	objectCh := s3c.client.ListObjectsV2(s3c.bucket, objectPrefix, recursive, doneCh)
 	for object := range objectCh {
 		if object.Err != nil {
 			return trace.Wrap(object.Err)
@@ -148,8 +164,5 @@ func (s3c *s3Config) deleteBucket() error {
 		}
 	}
 
-	if err := s3c.client.RemoveBucket(s3c.bucket); err != nil {
-		return trace.Wrap(err)
-	}
 	return nil
 }
