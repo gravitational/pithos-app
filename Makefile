@@ -39,7 +39,6 @@ IMPORT_OPTIONS := --vendor \
 		--exclude="Makefile" \
 		--exclude="tool" \
 		--exclude=".git" \
-		--registry-url=apiserver:5000 \
 		$(IMPORT_IMAGE_FLAGS)
 
 TELE_BUILD_OPTIONS := --insecure \
