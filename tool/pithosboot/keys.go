@@ -72,9 +72,8 @@ func determineReplicationFactor() (int, error) {
 
 	if len(nodes.Items) >= 3 {
 		return 3, nil
-	} else {
-		return 1, nil
 	}
+	return 1, nil
 }
 
 func createPithosConfig() error {
@@ -128,7 +127,7 @@ func createPithosConfig() error {
 	}
 
 	out, err := rigging.CreateConfigMapFromPath("pithos-cfg", dir)
-	if err != nil {
+	if err != nil && !strings.Contains(string(out), "already exists") {
 		log.Errorf("%s", string(out))
 		return trace.Wrap(err)
 	}
@@ -141,7 +140,7 @@ func createPithosConfig() error {
 	}
 
 	out, err = rigging.CreateSecretFromMap("pithos-keys", keyMap)
-	if err != nil {
+	if err != nil && !strings.Contains(string(out), "already exists") {
 		log.Errorf("%s", string(out))
 		return trace.Wrap(err)
 	}
