@@ -63,6 +63,9 @@ RUN gpg --keyserver ha.pool.sks-keyservers.net --recv-keys F758CE318D77295D && \
 
 ADD rootfs/ /
 
+ADD build/cassandra-seed.h /usr/local/bin/include/
+ADD build/cassandra-seed.so /etc/cassandra/
+
 RUN chmod a+rx /run.sh && \
     chmod a+rx /initialize.sh && \
     chmod a+rx /usr/sbin/start-utils.sh && \

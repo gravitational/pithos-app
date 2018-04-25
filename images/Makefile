@@ -49,8 +49,12 @@ bootstrap: $(BOOTSTRAP_BINS)
 uninstall:
 	docker build --pull -t $(UNINSTALL_TAG) uninstall
 
+.PHONY: cassandra-build-seed
+cassandra-build-seed:
+	$(MAKE) -C cassandra build-go
+
 .PHONY: cassandra
-cassandra:
+cassandra: cassandra-build-seed
 	docker build --pull -t $(CASSANDRA_TAG) cassandra
 
 .PHONY: proxy
