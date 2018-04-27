@@ -57,7 +57,7 @@ sed -ri 's/- seeds:.*/- seeds: "'"$POD_IP"'"/' $CFG
 #
 # see if this is needed
 echo "JVM_OPTS=\"\$JVM_OPTS -Djava.rmi.server.hostname=$POD_IP\"" >> $CONF_DIR/cassandra-env.sh
-echo "JVM_OPTS=\"\$JVM_OPTS -javaagent:/jolokia-jvm-agent.jar\"" >> $CONF_DIR/cassandra-env.sh
+echo "JVM_OPTS=\"\$JVM_OPTS -javaagent:jolokia-jvm-agent.jar\"" >> $CONF_DIR/cassandra-env.sh
 
 # FIXME create README for these args
 echo "Starting Cassandra on $POD_IP"
@@ -67,8 +67,6 @@ echo CASSANDRA_CLUSTER_NAME ${CASSANDRA_CLUSTER_NAME}
 echo CASSANDRA_LISTEN_ADDRESS ${POD_IP}
 echo CASSANDRA_BROADCAST_ADDRESS ${POD_IP}
 echo CASSANDRA_BROADCAST_RPC_ADDRESS ${POD_IP}
-
-export CLASSPATH=/kubernetes-cassandra.jar
 
 # create telegraf user
 curl -XPOST "http://influxdb.kube-system.svc:8086/query?u=root&p=root" \

@@ -143,8 +143,6 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /cassandra_data
-            - name: cassandra-cfg
-              mountPath: /etc/cassandra
             - name: cluster-ca
               mountPath: /etc/ssl/cluster-ca
             - name: cluster-default-ssl
@@ -172,9 +170,6 @@ spec:
         - name: data
           hostPath:
             path: /var/lib/data/pithos
-        - name: cassandra-cfg
-          configMap:
-            name: cassandra-cfg
         - name: cluster-ca
           secret:
             secretName: cluster-ca

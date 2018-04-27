@@ -10,21 +10,13 @@ import (
 )
 
 func bootCluster() error {
-	log.Infof("creating ConfigMap/cassandra-cfg")
-	out, err := rigging.CreateConfigMapFromPath("cassandra-cfg", "/var/lib/gravity/resources/cassandra-cfg")
-	if err != nil && !strings.Contains(string(out), "already exists") {
-		log.Errorf("%s", string(out))
-		return trace.Wrap(err)
-	}
-
-	err = createPithosConfig()
-	if err != nil && !strings.Contains(string(out), "already exists") {
-		log.Errorf("%s", string(out))
+	err := createPithosConfig()
+	if err != nil {
 		return trace.Wrap(err)
 	}
 
 	log.Infof("creating cassandra services + daemonset")
-	out, err = rigging.FromFile(rigging.ActionCreate, "/var/lib/gravity/resources/cassandra.yaml")
+	out, err := rigging.FromFile(rigging.ActionCreate, "/var/lib/gravity/resources/cassandra.yaml")
 	if err != nil && !strings.Contains(string(out), "already exists") {
 		return trace.Wrap(err)
 	}

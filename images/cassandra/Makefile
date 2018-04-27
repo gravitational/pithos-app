@@ -14,19 +14,20 @@
 
 # build the cassandra image.
 
-VERSION=v9
+all: build-go
 
-all: build
+NOROOT=-u $$(id -u):$$(id -g)
+SRCDIR=/go/src/github.com/gravitational/pithos-app/images/cassandra
+DOCKERFLAGS=--rm=true $(NOROOT) -v $(CURDIR):$(SRCDIR) -w $(SRCDIR)
+BUILDIMAGE=golang:1.9
 
-kubernetes-cassandra.jar: ../java/* ../java/src/main/java/io/k8s/cassandra/*.java
-	cd ../java && mvn package
-	mv ../java/target/kubernetes-cassandra*.jar kubernetes-cassandra.jar
-	cd ../java && mvn clean
+.PHONY: build-go
+build-go:
+	mkdir -p build
+	docker run $(DOCKERFLAGS) $(BUILDIMAGE) make build
 
-build: kubernetes-cassandra.jar
-	docker build -t gcr.io/google_samples/cassandra:${VERSION} .
-
-push: build
-	gcloud docker push gcr.io/google_samples/cassandra:${VERSION}
-
-.PHONY: all build push
+.PHONY: build
+build:
+	go build -a -installsuffix cgo \
+		-ldflags "-s -w" \
+		-o build/cassandra-seed.so -buildmode=c-shared go/main.go
