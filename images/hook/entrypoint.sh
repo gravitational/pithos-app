@@ -13,8 +13,7 @@ if [ $1 = "update" ]; then
     sed -i 's/localhost/cassandra.default.svc.cluster.local/' pithoscfg.yaml
     kubectl apply -f pithoscfg.yaml
 
-    kubectl delete configmap/cassandra-cfg
-    kubectl create configmap cassandra-cfg --from-file=/var/lib/gravity/resources/cassandra-cfg
+    rig delete configmap/cassandra-cfg --force
     rig delete deployments/pithos --force
     rig delete deployments/cassandra-utils --force
 
