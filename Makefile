@@ -49,6 +49,7 @@ TELE_BUILD_OPTIONS := --insecure \
                 --ignore=".git" \
                 --ignore="images" \
                 --ignore="tool" \
+                --ignore="pithos-cfg" \
                 $(IMPORT_IMAGE_FLAGS)
 
 BUILD_DIR := build
