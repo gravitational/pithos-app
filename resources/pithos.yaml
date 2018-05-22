@@ -85,6 +85,11 @@ metadata:
     app: pithos
     pithos-role: pithos
 spec:
+  selector:
+    matchLabels:
+      app: pithos
+      pithos-role: pithos
+      component: pithos
   replicas: 1
   template:
     metadata:

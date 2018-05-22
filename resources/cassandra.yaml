@@ -86,6 +86,11 @@ metadata:
     app: pithos
     pithos-role: cassandra
 spec:
+  selector:
+    matchLabels:
+      app: pithos
+      pithos-role: cassandra
+      component: cassandra
   template:
     metadata:
       labels:
