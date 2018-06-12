@@ -30,11 +30,8 @@ IMPORT_OPTIONS := --vendor \
 		--name=$(NAME) \
 		--version=$(VERSION) \
 		--glob=**/*.yaml \
-		--ignore=dev \
-		--ignore=cassandra-cfg \
 		--ignore=pithos-cfg \
 		--exclude="build" \
-		--exclude="gravity.log" \
 		--exclude="images" \
 		--exclude="Makefile" \
 		--exclude="tool" \
@@ -82,6 +79,7 @@ $(TARBALL): import $(BUILD_DIR)
 
 .PHONY: build-app
 build-app: images
+	mkdir -p build
 	tele build -o build/installer.tar $(TELE_BUILD_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) resources/app.yaml
 
 .PHONY: clean

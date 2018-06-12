@@ -1,4 +1,4 @@
-# Parse output of `nodetool status -r` command
+# Parse output of `nodetool status` command
 
 # --  Address  Load       Tokens       Owns (effective)  Host ID                               Rack
 # UN  node-1  105.58 KiB  32           100.0%            0ab52e7b-672f-4821-aeca-1d745c9d5720  rack1

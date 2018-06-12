@@ -1,4 +1,8 @@
 VERSION ?= latest
+CASSANDRA_VERSION ?= 3.11.2
+# JMX -> json bridge agent(needed for getting metrics from Cassandra)
+JOLOKIA_VERSION ?= 1.5.0
+TELEGRAF_VERSION ?= 1.6.4
 
 BOOTSTRAP_TAG := pithos-bootstrap:$(VERSION)
 UNINSTALL_TAG := pithos-uninstall:$(VERSION)
@@ -49,13 +53,18 @@ bootstrap: $(BOOTSTRAP_BINS)
 uninstall:
 	docker build --pull -t $(UNINSTALL_TAG) uninstall
 
-.PHONY: cassandra-build-seed
 cassandra-build-seed:
 	$(MAKE) -C cassandra build-go
 
+cassandra-build-jar:
+	$(MAKE) -C cassandra kubernetes-cassandra.jar
+
 .PHONY: cassandra
-cassandra: cassandra-build-seed
-	docker build --pull -t $(CASSANDRA_TAG) cassandra
+cassandra: cassandra-build-jar
+	docker build --pull --build-arg CASSANDRA_VERSION=$(CASSANDRA_VERSION) \
+		--build-arg JOLOKIA_VERSION=$(JOLOKIA_VERSION) \
+		--build-arg TELEGRAF_VERSION=$(TELEGRAF_VERSION) \
+		-t $(CASSANDRA_TAG) cassandra
 
 .PHONY: proxy
 proxy:
@@ -81,3 +90,5 @@ healthz: $(HEALTHZ_BINS)
 clean:
 	-rm -rf $(BOOTSTRAP_BINS)
 	-rm -rf $(HEALTHZ_BINS)
+	-rm -f cassandra/rootfs/cassandra-seed.*
+	-rm -f cassandra/rootfs/kubernetes-cassandra.jar
