@@ -53,9 +53,6 @@ bootstrap: $(BOOTSTRAP_BINS)
 uninstall:
 	docker build --pull -t $(UNINSTALL_TAG) uninstall
 
-cassandra-build-seed:
-	$(MAKE) -C cassandra build-go
-
 cassandra-build-jar:
 	$(MAKE) -C cassandra kubernetes-cassandra.jar
 
@@ -90,5 +87,4 @@ healthz: $(HEALTHZ_BINS)
 clean:
 	-rm -rf $(BOOTSTRAP_BINS)
 	-rm -rf $(HEALTHZ_BINS)
-	-rm -f cassandra/rootfs/cassandra-seed.*
 	-rm -f cassandra/rootfs/kubernetes-cassandra.jar
