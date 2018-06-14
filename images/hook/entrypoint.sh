@@ -18,7 +18,7 @@ if [ $1 = "update" ]; then
     rig delete deployments/cassandra-utils --force
     rig delete daemonsets/cassandra --force
 
-    kubectl apply -f /var/lib/gravity/resources/cassandra.yaml --force
+    rig upsert -f /var/lib/gravity/resources/cassandra.yaml --debug
     if [ $(kubectl get nodes -l pithos-role=node -o name | wc -l) -ge 3 ]
     then
         kubectl scale statefulset cassandra --replicas=3
