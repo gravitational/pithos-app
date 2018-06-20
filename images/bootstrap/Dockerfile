@@ -1,7 +1,7 @@
-FROM quay.io/gravitational/debian-grande:latest
+FROM quay.io/gravitational/debian-grande:stretch
 
 RUN apt-get update && \
-    apt-get -y install openjdk-7-jre-headless
+    apt-get -y install openjdk-8-jre-headless
 
 ADD bin/pithosboot \
         /usr/local/bin/

@@ -1,4 +1,6 @@
-# Copyright 2016 The Kubernetes Authors All rights reserved.
+#!/bin/bash
+
+# Copyright 2016 The Kubernetes Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-all: kubernetes-cassandra.jar
-
-# build the cassandra seed provider
-kubernetes-cassandra.jar:
-	@echo "Building kubernetes-cassandra.jar"
-	docker run -v ${CURDIR}/java:/usr/src/app maven:3-jdk-8-onbuild-alpine mvn clean package
-	cp java/target/*jar-with-dependencies.jar rootfs/kubernetes-cassandra.jar
+if [[ $(nodetool status | grep $POD_IP) == *"UN"* ]]; then
+  if [[ $DEBUG ]]; then
+    echo "UN";
+  fi
+  exit 0;
+else
+  if [[ $DEBUG ]]; then
+    echo "Not Up";
+  fi
+  exit 1;
+fi

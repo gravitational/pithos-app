@@ -43,3 +43,8 @@ kubectl create secret generic cassandra-ssl \
     --from-file=cassandra-node.pem=cassandra-node.pem
 
 pithosboot
+
+if [ $(/opt/bin/kubectl get nodes -l pithos-role=node -o name | wc -l) -ge 3 ]
+then
+    /opt/bin/kubectl scale statefulset cassandra --replicas=3
+fi

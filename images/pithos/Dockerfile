@@ -1,9 +1,9 @@
-FROM quay.io/gravitational/debian-grande:0.0.1
+FROM quay.io/gravitational/debian-grande:stretch
 
 ADD pithos-0.7.5-standalone.jar /pithos.jar
 ADD run.sh /run.sh
 
-RUN apt-get update && apt-get -qq -y install openjdk-7-jre-headless && \
+RUN apt-get update && apt-get -qq -y install openjdk-8-jre-headless && \
     useradd -ms /bin/bash pithos && \
     chown -R pithos /run.sh /pithos.jar && \
     chmod +x /run.sh

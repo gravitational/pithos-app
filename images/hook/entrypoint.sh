@@ -16,8 +16,14 @@ if [ $1 = "update" ]; then
     rig delete configmaps/cassandra-cfg --force
     rig delete deployments/pithos --force
     rig delete deployments/cassandra-utils --force
+    rig delete daemonsets/cassandra --force
 
     rig upsert -f /var/lib/gravity/resources/cassandra.yaml --debug
+    if [ $(kubectl get nodes -l pithos-role=node -o name | wc -l) -ge 3 ]
+    then
+        kubectl scale statefulset cassandra --replicas=3
+    fi
+
     rig upsert -f /var/lib/gravity/resources/pithos.yaml --debug
     echo "Checking status"
     rig status $RIG_CHANGESET --retry-attempts=120 --retry-period=1s --debug

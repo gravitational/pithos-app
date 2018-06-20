@@ -1,4 +1,4 @@
-FROM quay.io/gravitational/debian-tall:latest
+FROM quay.io/gravitational/debian-tall:0.0.2
 
 ADD uninstall.sh /uninstall.sh
 

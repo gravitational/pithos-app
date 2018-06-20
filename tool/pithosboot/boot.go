@@ -15,7 +15,7 @@ func bootCluster() error {
 		return trace.Wrap(err)
 	}
 
-	log.Infof("creating cassandra services + daemonset")
+	log.Infof("creating cassandra services + statefulset")
 	out, err := rigging.FromFile(rigging.ActionCreate, "/var/lib/gravity/resources/cassandra.yaml")
 	if err != nil && !strings.Contains(string(out), "already exists") {
 		return trace.Wrap(err)

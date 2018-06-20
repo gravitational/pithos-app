@@ -72,7 +72,7 @@
 #-Dcassandra.triggers_dir=directory
 
 # For testing new compaction and compression strategies. It allows you to experiment with different
-# strategies and benchmark write performance differences without affecting the production workload. 
+# strategies and benchmark write performance differences without affecting the production workload.
 #-Dcassandra.write_survey=true
 
 # To disable configuration via JMX of auth caches (such as those for credentials, permissions and
@@ -184,27 +184,27 @@
 
 ### CMS Settings
 
--XX:+UseParNewGC
--XX:+UseConcMarkSweepGC
--XX:+CMSParallelRemarkEnabled
--XX:SurvivorRatio=8
--XX:MaxTenuringThreshold=1
--XX:CMSInitiatingOccupancyFraction=75
--XX:+UseCMSInitiatingOccupancyOnly
--XX:CMSWaitDuration=10000
--XX:+CMSParallelInitialMarkEnabled
--XX:+CMSEdenChunksRecordAlways
+#-XX:+UseParNewGC
+#-XX:+UseConcMarkSweepGC
+#-XX:+CMSParallelRemarkEnabled
+#-XX:SurvivorRatio=8
+#-XX:MaxTenuringThreshold=1
+#-XX:CMSInitiatingOccupancyFraction=75
+#-XX:+UseCMSInitiatingOccupancyOnly
+#-XX:CMSWaitDuration=10000
+#-XX:+CMSParallelInitialMarkEnabled
+#-XX:+CMSEdenChunksRecordAlways
 # some JVMs will fill up their heap when accessed via JMX, see CASSANDRA-6541
--XX:+CMSClassUnloadingEnabled
+#-XX:+CMSClassUnloadingEnabled
 
 ### G1 Settings (experimental, comment previous section and uncomment section below to enable)
 
 ## Use the Hotspot garbage-first collector.
-#-XX:+UseG1GC
+-XX:+UseG1GC
 #
 ## Have the JVM do less remembered set work during STW, instead
 ## preferring concurrent GC. Reduces p99.9 latency.
-#-XX:G1RSetUpdatingPauseTimePercent=5
+-XX:G1RSetUpdatingPauseTimePercent=5
 #
 ## Main G1GC tunable: lowering the pause target will lower throughput and vise versa.
 ## 200ms is the JVM default and lowest viable setting

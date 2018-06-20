@@ -1,7 +1,0 @@
-[default]
-host_base = localhost
-host_bucket = local
-access_key = AKIAIOSFODNN7EXAMPLE
-secret_key = wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-signature_v2 = True
-use_https = False

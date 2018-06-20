@@ -68,17 +68,16 @@ metadata:
   labels:
     app: pithos
 spec:
+  clusterIP: None
   ports:
     - port: 9042
       name: cql
-    - port: 9160
-      name: rpc
   selector:
     app: pithos
     pithos-role: cassandra
 ---
-apiVersion: extensions/v1beta1
-kind: DaemonSet
+apiVersion: apps/v1beta1
+kind: StatefulSet
 metadata:
   name: cassandra
   namespace: default
@@ -86,6 +85,8 @@ metadata:
     app: pithos
     pithos-role: cassandra
 spec:
+  serviceName: cassandra
+  replicas: 1
   selector:
     matchLabels:
       app: pithos
@@ -98,7 +99,11 @@ spec:
         pithos-role: cassandra
         component: cassandra
     spec:
+      terminationGracePeriodSeconds: 1800
       securityContext:
+        capabilities:
+          add:
+            - IPC_LOCK
         runAsUser: 0
       serviceAccountName: cassandra
       nodeSelector:
@@ -107,29 +112,28 @@ spec:
         - image: cassandra:latest
           name: cassandra
           imagePullPolicy: Always
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - nodetool drain
           env:
-            - name: INFLUXDB_TELEGRAF_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: telegraf-influxdb-creds
-                  key: username
-            - name: INFLUXDB_TELEGRAF_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: telegraf-influxdb-creds
-                  key: password
             - name: MAX_HEAP_SIZE
               value: 2048M
             - name: HEAP_NEWSIZE
               value: 256M
-            - name: CASSANDRA_OPEN_JMX
-              value: "true"
+            - name: CASSANDRA_SEEDS
+              value: "cassandra-0.cassandra.default.svc.cluster.local"
             - name: CASSANDRA_CLUSTER_NAME
               value: Pithos Cluster
-            - name: POD_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
+            - name: CASSANDRA_DC
+              value: "datacenter1"
+            - name: CASSANDRA_RACK
+              value: "rack1"
+            - name: CASSANDRA_SEED_PROVIDER
+              value: io.k8s.cassandra.KubernetesSeedProvider
             - name: POD_IP
               valueFrom:
                 fieldRef:
@@ -137,14 +141,20 @@ spec:
           ports:
             - containerPort: 7000
               name: intra-node
-            - containerPort: 7011
+            - containerPort: 7001
               name: tls-intra-node
             - containerPort: 7199
               name: jmx
             - containerPort: 9042
               name: cql
-            - containerPort: 9160
-              name: rpc
+          readinessProbe:
+            exec:
+              command:
+                - /bin/bash
+                - -c
+                - /ready-probe.sh
+            initialDelaySeconds: 15
+            timeoutSeconds: 5
           volumeMounts:
             - name: data
               mountPath: /cassandra_data
@@ -161,6 +171,21 @@ spec:
           env:
             - name: CRON_SCHEDULE
               value: "15 2 * * *"
+            - name: INFLUXDB_TELEGRAF_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: telegraf-influxdb-creds
+                  key: username
+            - name: INFLUXDB_TELEGRAF_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: telegraf-influxdb-creds
+                  key: password
+        - image: cassandra:latest
+          name: cassandra-metrics
+          command: ["/usr/bin/dumb-init", "/usr/sbin/start-telegraf.sh"]
+          imagePullPolicy: Always
+          env:
             - name: INFLUXDB_TELEGRAF_USERNAME
               valueFrom:
                 secretKeyRef:
