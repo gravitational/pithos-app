@@ -1,109 +1,117 @@
-#
-## pithos main configuration
-## =========================
-#
-# This file contains the following sections
-#   - service
-#   - logging
-#   - options
-#   - keystore
-#   - bucketstore
-#   - regions
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pithos-cfg
+  namespace: default
+data:
+  config.yaml: |
+    #
+    ## pithos main configuration
+    ## =========================
+    #
+    # This file contains the following sections
+    #   - service
+    #   - logging
+    #   - options
+    #   - keystore
+    #   - bucketstore
+    #   - regions
 
 
-## service configuration
-## ---------------------
-#
-# indicates
-service:
-  host: '0.0.0.0'
-  port: 18080
+    ## service configuration
+    ## ---------------------
+    #
+    # indicates
+    service:
+      host: '0.0.0.0'
+      port: 18080
 
 
-## logging configuration
-## ---------------------
-logging:
-  level: info
-  console: true
-  files:
-    - "/tmp/pithos.log"
+    ## logging configuration
+    ## ---------------------
+    logging:
+      level: info
+      console: true
+      files:
+        - "/tmp/pithos.log"
 
 
-## global options
-## --------------
-options:
-  service-uri: 's3.gravitational.io'
-  reporting: true
-  server-side-encryption: true
-  multipart-upload: true
-  masterkey-provisioning: true
-  masterkey-access: true
-  default-region: 'G1'
+    ## global options
+    ## --------------
+    options:
+      service-uri: 's3.gravitational.io'
+      reporting: true
+      server-side-encryption: true
+      multipart-upload: true
+      masterkey-provisioning: true
+      masterkey-access: true
+      default-region: 'G1'
 
 
-## keystore configuration
-## ----------------------
-#
-# Keystores associate an access key with
-# an organization and secret key.
-#
-# They may offer provisioning capacities with the
-# masterkey. The default provider relies on keys
-# being defined inline.
-keystore:
-  keys:
-{{range .Keys}}
-    {{.Key}}:
-      master: {{.Master}}
-      tenant: '{{.Tenant}}'
-      secret: '{{.Secret}}'
-{{end}}
+    ## keystore configuration
+    ## ----------------------
+    #
+    # Keystores associate an access key with
+    # an organization and secret key.
+    #
+    # They may offer provisioning capacities with the
+    # masterkey. The default provider relies on keys
+    # being defined inline.
+    keystore:
+      keys:
+    {{range .Keys}}
+        {{.Key}}:
+          master: {{.Master}}
+          tenant: '{{.Tenant}}'
+          secret: '{{.Secret}}'
+    {{end}}
 
 
-## bucketstore configuration
-## -------------------------
-#
-# The bucketstore is ring global and contains information
-# on bucket location and global parameters.
-#
-# Its primary aim is to hold bucket location and ownership
-# information.
-#
-# The default provider relies on cassandra.
-bucketstore:
-  default-region: 'G1'
-  cluster: 'cassandra.default.svc.cluster.local'
-  keyspace: 'storage'
-  hints:
-    replication:
-      class: SimpleStrategy
-      replication_factor: {{ .ReplicationFactor }}
-
-
-## regions
-## -------
-#
-# Regions are composed of a metastore and an arbitrary number
-# of named storage classes which depend on a blobstore.
-#
-# The metastore holds metadata for the full region, as well as
-# object storage-class placement information.
-#
-# The default implementation of both metastore and blobstore
-# rely on cassandra.
-#
-regions:
-  G1:
-    metastore:
+    ## bucketstore configuration
+    ## -------------------------
+    #
+    # The bucketstore is ring global and contains information
+    # on bucket location and global parameters.
+    #
+    # Its primary aim is to hold bucket location and ownership
+    # information.
+    #
+    # The default provider relies on cassandra.
+    bucketstore:
+      default-region: 'G1'
       cluster: 'cassandra.default.svc.cluster.local'
       keyspace: 'storage'
-    storage-classes:
-      standard:
-        cluster: 'cassandra.default.svc.cluster.local'
-        keyspace: 'storage'
-        max-chunk: '128k'
-        max-block-chunks: 1024
-        hints:
-          replication:
-            class: SimpleStrategy
-            replication_factor: {{ .ReplicationFactor }}
+      hints:
+        replication:
+          class: SimpleStrategy
+          replication_factor: {{ .ReplicationFactor }}
+
+
+    ## regions
+    ## -------
+    #
+    # Regions are composed of a metastore and an arbitrary number
+    # of named storage classes which depend on a blobstore.
+    #
+    # The metastore holds metadata for the full region, as well as
+    # object storage-class placement information.
+    #
+    # The default implementation of both metastore and blobstore
+    # rely on cassandra.
+    #
+    regions:
+      G1:
+        metastore:
+          cluster: 'cassandra.default.svc.cluster.local'
+          keyspace: 'storage'
+        storage-classes:
+          standard:
+            cluster: 'cassandra.default.svc.cluster.local'
+            keyspace: 'storage'
+            max-chunk: '128k'
+            max-block-chunks: 1024
+            hints:
+              replication:
+                class: SimpleStrategy
+                replication_factor: {{ .ReplicationFactor }}
