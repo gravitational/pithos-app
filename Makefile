@@ -3,7 +3,9 @@ REPOSITORY := gravitational.io
 NAME := pithos-app
 OPS_URL ?= https://opscenter.localhost.localdomain:33009
 
-TOP := $(dir $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST)))
+SRCDIR=/go/src/github.com/gravitational/pithos-app
+DOCKERFLAGS=--rm=true -v $(PWD):$(SRCDIR) -v $(GOPATH)/pkg:/gopath/pkg -w $(SRCDIR)
+BUILDIMAGE=quay.io/gravitational/debian-venti:go1.9-stretch
 
 EXTRA_GRAVITY_OPTIONS ?=
 
@@ -78,36 +80,20 @@ $(TARBALL): import $(BUILD_DIR)
 	gravity package export $(REPOSITORY)/$(NAME):$(VERSION) $(TARBALL) $(EXTRA_GRAVITY_OPTIONS)
 
 .PHONY: build-app
-build-app: images
-	mkdir -p build
+build-app: $(BUILD_DIR) images
 	tele build -o build/installer.tar $(TELE_BUILD_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) resources/app.yaml
+
+.PHONY: build-pithosctl
+build-pithosctl: $(BUILD_DIR)
+	docker run $(DOCKERFLAGS) $(BUILDIMAGE) make build/pithosctl
+	for dir in bootstrap healthz; do mkdir -p images/$${dir}/bin; cp build/pithosctl images/$${dir}/bin/; done
+
+.PHONY: pithosctl
+build/pithosctl:
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -a -installsuffix cgo -o $@ cmd/pithosctl/*.go
 
 .PHONY: clean
 clean:
-	$(MAKE) -C $(TOP)/images clean
-	$(MAKE) -C $(TOP)/tool/pithosboot clean
-	$(MAKE) -C $(TOP)/tool/healthz clean
+	$(MAKE) -C images clean
+	for dir in bootstrap healthz; do rm -r images/$${dir}/bin; done
 	-rm -rf $(BUILD_DIR)
-
-.PHONY: dev-push
-dev-push: images
-	for container in $(CONTAINERS); do \
-		docker tag $$container apiserver:5000/$$container ;\
-		docker push apiserver:5000/$$container ;\
-	done
-
-.PHONY: dev-redeploy
-dev-redeploy: dev-clean dev-deploy
-
-.PHONY: dev-deploy
-dev-deploy: dev-push
-	-kubectl label nodes -l role=node pithos-role=node
-	kubectl create configmap cassandra-cfg --from-file=resources/cassandra-cfg
-	kubectl create configmap pithos-cfg --from-file=resources/pithos-cfg
-	kubectl create -f resources/pithos.yaml
-
-.PHONY: dev-clean
-dev-clean:
-	-kubectl delete -f resources/pithos.yaml
-	-kubectl delete configmap cassandra-cfg pithos-cfg
-	-kubectl label nodes -l pithos-role=node pithos-role-
