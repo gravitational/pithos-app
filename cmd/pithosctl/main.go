@@ -1,7 +1,10 @@
 package main
 
 import (
+	"context"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/config"
 
@@ -12,7 +15,9 @@ import (
 
 var (
 	pithosBootCfg config.Pithos
-	pithosctlCmd  = &cobra.Command{
+	ctx           context.Context
+
+	pithosctlCmd = &cobra.Command{
 		Use:   "",
 		Short: "Utility to bootstrap pithos application",
 		Run: func(ccmd *cobra.Command, args []string) {
@@ -36,4 +41,17 @@ func main() {
 func init() {
 	pithosctlCmd.PersistentFlags().StringVarP(&pithosBootCfg.Namespace, "namespace", "n", namespace, "Kubernetes namespace for pithos application")
 	pithosctlCmd.PersistentFlags().StringVar(&pithosBootCfg.NodeLabel, "label", nodeLabel, "Label to select nodes for pithos")
+
+	var cancel context.CancelFunc
+	ctx, cancel = context.WithCancel(context.TODO())
+	go func() {
+		exitSignals := make(chan os.Signal, 1)
+		signal.Notify(exitSignals, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
+
+		select {
+		case sig := <-exitSignals:
+			log.Infof("Caught signal: %v.", sig)
+			cancel()
+		}
+	}()
 }

@@ -46,7 +46,7 @@ func generateAccessKey(tenant string, master bool) (*config.AccessKey, error) {
 	return accessKey, nil
 }
 
-func generateKeyAndSecret() (key string, secret string, err error) {
+func generateKeyAndSecret() (key config.KeyString, secret config.KeyString, err error) {
 	key, err = randomHex(keyLength)
 	if err != nil {
 		return "", "", trace.Wrap(err)
@@ -55,14 +55,14 @@ func generateKeyAndSecret() (key string, secret string, err error) {
 	if err != nil {
 		return "", "", trace.Wrap(err)
 	}
-	return strings.ToUpper(key), strings.ToUpper(secret), nil
+	return config.KeyString(strings.ToUpper(key.String())), config.KeyString(strings.ToUpper(secret.String())), nil
 }
 
-func randomHex(length int) (string, error) {
+func randomHex(length int) (config.KeyString, error) {
 	data := make([]byte, 32)
 	_, err := rand.Read(data)
 	if err != nil {
 		return "", trace.Wrap(err)
 	}
-	return fmt.Sprintf("%x", sha256.Sum256(data))[:length], nil
+	return config.KeyString(fmt.Sprintf("%x", sha256.Sum256(data))[:length]), nil
 }

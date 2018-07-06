@@ -1,30 +1,34 @@
-// Copyright 2017 Gravitational, Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/*
+Copyright (C) 2018 Gravitational, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 
 package main
 
 import (
 	"bytes"
-	"flag"
 	"fmt"
 	"net/http"
 	"os"
 	"time"
 
+	hlz "github.com/gravitational/pithos-app/internal/pithosctl/pkg/healthz"
+
 	"github.com/gravitational/trace"
 	minio "github.com/minio/minio-go"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 )
 
 const (
@@ -34,34 +38,47 @@ const (
 	defaultPrefix         = "liveness"
 )
 
+var (
+	healthzConfig hlz.Config
+
+	healthzCmd = &cobra.Command{
+		Use:          "healthz",
+		Short:        "Healthz endpoint for pithos application",
+		SilenceUsage: true,
+		RunE:         healthz,
+	}
+)
+
 // s3Config describes configuration to access an s3 bucket
 type s3Config struct {
 	bucket string
 	client *minio.Client
 }
 
-func main() {
-	s3AccessKeyID := flag.String("access-key-id", "", "S3 access key")
-	s3SecretAccessKey := flag.String("secret-access-key", "", "S3 secret key")
-	s3Endpoint := flag.String("endpoint", defaultEndpoint, "S3 endpoint address")
-	s3Bucket := flag.String("bucket", defaultBucket, "S3 Bucket name")
+func init() {
+	pithosctlCmd.AddCommand(healthzCmd)
+	healthzCmd.Flags().StringVar(&healthzConfig.AccessKey, "access-key-id", "", "S3 access key")
+	healthzCmd.Flags().StringVar(&healthzConfig.SecretAccessKey, "secret-access-key", "", "S3 secret key")
+	healthzCmd.Flags().StringVar(&healthzConfig.Endpoint, "endpoint", defaultEndpoint, "S3 endpoint address")
+	healthzCmd.Flags().StringVar(&healthzConfig.Bucket, "bucket", defaultBucket, "S3 bucket name")
+}
 
-	flag.Parse()
-	if *s3AccessKeyID == "" && *s3SecretAccessKey == "" {
-		log.Fatal("access-key-id and secret-access-key are required")
+func healthz(ccmd *cobra.Command, args []string) error {
+	if err := healthzConfig.Check(); err != nil {
+		return trace.Wrap(err)
 	}
 
-	client, err := initClient(*s3Endpoint, *s3AccessKeyID, *s3SecretAccessKey)
+	client, err := initClient(healthzConfig.Endpoint, healthzConfig.AccessKey, healthzConfig.SecretAccessKey)
 	if err != nil {
-		log.Fatalf("failed to create s3 client: %v", err)
+		return trace.Wrap(err, "failed to create s3 client")
 	}
 
 	s3Config := &s3Config{
-		bucket: *s3Bucket,
+		bucket: healthzConfig.Bucket,
 		client: client,
 	}
 
-	log.Info("starting healthz endpoint")
+	log.Info("Starting healthz endpoint.")
 
 	http.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		if err := livenessProbe(s3Config); err != nil {
@@ -71,7 +88,7 @@ func main() {
 			w.WriteHeader(http.StatusOK)
 		}
 	})
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	return http.ListenAndServe(":8080", nil)
 }
 
 func livenessProbe(s3Config *s3Config) error {

@@ -17,8 +17,13 @@ limitations under the License.
 package main
 
 import (
+	"strings"
+
+	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/pithos"
+
 	"github.com/gravitational/rigging"
 	"github.com/gravitational/trace"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -39,15 +44,38 @@ func initApp(ccmd *cobra.Command, args []string) error {
 		return trace.Wrap(err)
 	}
 
+	log.Infof("Determined replication factor: %v.", replicas)
 	pithosBootCfg.ReplicationFactor = replicas
 	if err = pithosBootCfg.Check(); err != nil {
 		return trace.Wrap(err)
 	}
 
-	if err = pithos.CreateConfig(pithosBootCfg); err != nil {
+	log.Info("Creating pithos configmap and secret.")
+	pithosControl, err := pithos.NewControl(pithosBootCfg)
+	if err != nil {
 		return trace.Wrap(err)
 	}
 
+	if err = pithosControl.CreateResources(ctx); err != nil {
+		return trace.Wrap(err)
+	}
+
+	log.Infof("Creating cassandra services + statefulset.")
+	out, err := rigging.FromFile(rigging.ActionCreate, "/var/lib/gravity/resources/cassandra.yaml")
+	if err != nil && !strings.Contains(string(out), "already exists") {
+		return trace.Wrap(err)
+	}
+
+	log.Infof("Initializing cassandra tables.")
+	if err = pithosControl.InitCassandraTables(ctx); err != nil {
+		return trace.Wrap(err)
+	}
+
+	log.Infof("Creating pithos deployment.")
+	out, err = rigging.FromFile(rigging.ActionCreate, "/var/lib/gravity/resources/pithos.yaml")
+	if err != nil && !strings.Contains(string(out), "already exists") {
+		return trace.Wrap(err)
+	}
 	return nil
 }
 

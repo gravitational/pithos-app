@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: pithos-cfg
-  namespace: default
+  namespace: {{.Namespace}}
 data:
   config.yaml: |
     #
@@ -60,12 +60,12 @@ data:
     # being defined inline.
     keystore:
       keys:
-    {{range .Keys}}
+    {{- range .Keys}}
         {{.Key}}:
           master: {{.Master}}
           tenant: '{{.Tenant}}'
           secret: '{{.Secret}}'
-    {{end}}
+    {{- end}}
 
 
     ## bucketstore configuration
