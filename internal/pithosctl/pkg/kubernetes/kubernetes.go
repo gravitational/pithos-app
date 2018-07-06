@@ -23,13 +23,8 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-// Client is the Kubernetes API client
-type Client struct {
-	*kubernetes.Clientset
-}
-
-// NewClient returns a new client for Kubernetes APIs
-func NewClient(kubeConfig string) (client *Client, err error) {
+// NewClient returns a new clientset for Kubernetes APIs
+func NewClient(kubeConfig string) (*kubernetes.Clientset, error) {
 	config, err := GetClientConfig(kubeConfig)
 	if err != nil {
 		return nil, trace.Wrap(err)
@@ -39,7 +34,7 @@ func NewClient(kubeConfig string) (client *Client, err error) {
 	if err != nil {
 		return nil, trace.Wrap(err)
 	}
-	return &Client{clientset}, nil
+	return clientset, nil
 }
 
 // GetClientConfig returns client configuration,

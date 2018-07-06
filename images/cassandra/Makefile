@@ -18,5 +18,6 @@ all: kubernetes-cassandra.jar
 # build the cassandra seed provider
 kubernetes-cassandra.jar:
 	@echo "Building kubernetes-cassandra.jar"
-	docker run -v ${CURDIR}/java:/usr/src/app maven:3-jdk-8-onbuild-alpine mvn clean package
+	docker run -v ${CURDIR}/.m2:/root/.m2 -v ${CURDIR}/java:/usr/src/app \
+		maven:3-jdk-8-onbuild-alpine mvn clean package
 	cp java/target/*jar-with-dependencies.jar rootfs/kubernetes-cassandra.jar

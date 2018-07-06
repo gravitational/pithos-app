@@ -16,7 +16,11 @@ limitations under the License.
 
 package config
 
-import "github.com/gravitational/trace"
+import (
+	"encoding/base64"
+
+	"github.com/gravitational/trace"
+)
 
 // Pithos describes pithos application configuration
 type Pithos struct {
@@ -34,11 +38,24 @@ type Pithos struct {
 
 // AccessKey defines pithos S3 access key
 type AccessKey struct {
-	Key    string
-	Secret string
+	Key    KeyString
+	Secret KeyString
 	// Master parameter for key will allow access to all buckets
 	Master bool
 	Tenant string
+}
+
+// KeyString is a string
+type KeyString string
+
+// EncodeBase64 encodes source string to base64 format
+func (k *KeyString) EncodeBase64() string {
+	return base64.StdEncoding.EncodeToString([]byte(*k))
+}
+
+// String is a string representation of KeyString type
+func (k *KeyString) String() string {
+	return string(*k)
 }
 
 // Check checks configuration parameters

@@ -17,40 +17,63 @@ limitations under the License.
 package pithos
 
 import (
+	"bufio"
 	"bytes"
-	"html/template"
-	"strings"
+	"context"
+	"os"
+	"text/template"
+	"time"
 
 	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/config"
 	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/kubernetes"
+
 	"github.com/gravitational/rigging"
 	"github.com/gravitational/trace"
-
 	log "github.com/sirupsen/logrus"
+	"k8s.io/api/core/v1"
+	k8s "k8s.io/client-go/kubernetes"
 )
 
 const (
-	templateFile  = "/var/lib/gravity/resources/pithos-cfg/config.yaml.template"
-	masterTenant  = "ops@gravitational.io"
-	regularTenant = "pithos"
-	configMapName = "pithos-cfg"
+	templateFile      = "/var/lib/gravity/resources/pithos-cfg/config.yaml.template"
+	initJobFile       = "/var/lib/gravity/resources/pithos-initialize.yaml"
+	masterTenantName  = "ops@gravitational.io"
+	regularTenantName = "pithos"
+	configMapName     = "pithos-cfg"
+	retryAttempts     = 60
+	retryPeriod       = 5 * time.Second
 )
 
-// CreateConfig generates configuration file for pithos application
-func CreateConfig(pithosConfig config.Pithos) error {
+// Control defines configuration for operations
+type Control struct {
+	cfg    config.Pithos
+	client *k8s.Clientset
+}
+
+// NewControl creates new Control object
+func NewControl(pithosConfig config.Pithos) (*Control, error) {
+	client, err := kubernetes.NewClient(pithosConfig.KubeConfig)
+	if err != nil {
+		return nil, trace.Wrap(err)
+	}
+	return &Control{cfg: pithosConfig, client: client}, nil
+}
+
+// CreateResources creates kubernetes resource for pithos application
+func (c *Control) CreateResources(ctx context.Context) error {
 	log.Infoln("Creating pithos-cfg configmap.")
 
-	masterKey, err := generateAccessKey(masterTenant, true)
+	masterKey, err := generateAccessKey(masterTenantName, true)
 	if err != nil {
 		return trace.Wrap(err)
 	}
-	pithosConfig.Keys = append(pithosConfig.Keys, *masterKey)
+	c.cfg.Keys = append(c.cfg.Keys, *masterKey)
 
-	tenantKey, err := generateAccessKey(regularTenant, false)
+	tenantKey, err := generateAccessKey(regularTenantName, false)
 	if err != nil {
 		return trace.Wrap(err)
 	}
-	pithosConfig.Keys = append(pithosConfig.Keys, *tenantKey)
+	c.cfg.Keys = append(c.cfg.Keys, *tenantKey)
 
 	configTemplate, err := template.ParseFiles(templateFile)
 	if err != nil {
@@ -58,8 +81,7 @@ func CreateConfig(pithosConfig config.Pithos) error {
 	}
 
 	buffer := &bytes.Buffer{}
-	err = configTemplate.Execute(buffer, pithosConfig)
-	if err != nil {
+	if err = configTemplate.Execute(buffer, c.cfg); err != nil {
 		return trace.Wrap(err)
 	}
 
@@ -68,29 +90,101 @@ func CreateConfig(pithosConfig config.Pithos) error {
 		return trace.Wrap(err)
 	}
 
-	client, err := kubernetes.NewClient(pithosConfig.KubeConfig)
+	if err = createConfigMap(ctx, configMap, c.client); err != nil {
+		return trace.Wrap(err)
+	}
+
+	buffer.Reset()
+	if err = secretTemplate.Execute(buffer, c.cfg); err != nil {
+		return trace.Wrap(err)
+	}
+
+	secret, err := rigging.ParseSecret(bytes.NewReader(buffer.Bytes()))
 	if err != nil {
 		return trace.Wrap(err)
 	}
 
-	out, err := rigging.GenerateConfigMap(configMapName, pithosConfig.Namespace)
-	if err != nil && !strings.Contains(string(out), "already exists") {
-		log.Errorf("%s", string(out))
+	log.Infof("%v", secret)
+	if err = createSecret(ctx, secret, c.client); err != nil {
 		return trace.Wrap(err)
 	}
-
-	keyMap := map[string]string{
-		"master.key":    masterKey.Key,
-		"master.secret": masterKey.Secret,
-		"tenant.key":    tenantKey.Key,
-		"tenant.secret": tenantKey.Secret,
-	}
-
-	out, err = rigging.CreateSecretFromMap("pithos-keys", keyMap)
-	if err != nil && !strings.Contains(string(out), "already exists") {
-		log.Errorf("%s", string(out))
-		return trace.Wrap(err)
-	}
-
 	return nil
 }
+
+// InitCassandraTables creates underlying cassandra tables for object store
+func (c *Control) InitCassandraTables(ctx context.Context) error {
+	file, err := os.Open(initJobFile)
+	if err != nil {
+		return trace.ConvertSystemError(err)
+	}
+	defer file.Close()
+
+	job, err := rigging.ParseJob(bufio.NewReader(file))
+	if err != nil {
+		return trace.Wrap(err)
+	}
+
+	jobConfig := rigging.JobConfig{
+		job,
+		c.client,
+	}
+
+	jobControl, err := rigging.NewJobControl(jobConfig)
+	if err != nil {
+		return trace.Wrap(err)
+	}
+
+	if err := jobControl.Upsert(ctx); err != nil {
+		return trace.Wrap(err)
+	}
+
+	return rigging.PollStatus(ctx, retryAttempts, retryPeriod, jobControl)
+}
+
+func createConfigMap(ctx context.Context, configMap *v1.ConfigMap, client *k8s.Clientset) error {
+	configMapConfig := rigging.ConfigMapConfig{
+		ConfigMap: configMap,
+		Client:    client,
+	}
+	configMapControl, err := rigging.NewConfigMapControl(configMapConfig)
+	if err != nil {
+		return trace.Wrap(err)
+	}
+
+	if err := configMapControl.Upsert(ctx); err != nil {
+		return trace.Wrap(err)
+	}
+	return nil
+}
+
+func createSecret(ctx context.Context, secret *v1.Secret, client *k8s.Clientset) error {
+	secretConfig := rigging.SecretConfig{
+		Secret: secret,
+		Client: client,
+	}
+	secretControl, err := rigging.NewSecretControl(secretConfig)
+	if err != nil {
+		return trace.Wrap(err)
+	}
+
+	if err := secretControl.Upsert(ctx); err != nil {
+		return trace.Wrap(err)
+	}
+	return nil
+}
+
+var secretTemplate = template.Must(
+	template.New("pithos_secret").Parse(`apiVersion: v1
+kind: Secret
+metadata:
+  name: pithos-keys
+  namespace: {{.Namespace}}
+type: Opaque
+data:
+{{- range .Keys}}
+  {{if .Master}}master.key: {{.Key.EncodeBase64}}
+  master.secret: {{.Secret.EncodeBase64}}{{else -}}
+  tenant.key: {{.Key.EncodeBase64}}
+  tenant.secret: {{.Secret.EncodeBase64}}{{end}}
+{{- end}}
+`))
