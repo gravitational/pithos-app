@@ -1,11 +1,13 @@
-export VERSION ?= $(shell ./version.sh)
+export VERSION ?= $(shell git describe --long --tags --always|awk -F'[.-]' '{print $$1 "." $$2 "." $$4}')
 REPOSITORY := gravitational.io
 NAME := pithos-app
 OPS_URL ?= https://opscenter.localhost.localdomain:33009
 TELE ?= $(shell which tele)
 GRAVITY ?= $(shell which gravity)
 
-TOP := $(dir $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST)))
+SRCDIR=/go/src/github.com/gravitational/pithos-app
+DOCKERFLAGS=--rm=true -v $(PWD):$(SRCDIR) -v $(GOPATH)/pkg:/gopath/pkg -w $(SRCDIR)
+BUILDIMAGE=quay.io/gravitational/debian-venti:go1.9-stretch
 
 EXTRA_GRAVITY_OPTIONS ?=
 
@@ -85,9 +87,17 @@ $(TARBALL): import $(BUILD_DIR)
 build-app: $(BUILD_DIR) images
 	$(TELE) build -o build/installer.tar $(TELE_BUILD_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) resources/app.yaml
 
+.PHONY: build-pithosctl
+build-pithosctl: $(BUILD_DIR)
+	docker run $(DOCKERFLAGS) $(BUILDIMAGE) make build/pithosctl
+	for dir in bootstrap healthz; do mkdir -p images/$${dir}/bin; cp build/pithosctl images/$${dir}/bin/; done
+
+.PHONY: pithosctl
+build/pithosctl:
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -a -installsuffix cgo -o $@ cmd/pithosctl/*.go
+
 .PHONY: clean
 clean:
-	$(MAKE) -C $(TOP)/images clean
-	$(MAKE) -C $(TOP)/tool/pithosboot clean
-	$(MAKE) -C $(TOP)/tool/healthz clean
+	$(MAKE) -C images clean
+	for dir in bootstrap healthz; do rm -r images/$${dir}/bin; done
 	-rm -rf $(BUILD_DIR)
