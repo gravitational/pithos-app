@@ -38,7 +38,7 @@ func NewClient(kubeConfig string) (*kubernetes.Clientset, error) {
 }
 
 // GetClientConfig returns client configuration,
-// if master is not specified, in-cluster configuration is assumed
+// if KubeConfig is not specified, in-cluster configuration is assumed
 func GetClientConfig(kubeConfig string) (*rest.Config, error) {
 	if kubeConfig != "" {
 		return clientcmd.BuildConfigFromFlags("", kubeConfig)

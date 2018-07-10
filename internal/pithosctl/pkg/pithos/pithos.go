@@ -50,7 +50,7 @@ type Control struct {
 	client *k8s.Clientset
 }
 
-// NewControl creates new Control object
+// NewControl creates new pithos bootstrap controller
 func NewControl(pithosConfig config.Pithos) (*Control, error) {
 	client, err := kubernetes.NewClient(pithosConfig.KubeConfig)
 	if err != nil {
@@ -59,7 +59,7 @@ func NewControl(pithosConfig config.Pithos) (*Control, error) {
 	return &Control{cfg: pithosConfig, client: client}, nil
 }
 
-// CreateResources creates kubernetes resource for pithos application
+// CreateResources creates kubernetes resources for pithos application
 func (c *Control) CreateResources(ctx context.Context) error {
 	log.Infoln("Creating pithos-cfg configmap.")
 

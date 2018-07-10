@@ -43,7 +43,7 @@ func (c *Config) Check() error {
 		errors = append(errors, trace.BadParameter("bucket is required"))
 	}
 	if c.Endpoint == "" {
-		errors = append(errors, trace.BadParameter("endpoint is required"))
+		errors = append(errors, trace.BadParameter("endpoint address is required"))
 	}
 	return trace.NewAggregate(errors...)
 }
