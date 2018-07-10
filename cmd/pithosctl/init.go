@@ -44,7 +44,7 @@ func initApp(ccmd *cobra.Command, args []string) error {
 		return trace.Wrap(err)
 	}
 
-	log.Infof("Determined replication factor: %v.", replicas)
+	log.Infof("Replication factor: %v.", replicas)
 	pithosBootCfg.ReplicationFactor = replicas
 	if err = pithosBootCfg.Check(); err != nil {
 		return trace.Wrap(err)
@@ -60,20 +60,20 @@ func initApp(ccmd *cobra.Command, args []string) error {
 		return trace.Wrap(err)
 	}
 
-	log.Infof("Creating cassandra services + statefulset.")
+	log.Info("Creating cassandra services + statefulset.")
 	out, err := rigging.FromFile(rigging.ActionCreate, "/var/lib/gravity/resources/cassandra.yaml")
-	if err != nil && !strings.Contains(string(out), "already exists") {
+	if err != nil && !isAlreadyExistsError(out) {
 		return trace.Wrap(err)
 	}
 
-	log.Infof("Initializing cassandra tables.")
+	log.Info("Initializing cassandra tables.")
 	if err = pithosControl.InitCassandraTables(ctx); err != nil {
 		return trace.Wrap(err)
 	}
 
-	log.Infof("Creating pithos deployment.")
+	log.Info("Creating pithos deployment.")
 	out, err = rigging.FromFile(rigging.ActionCreate, "/var/lib/gravity/resources/pithos.yaml")
-	if err != nil && !strings.Contains(string(out), "already exists") {
+	if err != nil && !isAlreadyExistsError(out) {
 		return trace.Wrap(err)
 	}
 	return nil
@@ -89,4 +89,8 @@ func determineReplicationFactor() (int, error) {
 		return 3, nil
 	}
 	return 1, nil
+}
+
+func isAlreadyExistsError(output []byte) bool {
+	return strings.Contains(string(output), "already exists")
 }

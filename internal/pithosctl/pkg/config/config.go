@@ -38,10 +38,13 @@ type Pithos struct {
 
 // AccessKey defines pithos S3 access key
 type AccessKey struct {
-	Key    KeyString
+	// Key defines S3 access key
+	Key KeyString
+	// Secret defines S3 secret access key
 	Secret KeyString
 	// Master parameter for key will allow access to all buckets
 	Master bool
+	// Tenant defines S3 user name
 	Tenant string
 }
 
@@ -62,7 +65,7 @@ func (k *KeyString) String() string {
 func (p *Pithos) Check() error {
 	var errors []error
 	if p.ReplicationFactor < 1 {
-		errors = append(errors, trace.BadParameter("replication factor should be equal or great than 1"))
+		errors = append(errors, trace.BadParameter("replication factor must be >= 1"))
 	}
 	if p.Namespace == "" {
 		errors = append(errors, trace.BadParameter("namespace is required"))

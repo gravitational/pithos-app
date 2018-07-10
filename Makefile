@@ -80,7 +80,7 @@ $(TARBALL): import $(BUILD_DIR)
 	gravity package export $(REPOSITORY)/$(NAME):$(VERSION) $(TARBALL) $(EXTRA_GRAVITY_OPTIONS)
 
 .PHONY: build-app
-build-app: $(BUILD_DIR) images
+build-app: images | $(BUILD_DIR)
 	tele build -o build/installer.tar $(TELE_BUILD_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) resources/app.yaml
 
 .PHONY: build-pithosctl
@@ -95,5 +95,5 @@ build/pithosctl:
 .PHONY: clean
 clean:
 	$(MAKE) -C images clean
-	for dir in bootstrap healthz; do rm -r images/$${dir}/bin; done
+	for dir in bootstrap healthz; do rm -rf images/$${dir}/bin; done
 	-rm -rf $(BUILD_DIR)

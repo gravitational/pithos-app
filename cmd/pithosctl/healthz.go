@@ -23,7 +23,7 @@ import (
 	"os"
 	"time"
 
-	hlz "github.com/gravitational/pithos-app/internal/pithosctl/pkg/healthz"
+	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/healthz"
 
 	"github.com/gravitational/trace"
 	minio "github.com/minio/minio-go"
@@ -39,13 +39,13 @@ const (
 )
 
 var (
-	healthzConfig hlz.Config
+	healthzConfig healthz.Config
 
 	healthzCmd = &cobra.Command{
 		Use:          "healthz",
 		Short:        "Healthz endpoint for pithos application",
 		SilenceUsage: true,
-		RunE:         healthz,
+		RunE:         serveHealthz,
 	}
 )
 
@@ -63,7 +63,7 @@ func init() {
 	healthzCmd.Flags().StringVar(&healthzConfig.Bucket, "bucket", defaultBucket, "S3 bucket name")
 }
 
-func healthz(ccmd *cobra.Command, args []string) error {
+func serveHealthz(ccmd *cobra.Command, args []string) error {
 	if err := healthzConfig.Check(); err != nil {
 		return trace.Wrap(err)
 	}

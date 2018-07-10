@@ -44,7 +44,7 @@ then
 	        --from-file=cassandra-node.cer=cassandra-node.cer \
 	        --from-file=keystore=keystore \
 	        --from-file=sbx.truststore=sbx.truststore \
-            --from-file=cassandra-node.pem=cassandra-node.pem
+	        --from-file=cassandra-node.pem=cassandra-node.pem
 fi
 
 pithosctl init

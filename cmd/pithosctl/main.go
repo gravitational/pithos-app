@@ -48,10 +48,8 @@ func init() {
 		exitSignals := make(chan os.Signal, 1)
 		signal.Notify(exitSignals, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 
-		select {
-		case sig := <-exitSignals:
-			log.Infof("Caught signal: %v.", sig)
-			cancel()
-		}
+		sig := <-exitSignals
+		log.Infof("Caught signal: %v.", sig)
+		cancel()
 	}()
 }
