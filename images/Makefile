@@ -1,5 +1,5 @@
 VERSION ?= latest
-CASSANDRA_VERSION ?= 3.11.2
+CASSANDRA_VERSION ?= 3.11.3
 # JMX -> json bridge agent(needed for getting metrics from Cassandra)
 JOLOKIA_VERSION ?= 1.5.0
 TELEGRAF_VERSION ?= 1.6.4
