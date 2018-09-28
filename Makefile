@@ -80,7 +80,7 @@ $(TARBALL): import $(BUILD_DIR)
 	gravity package export $(REPOSITORY)/$(NAME):$(VERSION) $(TARBALL) $(EXTRA_GRAVITY_OPTIONS)
 
 .PHONY: build-app
-build-app: images | $(BUILD_DIR)
+build-app: clean images | $(BUILD_DIR)
 	tele build -o build/installer.tar $(TELE_BUILD_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) resources/app.yaml
 
 .PHONY: build-pithosctl
