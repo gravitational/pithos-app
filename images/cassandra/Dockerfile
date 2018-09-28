@@ -24,7 +24,7 @@ ENV TERM=xterm \
     CASSANDRA_DATA=/cassandra_data \
     CASSANDRA_LOGS=/var/log/cassandra \
     JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 \
-    PATH=${PATH}:/usr/lib/jvm/java-8-openjdk-amd64/bin:/usr/local/apache-cassandra-${CASSANDRA_VERSION}/bin
+    PATH=${PATH}:/usr/lib/jvm/java-8-openjdk-amd64/bin:/usr/local/apache-cassandra-${CASSANDRA_VERSION}/bin:/usr/local/apache-cassandra-${CASSANDRA_VERSION}/tools/bin
 
 ADD rootfs/ /
 
