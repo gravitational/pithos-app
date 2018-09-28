@@ -29,7 +29,8 @@ apt-get install -y \
     cron \
     curl \
     gawk \
-    python
+    python \
+    jq
 
 CASSANDRA_PATH="cassandra/${CASSANDRA_VERSION}/apache-cassandra-${CASSANDRA_VERSION}-bin.tar.gz"
 CASSANDRA_DOWNLOAD="http://www.apache.org/dyn/closer.cgi?path=/${CASSANDRA_PATH}&as_json=1"
@@ -61,6 +62,8 @@ adduser --disabled-password --no-create-home --gecos '' --disabled-login telegra
 chown telegraf: /usr/bin/telegraf
 chown -R telegraf: /etc/telegraf
 
+echo "Dwonloading jmxterm"
+curl -L https://sourceforge.net/projects/cyclops-group/files/jmxterm/1.0.0/jmxterm-1.0.0-uber.jar/download -o /jmxterm.jar
 rm -rf \
     $CASSANDRA_HOME/*.txt \
     $CASSANDRA_HOME/doc \
