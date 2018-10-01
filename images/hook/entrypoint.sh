@@ -27,6 +27,8 @@ if [ $1 = "update" ]; then
     rig upsert -f /var/lib/gravity/resources/pithos.yaml --debug
     echo "Checking status"
     rig status $RIG_CHANGESET --retry-attempts=120 --retry-period=1s --debug
+    echo "Updating cassandra compaction settings for storage.block column family"
+    kubectl apply -f /var/lib/gravity/cassandra-alter-compaction.yaml
     echo "Freezing"
     rig freeze
 elif [ $1 = "rollback" ]; then
