@@ -140,6 +140,26 @@ spec:
               secretKeyRef:
                 name: pithos-keys
                 key: tenant.secret
+      - image: pithos:latest
+        name: utils
+        command: ["/bin/bash", "-c", "--"]
+        args: ["while true; do sleep 6000; done;"]
+        env:
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: pithos-keys
+                key: master.key
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: pithos-keys
+                key: master.secret
+          - name: ENDPOINT
+            value: https://pithos.default.svc
+        volumeMounts:
+          - name: cluster-default-ssl
+            mountPath: /etc/cluster-ssl
       volumes:
         - name: pithos-cfg
           configMap:

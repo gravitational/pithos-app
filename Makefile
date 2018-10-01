@@ -78,7 +78,7 @@ $(TARBALL): import $(BUILD_DIR)
 	gravity package export $(REPOSITORY)/$(NAME):$(VERSION) $(TARBALL) $(EXTRA_GRAVITY_OPTIONS)
 
 .PHONY: build-app
-build-app: images
+build-app: clean images
 	mkdir -p build
 	tele build -o build/installer.tar $(TELE_BUILD_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) resources/app.yaml
 
