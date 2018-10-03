@@ -28,7 +28,7 @@ if [ $1 = "update" ]; then
     echo "Checking status"
     rig status $RIG_CHANGESET --retry-attempts=120 --retry-period=1s --debug
     echo "Updating cassandra compaction settings for storage.block column family"
-    kubectl apply -f /var/lib/gravity/cassandra-alter-compaction.yaml
+    kubectl apply -f /var/lib/gravity/resources/cassandra-alter-compaction.yaml
     echo "Freezing"
     rig freeze
 elif [ $1 = "rollback" ]; then
