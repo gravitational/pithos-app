@@ -29,7 +29,8 @@ apt-get install -y \
     cron \
     curl \
     gawk \
-    python
+    python \
+    jq
 
 CASSANDRA_PATH="cassandra/${CASSANDRA_VERSION}/apache-cassandra-${CASSANDRA_VERSION}-bin.tar.gz"
 CASSANDRA_DOWNLOAD="http://www.apache.org/dyn/closer.cgi?path=/${CASSANDRA_PATH}&as_json=1"
@@ -55,11 +56,14 @@ echo "Downloading and installing jolokia agent..."
 curl -L https://github.com/rhuss/jolokia/releases/download/v${JOLOKIA_VERSION}/jolokia-${JOLOKIA_VERSION}-bin.tar.gz | tar -xzf - -C /tmp
 cp /tmp/jolokia-${JOLOKIA_VERSION}/agents/jolokia-jvm.jar /usr/local/apache-cassandra-${CASSANDRA_VERSION}/lib
 
-echo "Downloading and installing telegraf"
+echo "Downloading and installing telegraf..."
 curl -L https://dl.influxdata.com/telegraf/releases/telegraf-${TELEGRAF_VERSION}_linux_amd64.tar.gz | tar -xzf - --strip-components=2 -C / ./telegraf/usr/bin/telegraf
 adduser --disabled-password --no-create-home --gecos '' --disabled-login telegraf
 chown telegraf: /usr/bin/telegraf
 chown -R telegraf: /etc/telegraf
+
+echo "Dwonloading jmxterm..."
+curl -L https://sourceforge.net/projects/cyclops-group/files/jmxterm/1.0.0/jmxterm-1.0.0-uber.jar/download -o /jmxterm.jar
 
 rm -rf \
     $CASSANDRA_HOME/*.txt \
