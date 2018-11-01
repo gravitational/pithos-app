@@ -108,6 +108,16 @@ spec:
       serviceAccountName: cassandra
       nodeSelector:
         pithos-role: node
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: component
+                    operator: In
+                    values:
+                      - cassandra
+              topologyKey: kubernetes.io/hostname
       containers:
         - image: cassandra:latest
           name: cassandra
