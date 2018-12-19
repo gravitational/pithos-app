@@ -53,3 +53,5 @@ if [ $(kubectl get nodes -l pithos-role=node -o name | wc -l) -ge 3 ]
 then
     kubectl scale statefulset cassandra --replicas=3
 fi
+
+kubectl create -f /var/lib/gravity/resources/monitoring.yaml
