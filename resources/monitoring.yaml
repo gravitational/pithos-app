@@ -37,7 +37,7 @@ metadata:
   labels:
     monitoring: alert
 data:
-  cassandra_load.tick:
+  cassandra_load.tick: |
     var period = 30m
     var every = 5m
     var data_cassandra_load = stream
