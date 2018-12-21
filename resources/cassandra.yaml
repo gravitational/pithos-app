@@ -144,6 +144,8 @@ spec:
             - name: data
               mountPath: /cassandra_data
             - name: cassandra-cfg
+              mountPath: /etc/cassandra-ro
+            - name: cassandra-cfg-rw
               mountPath: /etc/cassandra
             - name: cluster-ca
               mountPath: /etc/ssl/cluster-ca
@@ -175,6 +177,8 @@ spec:
         - name: cassandra-cfg
           configMap:
             name: cassandra-cfg
+        - name: cassandra-cfg-rw
+          emptyDir: {}
         - name: cluster-ca
           secret:
             secretName: cluster-ca

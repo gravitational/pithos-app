@@ -15,6 +15,7 @@
 # limitations under the License.
 
 CONF_DIR=/etc/cassandra
+CONF_DIR_RO=/etc/cassandra-ro
 CFG=$CONF_DIR/cassandra.yaml
 
 CASSANDRA_RPC_ADDRESS="${CASSANDRA_RPC_ADDRESS:-0.0.0.0}"
@@ -25,6 +26,11 @@ CASSANDRA_BROADCAST_ADDRESS=${POD_IP}
 CASSANDRA_BROADCAST_RPC_ADDRESS=${POD_IP}
 
 CASSANDRA_OPEN_JMX=false
+
+# Replace content of /etc/cassandra directory with content from ConfigMap
+rm -rf $CONF_DIR/*
+cp -aL $CONF_DIR_RO/* $CONF_DIR/
+chmod +w -R $CONF_DIR/*
 
 # TODO what else needs to be modified
 
