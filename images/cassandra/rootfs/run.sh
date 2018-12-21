@@ -84,5 +84,7 @@ curl -XPOST "http://influxdb.kube-system.svc:8086/query?u=root&p=root" \
 sed -i "s/superSecurePassword/${INFLUXDB_TELEGRAF_PASSWORD}/" /etc/telegraf/telegraf-node.conf
 sed -i "s/username = \"telegraf\"/username = \"${INFLUXDB_TELEGRAF_USERNAME}\"/" /etc/telegraf/telegraf-node.conf
 
+cat $CFG/cassandra.yaml
+
 /usr/bin/telegraf --quiet --config /etc/telegraf/telegraf-node.conf 2>&1 &
 cassandra -f -R
