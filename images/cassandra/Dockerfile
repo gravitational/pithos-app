@@ -20,15 +20,15 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 COPY cassandra.list /etc/apt/sources.list.d/cassandra.list
 
-RUN gpg --keyserver ha.pool.sks-keyservers.net --recv-keys F758CE318D77295D && \
-  gpg --export --armor F758CE318D77295D | apt-key add - && \
-  gpg --keyserver ha.pool.sks-keyservers.net --recv-keys 2B5C1B00 && \
-  gpg --export --armor 2B5C1B00 | apt-key add - && \
-  gpg --keyserver ha.pool.sks-keyservers.net --recv-keys A278B781FE4B2BDA && \
-  gpg --export --armor A278B781FE4B2BDA | apt-key add - && \
-  gpg --keyserver ha.pool.sks-keyservers.net --recv-keys 0353B12C && \
-  gpg --export --armor 0353B12C | apt-key add - && \
-  apt-get update && \
+RUN for key in F758CE318D77295D 2B5C1B00 A278B781FE4B2BDA 0353B12C; \
+    do \
+      gpg --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys "$key" || \
+      gpg --keyserver hkp://ipv4.pool.sks-keyservers.net --recv-keys "$key" || \
+      gpg --keyserver hkp://pgp.mit.edu:80 --recv-keys "$key" ; \
+      gpg --export --armor $key | apt-key add - ; \
+    done
+
+RUN apt-get update && \
   apt-get -y install curl && \
   # Install older version of OpenJDK
   # https://stackoverflow.com/questions/48328661/cant-start-cassandra-after-os-patch-up
