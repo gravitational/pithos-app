@@ -1,0 +1,65 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rollups-pithos
+  namespace: monitoring
+  labels:
+    monitoring: rollup
+data:
+  cassandra_load: |
+    [
+      {
+        "retention": "default",
+        "custom_from": "(select last(\"Load_Count\") from \"k8s\".\"default\".\"cassandra_Storage\" group by \"host\")",
+        "custom_group_by": "time(1m)",
+        "name": "cassandra_load",
+        "functions": [
+          {
+            "function": "min",
+            "field": "last",
+            "alias": "min"
+          },
+          {
+            "function": "max",
+            "field": "last",
+            "alias": "max"
+          }
+        ]
+      }
+    ]
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pithos-alerts
+  namespace: monitoring
+  labels:
+    monitoring: alert
+data:
+  cassandra_load.tick: |
+    var period = 30m
+    var every = 5m
+    var data_cassandra_load = stream
+        |from()
+            .measurement('cassandra_load')
+        |window()
+            .period(period)
+            .every(every)
+
+    var trigger_load_difference = data_cassandra_load
+        |eval(lambda: 100.0 - float("min")*100.0/float("max"))
+            .as('percent_difference')
+        |alert()
+            .message('{{ .Level }} / cassandra: storage load is different between nodes')
+            .crit(lambda: "percent_difference" > 20.0)
+            .critReset(lambda: "percent_difference" < 10.0)
+            .stateChangesOnly(1h)
+            .details('''
+    <b>{{ .Message }}</b>
+    <p>Level: {{ .Level }}</p>
+    <p>Storage load difference(%): {{ index .Fields "percent_difference" | printf "%0.2f" }}</p>
+    ''')
+            .email()
+            .log('/var/lib/kapacitor/logs/cassandra_load.log')
+            .mode(0644)
