@@ -50,3 +50,4 @@ then
 fi
 
 /opt/bin/kubectl create -f /var/lib/gravity/resources/monitoring.yaml
+/opt/bin/gravity resource create -f /var/lib/gravity/resources/alerts.yaml
