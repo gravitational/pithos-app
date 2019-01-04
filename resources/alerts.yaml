@@ -10,6 +10,7 @@ spec:
     var data_cassandra_load = stream
         |from()
             .measurement('cassandra_load')
+        |where(lambda: "max" > 1073741824)
         |window()
             .period(period)
             .every(every)
