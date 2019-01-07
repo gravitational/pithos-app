@@ -47,6 +47,7 @@ TELE_BUILD_OPTIONS := --insecure \
                 --ignore="images" \
                 --ignore="tool" \
                 --ignore="pithos-cfg" \
+                --ignore="alerts.yaml" \
                 $(IMPORT_IMAGE_FLAGS)
 
 BUILD_DIR := build
