@@ -30,6 +30,7 @@ IMPORT_OPTIONS := --vendor \
 		--name=$(NAME) \
 		--version=$(VERSION) \
 		--glob=**/*.yaml \
+		--ignore="alerts.yaml" \
 		--ignore=pithos-cfg \
 		--exclude="build" \
 		--exclude="images" \
