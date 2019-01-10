@@ -1,0 +1,30 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rollups-pithos
+  namespace: kube-system
+  labels:
+    monitoring: rollup
+data:
+  cassandra_load: |
+    [
+      {
+        "retention": "default",
+        "custom_from": "(select last(\"Load_Count\") from \"k8s\".\"default\".\"cassandraStorage\" group by \"host\")",
+        "custom_group_by": "time(1m)",
+        "name": "cassandra_load",
+        "functions": [
+          {
+            "function": "min",
+            "field": "last",
+            "alias": "min"
+          },
+          {
+            "function": "max",
+            "field": "last",
+            "alias": "max"
+          }
+        ]
+      }
+    ]

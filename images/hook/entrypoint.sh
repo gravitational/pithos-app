@@ -17,6 +17,8 @@ if [ $1 = "update" ]; then
     rig delete deployments/pithos --force
     rig delete deployments/cassandra-utils --force
     rig delete daemonsets/cassandra --force
+    rig delete configmaps/rollups-pithos --force
+    rig delete configmaps/pithos-alerts --force
 
     rig upsert -f /var/lib/gravity/resources/cassandra.yaml --debug
     if [ $(kubectl get nodes -l pithos-role=node -o name | wc -l) -ge 3 ]
@@ -25,6 +27,9 @@ if [ $1 = "update" ]; then
     fi
 
     rig upsert -f /var/lib/gravity/resources/pithos.yaml --debug
+    rig upsert -f /var/lib/gravity/resources/monitoring.yaml --debug
+    gravity resource create -f /var/lib/gravity/resources/alerts.yaml
+
     echo "Checking status"
     rig status $RIG_CHANGESET --retry-attempts=120 --retry-period=1s --debug
     echo "Updating cassandra compaction settings for storage.block column family"
