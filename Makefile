@@ -2,6 +2,8 @@ export VERSION ?= $(shell ./version.sh)
 REPOSITORY := gravitational.io
 NAME := pithos-app
 OPS_URL ?= https://opscenter.localhost.localdomain:33009
+TELE ?= $(shell which tele)
+GRAVITY ?= $(shell which gravity)
 
 TOP := $(dir $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST)))
 
@@ -67,8 +69,8 @@ images:
 
 .PHONY: import
 import: images
-	-gravity app delete --ops-url=$(OPS_URL) $(REPOSITORY)/$(NAME):$(VERSION) --force --insecure $(EXTRA_GRAVITY_OPTIONS)
-	gravity app import $(IMPORT_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) .
+	-$(GRAVITY) app delete --ops-url=$(OPS_URL) $(REPOSITORY)/$(NAME):$(VERSION) --force --insecure $(EXTRA_GRAVITY_OPTIONS)
+	$(GRAVITY) app import $(IMPORT_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) .
 
 .PHONY: export
 export: $(TARBALL)
@@ -77,12 +79,12 @@ $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
 $(TARBALL): import $(BUILD_DIR)
-	gravity package export $(REPOSITORY)/$(NAME):$(VERSION) $(TARBALL) $(EXTRA_GRAVITY_OPTIONS)
+	$(GRAVITY) package export $(REPOSITORY)/$(NAME):$(VERSION) $(TARBALL) $(EXTRA_GRAVITY_OPTIONS)
 
 .PHONY: build-app
 build-app: clean images
 	mkdir -p build
-	tele build -o build/installer.tar $(TELE_BUILD_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) resources/app.yaml
+	$(TELE) build -o build/installer.tar $(TELE_BUILD_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) resources/app.yaml
 
 .PHONY: clean
 clean:
@@ -90,26 +92,3 @@ clean:
 	$(MAKE) -C $(TOP)/tool/pithosboot clean
 	$(MAKE) -C $(TOP)/tool/healthz clean
 	-rm -rf $(BUILD_DIR)
-
-.PHONY: dev-push
-dev-push: images
-	for container in $(CONTAINERS); do \
-		docker tag $$container apiserver:5000/$$container ;\
-		docker push apiserver:5000/$$container ;\
-	done
-
-.PHONY: dev-redeploy
-dev-redeploy: dev-clean dev-deploy
-
-.PHONY: dev-deploy
-dev-deploy: dev-push
-	-kubectl label nodes -l role=node pithos-role=node
-	kubectl create configmap cassandra-cfg --from-file=resources/cassandra-cfg
-	kubectl create configmap pithos-cfg --from-file=resources/pithos-cfg
-	kubectl create -f resources/pithos.yaml
-
-.PHONY: dev-clean
-dev-clean:
-	-kubectl delete -f resources/pithos.yaml
-	-kubectl delete configmap cassandra-cfg pithos-cfg
-	-kubectl label nodes -l pithos-role=node pithos-role-
