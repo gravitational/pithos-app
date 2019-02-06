@@ -53,11 +53,8 @@ bootstrap: $(BOOTSTRAP_BINS)
 uninstall:
 	docker build --pull -t $(UNINSTALL_TAG) uninstall
 
-cassandra-build-jar:
-	$(MAKE) -C cassandra kubernetes-cassandra.jar
-
 .PHONY: cassandra
-cassandra: cassandra-build-jar
+cassandra:
 	docker build --pull --build-arg CASSANDRA_VERSION=$(CASSANDRA_VERSION) \
 		--build-arg JOLOKIA_VERSION=$(JOLOKIA_VERSION) \
 		--build-arg TELEGRAF_VERSION=$(TELEGRAF_VERSION) \
