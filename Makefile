@@ -1,9 +1,10 @@
-export VERSION ?= $(shell git describe --long --tags --always|awk -F'[.-]' '{print $$1 "." $$2 "." $$4}')
+export VERSION ?= $(shell ./version.sh)
 REPOSITORY := gravitational.io
 NAME := pithos-app
 OPS_URL ?= https://opscenter.localhost.localdomain:33009
 TELE ?= $(shell which tele)
 GRAVITY ?= $(shell which gravity)
+RUNTIME_VERSION ?= $(shell $(TELE) version | awk '/version:/ {print $$2}')
 
 SRCDIR=/go/src/github.com/gravitational/pithos-app
 DOCKERFLAGS=--rm=true -v $(PWD):$(SRCDIR) -v $(GOPATH)/pkg:/gopath/pkg -w $(SRCDIR)
@@ -56,7 +57,6 @@ TELE_BUILD_OPTIONS := --insecure \
                 $(IMPORT_IMAGE_FLAGS)
 
 BUILD_DIR := build
-TARBALL := $(BUILD_DIR)/pithos-app.tar.gz
 
 .PHONY: all
 all: clean images
@@ -74,9 +74,6 @@ import: images
 	-$(GRAVITY) app delete --ops-url=$(OPS_URL) $(REPOSITORY)/$(NAME):$(VERSION) --force --insecure $(EXTRA_GRAVITY_OPTIONS)
 	$(GRAVITY) app import $(IMPORT_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) .
 
-.PHONY: export
-export: $(TARBALL)
-
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
@@ -85,7 +82,9 @@ $(TARBALL): import $(BUILD_DIR)
 
 .PHONY: build-app
 build-app: images | $(BUILD_DIR)
-	$(TELE) build -o build/installer.tar $(TELE_BUILD_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) resources/app.yaml
+	sed -i.bak "s/version: \"0.0.0+latest\"/version: \"$(RUNTIME_VERSION)\"/" resources/app.yaml
+	$(TELE) build -f -o build/installer.tar $(TELE_BUILD_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) resources/app.yaml
+	if [ -f resources/app.yaml.bak ]; then mv resources/app.yaml.bak resources/app.yaml; fi
 
 .PHONY: build-pithosctl
 build-pithosctl: $(BUILD_DIR)

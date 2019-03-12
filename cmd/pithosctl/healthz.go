@@ -156,7 +156,7 @@ func (s3c *s3Config) createObject(objectName string) error {
 	var content = []byte("test")
 	reader := bytes.NewReader(content)
 
-	_, err := s3c.client.PutObject(s3c.bucket, objectName, reader, "application/octet-stream")
+	_, err := s3c.client.PutObject(s3c.bucket, objectName, reader, int64(len(content)), minio.PutObjectOptions{ContentType: "application/octet-stream"})
 	if err != nil {
 		return trace.Wrap(err)
 	}

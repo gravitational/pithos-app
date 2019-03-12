@@ -16,7 +16,12 @@
 
 set -e
 CASSANDRA_CONF_DIR=/etc/cassandra
+CASSANDRA_CONF_DIR_RO=/etc/cassandra-ro
 CASSANDRA_CFG=$CASSANDRA_CONF_DIR/cassandra.yaml
+
+mkdir -p $CASSANDRA_CONF_DIR_RO
+cp -a $CASSANDRA_CONF_DIR_RO/* $CASSANDRA_CONF_DIR
+chmod +w $CASSANDRA_CONF_DIR/*
 
 # we are doing StatefulSet or just setting our seeds
 if [ -z "$CASSANDRA_SEEDS" ]; then

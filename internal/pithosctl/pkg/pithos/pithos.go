@@ -24,14 +24,13 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/config"
+	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/cluster"
 	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/kubernetes"
 
 	"github.com/gravitational/rigging"
 	"github.com/gravitational/trace"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/api/core/v1"
-	k8s "k8s.io/client-go/kubernetes"
 )
 
 const (
@@ -46,17 +45,17 @@ const (
 
 // Control defines configuration for operations
 type Control struct {
-	cfg    config.Pithos
-	client *k8s.Clientset
+	cfg    cluster.Config
+	client kubernetes.Client
 }
 
 // NewControl creates new pithos bootstrap controller
-func NewControl(pithosConfig config.Pithos) (*Control, error) {
+func NewControl(pithosConfig cluster.Config) (*Control, error) {
 	client, err := kubernetes.NewClient(pithosConfig.KubeConfig)
 	if err != nil {
 		return nil, trace.Wrap(err)
 	}
-	return &Control{cfg: pithosConfig, client: client}, nil
+	return &Control{cfg: pithosConfig, client: *client}, nil
 }
 
 // CreateResources creates kubernetes resources for pithos application
@@ -104,7 +103,6 @@ func (c *Control) CreateResources(ctx context.Context) error {
 		return trace.Wrap(err)
 	}
 
-	log.Infof("%v", secret)
 	if err = createSecret(ctx, secret, c.client); err != nil {
 		return trace.Wrap(err)
 	}
@@ -126,7 +124,7 @@ func (c *Control) InitCassandraTables(ctx context.Context) error {
 
 	jobConfig := rigging.JobConfig{
 		job,
-		c.client,
+		c.client.Clientset,
 	}
 
 	jobControl, err := rigging.NewJobControl(jobConfig)
@@ -141,10 +139,10 @@ func (c *Control) InitCassandraTables(ctx context.Context) error {
 	return rigging.PollStatus(ctx, retryAttempts, retryPeriod, jobControl)
 }
 
-func createConfigMap(ctx context.Context, configMap *v1.ConfigMap, client *k8s.Clientset) error {
+func createConfigMap(ctx context.Context, configMap *v1.ConfigMap, client kubernetes.Client) error {
 	configMapConfig := rigging.ConfigMapConfig{
 		ConfigMap: configMap,
-		Client:    client,
+		Client:    client.Clientset,
 	}
 	configMapControl, err := rigging.NewConfigMapControl(configMapConfig)
 	if err != nil {
@@ -157,10 +155,10 @@ func createConfigMap(ctx context.Context, configMap *v1.ConfigMap, client *k8s.C
 	return nil
 }
 
-func createSecret(ctx context.Context, secret *v1.Secret, client *k8s.Clientset) error {
+func createSecret(ctx context.Context, secret *v1.Secret, client kubernetes.Client) error {
 	secretConfig := rigging.SecretConfig{
 		Secret: secret,
-		Client: client,
+		Client: client.Clientset,
 	}
 	secretControl, err := rigging.NewSecretControl(secretConfig)
 	if err != nil {
