@@ -19,6 +19,7 @@ package main
 import (
 	"strings"
 
+	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/cluster"
 	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/pithos"
 
 	"github.com/gravitational/rigging"
@@ -45,11 +46,10 @@ func initApp(ccmd *cobra.Command, args []string) error {
 	}
 
 	log.Infof("Replication factor: %v.", replicas)
-	pithosConfig.Bootstrap.ReplicationFactor = replicas
-	if err = pithosConfig.Check(); err != nil {
-		return trace.Wrap(err)
+	pithosConfig.Bootstrap = &cluster.Bootstrap{
+		ReplicationFactor: replicas,
 	}
-	if err = pithosConfig.Bootstrap.Check(); err != nil {
+	if err = pithosConfig.Check(); err != nil {
 		return trace.Wrap(err)
 	}
 
@@ -82,7 +82,7 @@ func initApp(ccmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func determineReplicationFactor() (int, error) {
+func determineReplicationFactor() (replicationFactor int, err error) {
 	nodes, err := rigging.NodesMatchingLabel(pithosConfig.NodeSelector)
 	if err != nil {
 		return 0, trace.Wrap(err)

@@ -35,9 +35,10 @@ func main() {
 }
 
 func init() {
-	pithosctlCmd.PersistentFlags().StringVarP(&pithosConfig.Namespace, "namespace", "n", defaults.Namespace, "Kubernetes namespace for pithos application")
-	pithosctlCmd.PersistentFlags().StringVar(&pithosConfig.NodeSelector, "nodeSelector", defaults.PithosNodeSelector, "Label(s) to select nodes for pithos application")
-	pithosctlCmd.PersistentFlags().StringVar(&pithosConfig.CassandraPodSelector, "cassandraPodsSelector", defaults.CassandraPodSelector, "Label(s) to select cassandra pods")
+	pithosctlCmd.PersistentFlags().StringVarP(&pithosConfig.Namespace, "namespace", "n", defaults.Namespace, "Kubernetes namespace for pithos application.")
+	pithosctlCmd.PersistentFlags().StringVar(&pithosConfig.NodeSelector, "nodeSelector", defaults.PithosNodeSelector, "Label(s) to select nodes for pithos application.")
+	pithosctlCmd.PersistentFlags().StringVar(&pithosConfig.CassandraPodSelector, "cassandraPodsSelector",
+		defaults.CassandraPodSelector, "Label(s) to select cassandra pods. Format is the same as used in `kubectl --selector`.")
 
 	var cancel context.CancelFunc
 	ctx, cancel = context.WithCancel(context.TODO())

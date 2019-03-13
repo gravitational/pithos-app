@@ -84,9 +84,9 @@ func serveHealthz(ccmd *cobra.Command, args []string) error {
 		if err := livenessProbe(s3Config); err != nil {
 			log.Error(err)
 			w.WriteHeader(http.StatusServiceUnavailable)
-		} else {
-			w.WriteHeader(http.StatusOK)
+			return
 		}
+		w.WriteHeader(http.StatusOK)
 	})
 	return http.ListenAndServe(":8080", nil)
 }
@@ -97,26 +97,34 @@ func livenessProbe(s3Config *s3Config) error {
 		return trace.Wrap(err)
 	}
 
-	// change object name to be based on time.Now and POD hostname
-	now := time.Now()
-	hostname, err := os.Hostname()
+	name, prefix, err := generateNamePrefix()
 	if err != nil {
 		return trace.Wrap(err)
 	}
-	objectPrefix := fmt.Sprintf("%s-%s", defaultPrefix, hostname)
-	objectName := fmt.Sprintf("%s-%v", objectPrefix, now.Unix())
 
 	// verify that can create S3 object
-	if err := s3Config.createObject(objectName); err != nil {
+	if err := s3Config.createObject(name); err != nil {
 		return trace.Wrap(err)
 	}
 
 	// teardown
-	if err := s3Config.cleanBucket(objectPrefix); err != nil {
+	if err := s3Config.cleanBucket(prefix); err != nil {
 		return trace.Wrap(err)
 	}
 
 	return nil
+}
+
+// generateNamePrefix generates a unique object name to assess being able to create objects on S3
+func generateNamePrefix() (name, prefix string, err error) {
+	hostname, err := os.Hostname()
+	if err != nil {
+		return "", "", trace.Wrap(err)
+	}
+	prefix = fmt.Sprintf("%s-%s", defaultPrefix, hostname)
+	name = fmt.Sprintf("%s-%v", prefix, time.Now().Unix())
+
+	return name, prefix, nil
 }
 
 func initClient(endpoint, accessKeyID, secretAccessKey string) (*minio.Client, error) {
@@ -169,8 +177,8 @@ func (s3c *s3Config) cleanBucket(objectPrefix string) error {
 	doneCh := make(chan struct{})
 	defer close(doneCh)
 
-	recursive := false
-	objectCh := s3c.client.ListObjectsV2(s3c.bucket, objectPrefix, recursive, doneCh)
+	nonRecursive := false
+	objectCh := s3c.client.ListObjectsV2(s3c.bucket, objectPrefix, nonRecursive, doneCh)
 	for object := range objectCh {
 		if object.Err != nil {
 			return trace.Wrap(object.Err)

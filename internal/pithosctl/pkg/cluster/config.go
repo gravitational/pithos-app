@@ -35,12 +35,15 @@ type Config struct {
 	// CassandraPodSelector defines labels to select cassandra pods
 	CassandraPodSelector string
 	// Bootstrap represents bootstrapping configuration for pithos application
-	Bootstrap Bootstrap
+	Bootstrap *Bootstrap
 }
 
 // Check checks configuration parameters
 func (p *Config) Check() error {
 	var errors []error
+	if err := p.Bootstrap.Check(); err != nil {
+		errors = append(errors, err)
+	}
 	if p.Namespace == "" {
 		errors = append(errors, trace.BadParameter("namespace is required"))
 	}
@@ -58,6 +61,9 @@ type Bootstrap struct {
 
 // Check checks configuration parameters
 func (b *Bootstrap) Check() error {
+	if b == nil {
+		return nil
+	}
 	if b.ReplicationFactor < 1 {
 		return trace.BadParameter("replication factor must be >= 1")
 	}

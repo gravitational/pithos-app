@@ -92,7 +92,7 @@ func printStatus(status *cluster.Status) {
 	}
 
 	reason, isHealthy := isClusterHealthy(status)
-	fmt.Fprintf(w, "\nCluster status: %s\n", convertHealthyStatus(isHealthy))
+	fmt.Fprintf(w, "\nCluster status: %s\n", getStatusString(isHealthy))
 	if !isHealthy {
 		fmt.Fprintf(w, "Reason: %s\n", reason)
 	}
@@ -128,15 +128,15 @@ func translateTimestamp(timestamp metav1.Time) string {
 	return shortHumanDuration(time.Since(timestamp.Time))
 }
 
-func isClusterHealthy(status *cluster.Status) (string, bool) {
+func isClusterHealthy(status *cluster.Status) (unhealthyReason string, healthy bool) {
 	const podStatusRunning = "Running"
 
 	if len(status.PodsStatus) <= 1 {
-		return "cluster is running only with one or zero nodes", false
+		return "cluster is running with less than 2 nodes", false
 	}
 
 	if len(status.PodsStatus) != len(status.NodesStatus) {
-		return "number of pods and number of cassandra nodes is not equal", false
+		return "number of pods does not match the number of cassandra nodes", false
 	}
 
 	for _, pod := range status.PodsStatus {
@@ -145,25 +145,29 @@ func isClusterHealthy(status *cluster.Status) (string, bool) {
 		}
 
 		if pod.ReadyContainers != pod.TotalContainers {
-			return fmt.Sprintf("some container(s) are not ready in pod %s", pod.Name), false
+			return fmt.Sprintf("%d container(s) are not ready in pod %s", pod.TotalContainers-pod.ReadyContainers, pod.Name), false
 		}
 
 		node, ok := status.NodesStatus[pod.PodIP]
 		if !ok {
-			return fmt.Sprintf("cassandra node with IP %s from pod %s is not presented in cluster", pod.PodIP, pod.Name), false
+			return fmt.Sprintf("cassandra node (pod %s/%s) is not present in the cluster", pod.PodIP, pod.Name), false
 		}
 
 		if node.Status != cassandra.NodeStatusUp {
-			return fmt.Sprintf("cassandra node with IP %s from pod %s isn't up, current status: %s", pod.PodIP, pod.Name, node.Status), false
+			return fmt.Sprintf("cassandra node (pod %s/%s) isn't up, current status: %s", pod.PodIP, pod.Name, node.Status), false
 		}
 
 		if node.State != cassandra.NodeStateNormal {
-			return fmt.Sprintf("cassandra node with IP %s from pod %s isn't in normal state, current state: %s", pod.PodIP, pod.Name, node.State), false
+			return fmt.Sprintf("cassandra node (pod %s/%s) isn't in expected state, current state: %s", pod.PodIP, pod.Name, node.State), false
 		}
 	}
 
-	for _, nodeI := range status.NodesStatus {
-		for _, nodeJ := range status.NodesStatus {
+	var nodes []*cassandra.Status
+	for _, status := range status.NodesStatus {
+		nodes = append(nodes, status)
+	}
+	for i, nodeI := range nodes {
+		for _, nodeJ := range nodes[i+1:] {
 			loadI, err := units.ParseStrictBytes(nodeI.Load)
 			if err != nil {
 				return fmt.Sprintf("cannot parse load from cassandra node %s", nodeI.Address), false
@@ -174,7 +178,7 @@ func isClusterHealthy(status *cluster.Status) (string, bool) {
 			}
 
 			if math.Abs((float64(loadI-loadJ))/math.Max(float64(loadI), float64(loadJ))) > 0.2 {
-				return fmt.Sprintf("cassandra load on node %s(%s) is not equal to load on node %s(%s)", nodeI.Address, nodeI.Load, nodeJ.Address, nodeJ.Load), false
+				return fmt.Sprintf("cassandra load on node (pod %s/%s) is not equal to load on node (pod %s/%s)", nodeI.Address, nodeI.Load, nodeJ.Address, nodeJ.Load), false
 			}
 		}
 	}
@@ -182,8 +186,8 @@ func isClusterHealthy(status *cluster.Status) (string, bool) {
 	return "", true
 }
 
-func convertHealthyStatus(s bool) string {
-	if s {
+func getStatusString(status bool) string {
+	if status {
 		return "Healthy"
 	}
 	return "Unhealthy"
