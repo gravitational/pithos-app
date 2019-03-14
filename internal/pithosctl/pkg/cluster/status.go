@@ -62,13 +62,7 @@ func GetStatus(config Config) (*Status, error) {
 		podsStatus = append(podsStatus, podStatus)
 
 		if !isCassandraStatusParsed {
-			var statusCommand = []string{"nodetool", "status"}
-			statusOut, err := client.Exec(pod, statusCommand...)
-			if err != nil {
-				return nil, trace.Wrap(err)
-			}
-
-			nodesStatus, err = cassandra.GetStatus(statusOut)
+			nodesStatus, err = getCassandraStatus(client, pod)
 			if err != nil {
 				return nil, trace.Wrap(err)
 			}
@@ -99,4 +93,19 @@ func getPods(client *kubernetes.Client, config Config) ([]v1.Pod, error) {
 	}
 
 	return pods, nil
+}
+
+func getCassandraStatus(client *kubernetes.Client, pod v1.Pod) (nodesStatus map[string]*cassandra.Status, err error) {
+	var statusCommand = []string{"nodetool", "status"}
+	statusOut, err := client.Exec(pod, statusCommand...)
+	if err != nil {
+		return nil, trace.Wrap(err)
+	}
+
+	nodesStatus, err = cassandra.GetStatus(statusOut)
+	if err != nil {
+		return nil, trace.Wrap(err)
+	}
+
+	return nodesStatus, nil
 }

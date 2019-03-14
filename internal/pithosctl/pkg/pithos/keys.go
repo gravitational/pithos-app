@@ -59,7 +59,7 @@ func generateKeyAndSecret() (key cluster.KeyString, secret cluster.KeyString, er
 }
 
 func randomHex(length int) (cluster.KeyString, error) {
-	data := make([]byte, 32)
+	data := make([]byte, 32, 32*2)
 	_, err := rand.Read(data)
 	if err != nil {
 		return "", trace.Wrap(err)

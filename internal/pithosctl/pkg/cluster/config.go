@@ -82,15 +82,15 @@ type AccessKey struct {
 	Tenant string
 }
 
-// KeyString is a string
+// KeyString is helper type for converting string into base64-encoded format
 type KeyString string
 
 // EncodeBase64 encodes source string to base64 format
-func (k *KeyString) EncodeBase64() string {
-	return base64.StdEncoding.EncodeToString([]byte(*k))
+func (k KeyString) EncodeBase64() string {
+	return base64.StdEncoding.EncodeToString([]byte(k))
 }
 
 // String is a string representation of KeyString type
-func (k *KeyString) String() string {
-	return string(*k)
+func (k KeyString) String() string {
+	return string(k)
 }

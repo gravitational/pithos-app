@@ -45,11 +45,11 @@ type PodStatus struct {
 
 // DeterminePodStatus returns state of the pod, number of total containers
 // and number of ready containers
-func DeterminePodStatus(pod v1.Pod) (string, int, int) {
-	totalContainers := len(pod.Spec.Containers)
-	readyContainers := 0
+func DeterminePodStatus(pod v1.Pod) (reason string, totalContainers, readyContainers int) {
+	totalContainers = len(pod.Spec.Containers)
+	readyContainers = 0
 
-	reason := string(pod.Status.Phase)
+	reason = string(pod.Status.Phase)
 	if pod.Status.Reason != "" {
 		reason = pod.Status.Reason
 	}

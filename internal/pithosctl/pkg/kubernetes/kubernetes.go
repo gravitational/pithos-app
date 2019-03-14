@@ -17,6 +17,7 @@ limitations under the License.
 package kubernetes
 
 import (
+	"github.com/gravitational/rigging"
 	"github.com/gravitational/trace"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -59,11 +60,11 @@ func (c *Client) Pods(selector, namespace string) ([]v1.Pod, error) {
 
 	podList, err := c.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: labelSelector.String()})
 	if err != nil {
-		return nil, trace.Wrap(err)
+		return nil, rigging.ConvertError(err)
 	}
 
 	if len(podList.Items) == 0 {
-		return nil, trace.NotFound("no pods found matching the specified selector %s", labelSelector.String())
+		return nil, trace.NotFound("no pods found matching the specified selector %s", labelSelector)
 	}
 
 	return podList.Items, nil

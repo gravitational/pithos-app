@@ -26,8 +26,6 @@ import (
 	"github.com/gravitational/trace"
 )
 
-const numberOfColumns = 8
-
 // NodeState represents the phase/state of the cassandra node in the ring
 type NodeState string
 
@@ -60,7 +58,7 @@ type Status struct {
 	Address string
 	// Load represents disk usage for data of the cassandra node
 	Load string
-	// Owns represent percentage of data owned by the cassandra node
+	// Owns represents percentage of data owned by the cassandra node
 	Owns float32
 	// HostID represents unique ID of the cassandra node in the ring
 	HostID string
@@ -104,22 +102,28 @@ func GetStatus(statusOutput string) (map[string]*Status, error) {
 
 		statuses[nodeStatus.Address] = nodeStatus
 	}
+	if err := scanner.Err(); err != nil {
+		return nil, trace.Wrap(err)
+	}
+
 	return statuses, nil
 }
 
 func processNode(line string) (*Status, error) {
+	const numberOfColumns = 8
+
 	f := func(c rune) bool {
 		return !unicode.IsLetter(c) && !unicode.IsNumber(c) && c != '.' && c != '-'
 	}
 	fields := strings.FieldsFunc(line, f)
 
 	if len(fields) != numberOfColumns {
-		return nil, trace.Errorf("invalid format of nodetool status output, wrong line: %s", line)
+		return nil, trace.Errorf("invalid 'nodetool status' output: expected %v columns but got %v", line)
 	}
 
 	ownsPercentage, err := strconv.ParseFloat(fields[5], 32)
 	if err != nil {
-		return nil, err
+		return nil, trace.Wrap(err)
 	}
 
 	return &Status{

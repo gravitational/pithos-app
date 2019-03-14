@@ -32,7 +32,7 @@ const containerName = "cassandra"
 
 // Exec executes command in pod
 func (c *Client) Exec(pod v1.Pod, command ...string) (string, error) {
-	log.Debugf("Executing command \"%s\" in pod %s", strings.Join(command, " "), pod.ObjectMeta.Name)
+	log.Debugf("Executing command %q in pod %s", strings.Join(command, " "), pod.ObjectMeta.Name)
 
 	// iterate through all containers looking for one running cassandra
 	targetContainer := -1
@@ -76,10 +76,10 @@ func (c *Client) Exec(pod v1.Pod, command ...string) (string, error) {
 		Tty:    false,
 	})
 	if err != nil {
-		return "", trace.Wrap(err, "could not execute command \"%s\"", strings.Join(command, " "))
+		return "", trace.Wrap(err, "could not execute command %q", strings.Join(command, " "))
 	}
 	if execErr.Len() > 0 {
-		return "", trace.Errorf("error during execution of command \"%s\", stderr: %v", strings.Join(command, " "), execErr.String())
+		return "", trace.Errorf("error during execution of command %q, stderr: %v", strings.Join(command, " "), execErr.String())
 	}
 
 	return execOut.String(), nil

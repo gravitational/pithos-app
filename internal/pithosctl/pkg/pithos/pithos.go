@@ -84,7 +84,7 @@ func (c *Control) CreateResources(ctx context.Context) error {
 		return trace.Wrap(err)
 	}
 
-	configMap, err := rigging.ParseConfigMap(bytes.NewReader(buffer.Bytes()))
+	configMap, err := rigging.ParseConfigMap(buffer)
 	if err != nil {
 		return trace.Wrap(err)
 	}
@@ -98,7 +98,7 @@ func (c *Control) CreateResources(ctx context.Context) error {
 		return trace.Wrap(err)
 	}
 
-	secret, err := rigging.ParseSecret(bytes.NewReader(buffer.Bytes()))
+	secret, err := rigging.ParseSecret(buffer)
 	if err != nil {
 		return trace.Wrap(err)
 	}
