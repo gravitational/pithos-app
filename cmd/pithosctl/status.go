@@ -178,7 +178,7 @@ func isClusterHealthy(status *cluster.Status) (unhealthyReason string, healthy b
 			}
 
 			if math.Abs((float64(loadI-loadJ))/math.Max(float64(loadI), float64(loadJ))) > 0.2 {
-				return fmt.Sprintf("cassandra load on node (pod %s/%s) is not equal to load on node (pod %s/%s)", nodeI.Address, nodeI.Load, nodeJ.Address, nodeJ.Load), false
+				return fmt.Sprintf("cassandra load on node (pod %s, %s) is not equal to load on node (pod %s, %s)", nodeI.Address, nodeI.Load, nodeJ.Address, nodeJ.Load), false
 			}
 		}
 	}
