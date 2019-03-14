@@ -110,7 +110,10 @@ func GetStatus(statusOutput string) (map[string]*Status, error) {
 }
 
 func processNode(line string) (*Status, error) {
-	const numberOfColumns = 8
+	const (
+		numberOfColumns      = 8
+		numberOfStatusFields = 2
+	)
 
 	f := func(c rune) bool {
 		return !unicode.IsLetter(c) && !unicode.IsNumber(c) && c != '.' && c != '-'
@@ -126,6 +129,9 @@ func processNode(line string) (*Status, error) {
 		return nil, trace.Wrap(err)
 	}
 
+	if len(fields[0]) != numberOfStatusFields {
+		return nil, trace.Errorf("invalid 'nodetool status' output: expected %v status columns but got %v")
+	}
 	return &Status{
 		Status:  getNodeStatus(fields[0][0]),
 		State:   getNodeState(fields[0][1]),
