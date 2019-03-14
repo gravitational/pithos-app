@@ -17,9 +17,6 @@ limitations under the License.
 package cluster
 
 import (
-	"fmt"
-	"time"
-
 	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/cassandra"
 	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/kubernetes"
 
@@ -30,18 +27,15 @@ import (
 
 // GetStatus returns the status of cassandra cluster
 func GetStatus(config Config) (*Status, error) {
-	fmt.Printf("before k8s client: %v", time.Now())
 	client, err := kubernetes.NewClient(config.KubeConfig)
 	if err != nil {
 		return nil, trace.Wrap(err)
 	}
-	fmt.Printf("after k8s client: %v", time.Now())
 
 	podsList, err := getPods(client, config)
 	if err != nil {
 		return nil, trace.Wrap(err)
 	}
-	fmt.Printf("after podList: %v", time.Now())
 
 	var (
 		podsStatus              []kubernetes.PodStatus
@@ -50,7 +44,6 @@ func GetStatus(config Config) (*Status, error) {
 	)
 
 	for _, pod := range podsList {
-		fmt.Printf("loop for pod %s: %v", pod.Name, time.Now())
 		podIP := pod.Status.PodIP
 		if podIP == "" {
 			podIP = "<none>"
@@ -70,7 +63,6 @@ func GetStatus(config Config) (*Status, error) {
 
 		if !isCassandraStatusParsed {
 			var statusCommand = []string{"nodetool", "status"}
-			fmt.Printf("before nodetool status: %v", time.Now())
 			statusOut, err := client.Exec(pod, statusCommand...)
 			if err != nil {
 				return nil, trace.Wrap(err)
@@ -80,7 +72,6 @@ func GetStatus(config Config) (*Status, error) {
 			if err != nil {
 				return nil, trace.Wrap(err)
 			}
-			fmt.Printf("after nodetool status: %v", time.Now())
 			isCassandraStatusParsed = true
 		}
 	}
