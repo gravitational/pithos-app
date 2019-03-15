@@ -13,7 +13,7 @@ spec:
       containers:
         - image: cassandra:latest
           name: cassandra-alter-compaction
-          command: ["/alter_table_block.sh"]
+          command: ["/alter_tables.sh"]
           volumeMounts:
             - name: cassandra-ssl
               mountPath: /etc/ssl/cassandra
