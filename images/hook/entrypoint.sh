@@ -28,7 +28,7 @@ if [ $1 = "update" ]; then
 
     rig upsert -f /var/lib/gravity/resources/pithos.yaml --debug
     rig upsert -f /var/lib/gravity/resources/monitoring.yaml --debug
-    gravity resource create -f /var/lib/gravity/resources/alerts.yaml
+    /opt/bin/gravity resource create -f /var/lib/gravity/resources/alerts.yaml
 
     echo "Checking status"
     rig status $RIG_CHANGESET --retry-attempts=120 --retry-period=1s --debug
