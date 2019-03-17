@@ -2,8 +2,8 @@
 # -*- mode: sh; -*-
 
 # File: alter_table_block.sh
-# Time-stamp: <2018-10-01 17:32:16>
+# Time-stamp: <2019-03-14 16:44:30>
 # Copyright (C) 2018 Gravatational Inc.
 # Description: Update parameters for storage.block table
 
-cqlsh --keyspace storage -f /alter_table_block.cql cassandra.default.svc.cluster.local
+cqlsh --keyspace storage -f /alter_tables.cql cassandra.default.svc.cluster.local

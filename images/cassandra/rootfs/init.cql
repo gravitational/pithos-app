@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS storage.inode_blocks (
     AND default_time_to_live = 0
     AND gc_grace_seconds = 864000
     AND max_index_interval = 2048
-    AND memtable_flush_period_in_ms = 0
+    AND memtable_flush_period_in_ms = 300000
     AND min_index_interval = 128
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE';
@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS storage.object (
     AND default_time_to_live = 0
     AND gc_grace_seconds = 864000
     AND max_index_interval = 2048
-    AND memtable_flush_period_in_ms = 0
+    AND memtable_flush_period_in_ms = 300000
     AND min_index_interval = 128
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE';
@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS storage.bucket (
     AND default_time_to_live = 0
     AND gc_grace_seconds = 864000
     AND max_index_interval = 2048
-    AND memtable_flush_period_in_ms = 0
+    AND memtable_flush_period_in_ms = 300000
     AND min_index_interval = 128
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE';
@@ -98,7 +98,7 @@ CREATE TABLE IF NOT EXISTS storage.upload (
     AND default_time_to_live = 0
     AND gc_grace_seconds = 864000
     AND max_index_interval = 2048
-    AND memtable_flush_period_in_ms = 0
+    AND memtable_flush_period_in_ms = 300000
     AND min_index_interval = 128
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE';
@@ -120,7 +120,7 @@ CREATE TABLE IF NOT EXISTS storage.object_uploads (
     AND default_time_to_live = 0
     AND gc_grace_seconds = 864000
     AND max_index_interval = 2048
-    AND memtable_flush_period_in_ms = 0
+    AND memtable_flush_period_in_ms = 300000
     AND min_index_interval = 128
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE';
@@ -145,7 +145,7 @@ CREATE TABLE IF NOT EXISTS storage.block (
     AND default_time_to_live = 0
     AND gc_grace_seconds = 864000
     AND max_index_interval = 2048
-    AND memtable_flush_period_in_ms = 0
+    AND memtable_flush_period_in_ms = 300000
     AND min_index_interval = 128
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE';
