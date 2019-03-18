@@ -22,6 +22,7 @@ import (
 
 	"github.com/gravitational/rigging"
 	"github.com/gravitational/trace"
+	log "github.com/sirupsen/logrus"
 	"k8s.io/api/core/v1"
 )
 
@@ -104,6 +105,7 @@ func getCassandraStatus(client *kubernetes.Client, pod v1.Pod) (nodesStatus map[
 
 	nodesStatus, err = cassandra.GetStatus(statusOut)
 	if err != nil {
+		log.Errorf("Output of nodetool status command: \n%v", statusOut)
 		return nil, trace.Wrap(err)
 	}
 

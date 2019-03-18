@@ -121,7 +121,7 @@ func processNode(line string) (*Status, error) {
 	fields := strings.FieldsFunc(line, f)
 
 	if len(fields) != numberOfColumns {
-		return nil, trace.Errorf("invalid 'nodetool status' output: expected %v columns but got %v", line)
+		return nil, trace.Errorf("invalid 'nodetool status' output: expected %v columns but got %v", len(fields), numberOfColumns)
 	}
 
 	ownsPercentage, err := strconv.ParseFloat(fields[5], 32)
@@ -130,7 +130,7 @@ func processNode(line string) (*Status, error) {
 	}
 
 	if len(fields[0]) != numberOfStatusFields {
-		return nil, trace.Errorf("invalid 'nodetool status' output: expected %v status columns but got %v")
+		return nil, trace.Errorf("invalid 'nodetool status' output: expected %v status columns but got %v", len(fields[0]), numberOfStatusFields)
 	}
 	return &Status{
 		Status:  getNodeStatus(fields[0][0]),
