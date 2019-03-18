@@ -91,12 +91,12 @@ build-pithosctl: $(BUILD_DIR)
 	docker run $(DOCKERFLAGS) $(BUILDIMAGE) make build/pithosctl
 	for dir in bootstrap healthz; do mkdir -p images/$${dir}/bin; cp build/pithosctl images/$${dir}/bin/; done
 
-.PHONY: pithosctl
+.PHONY: build/pithosctl
 build/pithosctl:
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -a -installsuffix cgo -o $@ cmd/pithosctl/*.go
 
 .PHONY: clean
 clean:
 	$(MAKE) -C images clean
-	for dir in bootstrap healthz; do rm -rf images/$${dir}/bin; done
+	rm -rf images/{bootstrap/healthz}/bin; done
 	-rm -rf $(BUILD_DIR)
