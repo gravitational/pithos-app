@@ -4,8 +4,11 @@ NAME := pithos-app
 OPS_URL ?= https://opscenter.localhost.localdomain:33009
 TELE ?= $(shell which tele)
 GRAVITY ?= $(shell which gravity)
+RUNTIME_VERSION ?= $(shell $(TELE) version | awk '/version:/ {print $$2}')
 
-TOP := $(dir $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST)))
+SRCDIR=/go/src/github.com/gravitational/pithos-app
+DOCKERFLAGS=--rm=true -v $(PWD):$(SRCDIR) -v $(GOPATH)/pkg:/gopath/pkg -w $(SRCDIR)
+BUILDIMAGE=quay.io/gravitational/debian-venti:go1.9-stretch
 
 EXTRA_GRAVITY_OPTIONS ?=
 
@@ -54,7 +57,6 @@ TELE_BUILD_OPTIONS := --insecure \
                 $(IMPORT_IMAGE_FLAGS)
 
 BUILD_DIR := build
-TARBALL := $(BUILD_DIR)/pithos-app.tar.gz
 
 .PHONY: all
 all: clean images
@@ -72,9 +74,6 @@ import: images
 	-$(GRAVITY) app delete --ops-url=$(OPS_URL) $(REPOSITORY)/$(NAME):$(VERSION) --force --insecure $(EXTRA_GRAVITY_OPTIONS)
 	$(GRAVITY) app import $(IMPORT_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) .
 
-.PHONY: export
-export: $(TARBALL)
-
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
@@ -82,12 +81,22 @@ $(TARBALL): import $(BUILD_DIR)
 	$(GRAVITY) package export $(REPOSITORY)/$(NAME):$(VERSION) $(TARBALL) $(EXTRA_GRAVITY_OPTIONS)
 
 .PHONY: build-app
-build-app: $(BUILD_DIR) images
-	$(TELE) build -o build/installer.tar $(TELE_BUILD_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) resources/app.yaml
+build-app: images | $(BUILD_DIR)
+	sed -i.bak "s/version: \"0.0.0+latest\"/version: \"$(RUNTIME_VERSION)\"/" resources/app.yaml
+	$(TELE) build -f -o build/installer.tar $(TELE_BUILD_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) resources/app.yaml
+	if [ -f resources/app.yaml.bak ]; then mv resources/app.yaml.bak resources/app.yaml; fi
+
+.PHONY: build-pithosctl
+build-pithosctl: $(BUILD_DIR)
+	docker run $(DOCKERFLAGS) $(BUILDIMAGE) make build/pithosctl
+	for dir in bootstrap healthz; do mkdir -p images/$${dir}/bin; cp build/pithosctl images/$${dir}/bin/; done
+
+.PHONY: build/pithosctl
+build/pithosctl:
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -a -installsuffix cgo -o $@ cmd/pithosctl/*.go
 
 .PHONY: clean
 clean:
-	$(MAKE) -C $(TOP)/images clean
-	$(MAKE) -C $(TOP)/tool/pithosboot clean
-	$(MAKE) -C $(TOP)/tool/healthz clean
+	$(MAKE) -C images clean
+	rm -rf images/{bootstrap/healthz}/bin; done
 	-rm -rf $(BUILD_DIR)

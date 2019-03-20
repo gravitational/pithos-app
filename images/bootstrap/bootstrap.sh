@@ -1,7 +1,9 @@
-#!/bin/sh
+#!/usr/bin/env bash
+
+set -o errexit
+set -o nounset
 
 ## generate cassandra specific keys
-
 keytool -genkey \
 	-keyalg RSA \
 	-alias cassandra-node \
@@ -36,13 +38,16 @@ openssl pkcs12 \
 	-password pass:cassandra \
 	-nodes
 
-kubectl create secret generic cassandra-ssl \
-	--from-file=cassandra-node.cer=cassandra-node.cer \
-	--from-file=keystore=keystore \
-	--from-file=sbx.truststore=sbx.truststore \
-    --from-file=cassandra-node.pem=cassandra-node.pem
+if ! kubectl get secret cassandra-ssl > /dev/null 2>&1
+then
+    kubectl create secret generic cassandra-ssl \
+	        --from-file=cassandra-node.cer=cassandra-node.cer \
+	        --from-file=keystore=keystore \
+	        --from-file=sbx.truststore=sbx.truststore \
+	        --from-file=cassandra-node.pem=cassandra-node.pem
+fi
 
-pithosboot
+pithosctl init
 
 if [ $(/opt/bin/kubectl get nodes -l pithos-role=node -o name | wc -l) -ge 3 ]
 then
