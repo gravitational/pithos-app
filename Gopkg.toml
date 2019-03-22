@@ -27,6 +27,7 @@ ignored = ["github.com/gravitational/pithos-app/images*"]
   go-tests = true
   unused-packages = true
 
+# Constraints
 [[constraint]]
   name = "github.com/sirupsen/logrus"
   version = "1.0.6"
@@ -34,14 +35,19 @@ ignored = ["github.com/gravitational/pithos-app/images*"]
 
 [[constraint]]
   name = "github.com/gravitational/rigging"
-  version = "0.0.13"
+  version = "0.0.12"
+
+[[constraint]]
+  name = "github.com/minio/minio-go"
+  version = "4.0.9"
+
+# Overrides
+[[override]]
+  name = "github.com/gravitational/trace"
+  version = "1.1.6"
 
 [[override]]
   name = "k8s.io/api"
-  branch = "release-1.9"
-
-[[override]]
-  name = "k8s.io/kubernetes"
   branch = "release-1.9"
 
 [[override]]
@@ -52,6 +58,6 @@ ignored = ["github.com/gravitational/pithos-app/images*"]
   name = "k8s.io/client-go"
   branch = "release-6.0"
 
-[[constraint]]
-  name = "github.com/minio/minio-go"
-  version = "3.0.3"
+[[override]]
+  name = "k8s.io/kubernetes"
+  branch = "release-1.9"

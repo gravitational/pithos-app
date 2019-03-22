@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cassandra-alter-compaction
+  namespace: default
+spec:
+  template:
+    metadata:
+      name: cassandra-alter-compaction
+    spec:
+      serviceAccountName: cassandra
+      restartPolicy: OnFailure
+      containers:
+        - image: cassandra:latest
+          name: cassandra-alter-compaction
+          command: ["/alter_tables.sh"]
+          volumeMounts:
+            - name: cassandra-ssl
+              mountPath: /etc/ssl/cassandra
+      volumes:
+        - name: cassandra-ssl
+          secret:
+            secretName: cassandra-ssl

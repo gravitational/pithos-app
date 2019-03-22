@@ -1,6 +1,15 @@
+FROM clojure:openjdk-8-lein as builder
+ARG PITHOS_VERSION=54790f00fbfd330c6196d42e5408385028d5e029
+RUN apt-get update && \
+    apt-get install -qq -y git && \
+    git clone https://github.com/exoscale/pithos.git && \
+    cd pithos && \
+    git checkout $PITHOS_VERSION && \
+    LEIN_SILENT=true lein uberjar
+
 FROM quay.io/gravitational/debian-grande:stretch
 
-ADD pithos-0.7.5-standalone.jar /pithos.jar
+COPY --from=builder /tmp/pithos/target/pithos-0.7.6-SNAPSHOT-standalone.jar /pithos.jar
 ADD run.sh /run.sh
 ADD aws.sh /usr/local/bin/aws.sh
 

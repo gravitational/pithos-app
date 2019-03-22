@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/config"
+	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/cluster"
 
 	"github.com/gravitational/trace"
 )
@@ -31,8 +31,8 @@ const (
 	secretKeyLength = 20
 )
 
-func generateAccessKey(tenant string, master bool) (*config.AccessKey, error) {
-	accessKey := &config.AccessKey{
+func generateAccessKey(tenant string, master bool) (*cluster.AccessKey, error) {
+	accessKey := &cluster.AccessKey{
 		Master: master,
 		Tenant: tenant,
 	}
@@ -46,7 +46,7 @@ func generateAccessKey(tenant string, master bool) (*config.AccessKey, error) {
 	return accessKey, nil
 }
 
-func generateKeyAndSecret() (key config.KeyString, secret config.KeyString, err error) {
+func generateKeyAndSecret() (key cluster.KeyString, secret cluster.KeyString, err error) {
 	key, err = randomHex(keyLength)
 	if err != nil {
 		return "", "", trace.Wrap(err)
@@ -55,14 +55,18 @@ func generateKeyAndSecret() (key config.KeyString, secret config.KeyString, err 
 	if err != nil {
 		return "", "", trace.Wrap(err)
 	}
-	return config.KeyString(strings.ToUpper(key.String())), config.KeyString(strings.ToUpper(secret.String())), nil
+	return cluster.KeyString(strings.ToUpper(key.String())), cluster.KeyString(strings.ToUpper(secret.String())), nil
 }
 
-func randomHex(length int) (config.KeyString, error) {
+func randomHex(length int) (cluster.KeyString, error) {
+	const maxLength = 32 << 1
+	if length > maxLength {
+		length = maxLength
+	}
 	data := make([]byte, 32)
 	_, err := rand.Read(data)
 	if err != nil {
 		return "", trace.Wrap(err)
 	}
-	return config.KeyString(fmt.Sprintf("%x", sha256.Sum256(data))[:length]), nil
+	return cluster.KeyString(fmt.Sprintf("%x", sha256.Sum256(data))[:length]), nil
 }

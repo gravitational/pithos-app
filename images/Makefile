@@ -1,5 +1,5 @@
 VERSION ?= latest
-CASSANDRA_VERSION ?= 3.11.3
+CASSANDRA_VERSION ?= 3.11.4
 # JMX -> json bridge agent(needed for getting metrics from Cassandra)
 JOLOKIA_VERSION ?= 1.6.0
 TELEGRAF_VERSION ?= 1.7.4
@@ -39,11 +39,8 @@ bootstrap: build-pithosctl
 uninstall:
 	docker build --pull -t $(UNINSTALL_TAG) uninstall
 
-cassandra-build-jar:
-	$(MAKE) -C cassandra kubernetes-cassandra.jar
-
 .PHONY: cassandra
-cassandra: cassandra-build-jar
+cassandra:
 	docker build --pull --build-arg CASSANDRA_VERSION=$(CASSANDRA_VERSION) \
 		--build-arg JOLOKIA_VERSION=$(JOLOKIA_VERSION) \
 		--build-arg TELEGRAF_VERSION=$(TELEGRAF_VERSION) \

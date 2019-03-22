@@ -17,14 +17,24 @@ limitations under the License.
 package kubernetes
 
 import (
+	"github.com/gravitational/rigging"
 	"github.com/gravitational/trace"
+	"k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
+// Client is the Kubernetes API client
+type Client struct {
+	*kubernetes.Clientset
+	restConfig *rest.Config
+}
+
 // NewClient returns a new clientset for Kubernetes APIs
-func NewClient(kubeConfig string) (*kubernetes.Clientset, error) {
+func NewClient(kubeConfig string) (*Client, error) {
 	config, err := GetClientConfig(kubeConfig)
 	if err != nil {
 		return nil, trace.Wrap(err)
@@ -34,7 +44,30 @@ func NewClient(kubeConfig string) (*kubernetes.Clientset, error) {
 	if err != nil {
 		return nil, trace.Wrap(err)
 	}
-	return clientset, nil
+
+	return &Client{
+		Clientset:  clientset,
+		restConfig: config,
+	}, nil
+}
+
+// Pods returns stolon pods matching the specified label
+func (c *Client) Pods(selector, namespace string) ([]v1.Pod, error) {
+	labelSelector, err := labels.Parse(selector)
+	if err != nil {
+		return nil, trace.Wrap(err, "the provided label selector %s is not valid", selector)
+	}
+
+	podList, err := c.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: labelSelector.String()})
+	if err != nil {
+		return nil, rigging.ConvertError(err)
+	}
+
+	if len(podList.Items) == 0 {
+		return nil, trace.NotFound("no pods found matching the specified selector %s", labelSelector)
+	}
+
+	return podList.Items, nil
 }
 
 // GetClientConfig returns client configuration,
