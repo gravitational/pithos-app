@@ -4,6 +4,7 @@ set -o errexit
 set -o nounset
 
 ## generate cassandra specific keys
+
 keytool -genkey \
 	-keyalg RSA \
 	-alias cassandra-node \

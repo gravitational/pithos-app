@@ -1,10 +1,10 @@
-export VERSION ?= $(shell git describe --long --tags --always|awk -F'[.-]' '{print $$1 "." $$2 "." $$4}')
+export VERSION ?= $(shell ./version.sh)
 REPOSITORY := gravitational.io
 NAME := pithos-app
 OPS_URL ?= https://opscenter.localhost.localdomain:33009
 TELE ?= $(shell which tele)
 GRAVITY ?= $(shell which gravity)
-RUNTIME_VERSION ?= $(shell $(TELE) version | awk '/version:/ {print $$2}')
+RUNTIME_VERSION ?= $(shell $(TELE) version | awk '/^Version:/ {print $$2}')
 
 SRCDIR=/go/src/github.com/gravitational/pithos-app
 DOCKERFLAGS=--rm=true -v $(PWD):$(SRCDIR) -v $(GOPATH)/pkg:/gopath/pkg -w $(SRCDIR)
@@ -98,5 +98,5 @@ build/pithosctl:
 .PHONY: clean
 clean:
 	$(MAKE) -C images clean
-	rm -rf images/{bootstrap,healthz}/bin; done
+	rm -rf images/{bootstrap,healthz}/bin
 	-rm -rf $(BUILD_DIR)
