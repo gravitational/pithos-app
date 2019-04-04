@@ -65,6 +65,7 @@ metadata:
   namespace: default
   labels:
     app: pithos
+    product: pithos
 spec:
   type: NodePort
   ports:
@@ -74,6 +75,7 @@ spec:
       name: https
   selector:
     app: pithos
+    product: pithos
     pithos-role: pithos
 ---
 apiVersion: extensions/v1beta1
@@ -83,11 +85,13 @@ metadata:
   namespace: default
   labels:
     app: pithos
+    product: pithos
     pithos-role: pithos
 spec:
   selector:
     matchLabels:
       app: pithos
+      product: pithos
       pithos-role: pithos
       component: pithos
   replicas: 1
@@ -95,6 +99,7 @@ spec:
     metadata:
       labels:
         app: pithos
+        product: pithos
         pithos-role: pithos
         component: pithos
     spec:
