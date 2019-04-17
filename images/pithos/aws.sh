@@ -2,7 +2,7 @@
 # -*- mode: sh; -*-
 
 # File: aws.sh
-# Time-stamp: <2018-09-21 14:54:39>
+# Time-stamp: <2018-10-01 18:09:53>
 # Copyright (C) 2018 Gravitational Inc.
 # Description: Helper for AWS cli
 

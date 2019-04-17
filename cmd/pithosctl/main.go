@@ -6,7 +6,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/config"
+	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/cluster"
+	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/defaults"
 
 	"github.com/gravitational/trace"
 	log "github.com/sirupsen/logrus"
@@ -14,21 +15,16 @@ import (
 )
 
 var (
-	pithosBootCfg config.Pithos
-	ctx           context.Context
+	pithosConfig cluster.Config
+	ctx          context.Context
 
 	pithosctlCmd = &cobra.Command{
 		Use:   "",
-		Short: "Utility to bootstrap pithos application",
+		Short: "Utility to manage pithos application",
 		Run: func(ccmd *cobra.Command, args []string) {
 			ccmd.HelpFunc()(ccmd, args)
 		},
 	}
-)
-
-const (
-	namespace = "default"
-	nodeLabel = "pithos-role=node"
 )
 
 func main() {
@@ -39,8 +35,10 @@ func main() {
 }
 
 func init() {
-	pithosctlCmd.PersistentFlags().StringVarP(&pithosBootCfg.Namespace, "namespace", "n", namespace, "Kubernetes namespace for pithos application")
-	pithosctlCmd.PersistentFlags().StringVar(&pithosBootCfg.NodeLabel, "label", nodeLabel, "Label to select nodes for pithos")
+	pithosctlCmd.PersistentFlags().StringVarP(&pithosConfig.Namespace, "namespace", "n", defaults.Namespace, "Kubernetes namespace for pithos application.")
+	pithosctlCmd.PersistentFlags().StringVar(&pithosConfig.NodeSelector, "nodeSelector", defaults.PithosNodeSelector, "Label(s) to select nodes for pithos application.")
+	pithosctlCmd.PersistentFlags().StringVar(&pithosConfig.CassandraPodSelector, "cassandraPodsSelector",
+		defaults.CassandraPodSelector, "Label(s) to select cassandra pods. Format is the same as used in `kubectl --selector`.")
 
 	var cancel context.CancelFunc
 	ctx, cancel = context.WithCancel(context.TODO())

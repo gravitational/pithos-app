@@ -3,3 +3,5 @@ gravity.log
 build
 registry
 pithos.jar
+resources/app-m.yaml
+bin

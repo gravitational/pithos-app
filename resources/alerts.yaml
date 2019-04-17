@@ -1,0 +1,33 @@
+---
+version: v2
+kind: alert
+metadata:
+  name: cassandra-load
+spec:
+  formula: |
+    var period = 30m
+    var every = 5m
+    var data_cassandra_load = stream
+        |from()
+            .measurement('cassandra_load')
+        |where(lambda: "max" > 1073741824)
+        |window()
+            .period(period)
+            .every(every)
+
+    var trigger_load_difference = data_cassandra_load
+        |eval(lambda: 100.0 - float("min")*100.0/float("max"))
+            .as('percent_difference')
+        |alert()
+            .message('{{ .Level }} / cassandra: storage load is different between nodes')
+            .crit(lambda: "percent_difference" > 20.0)
+            .critReset(lambda: "percent_difference" < 10.0)
+            .stateChangesOnly(1h)
+            .details('''
+    <b>{{ .Message }}</b>
+    <p>Level: {{ .Level }}</p>
+    <p>Storage load difference(%): {{ index .Fields "percent_difference" | printf "%0.2f" }}</p>
+    ''')
+            .email()
+            .log('/var/lib/kapacitor/logs/cassandra_load.log')
+            .mode(0644)

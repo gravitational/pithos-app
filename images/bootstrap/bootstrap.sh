@@ -4,6 +4,7 @@ set -o errexit
 set -o nounset
 
 ## generate cassandra specific keys
+
 keytool -genkey \
 	-keyalg RSA \
 	-alias cassandra-node \
@@ -49,9 +50,10 @@ fi
 
 pithosctl init
 
-if [ $(kubectl get nodes -l pithos-role=node -o name | wc -l) -ge 3 ]
+if [ $(/opt/bin/kubectl get nodes -l pithos-role=node -o name | wc -l) -ge 3 ]
 then
-    kubectl scale statefulset cassandra --replicas=3
+    /opt/bin/kubectl scale statefulset cassandra --replicas=3
 fi
 
-kubectl create -f /var/lib/gravity/resources/monitoring.yaml
+/opt/bin/kubectl create -f /var/lib/gravity/resources/monitoring.yaml
+/opt/bin/gravity resource create -f /var/lib/gravity/resources/alerts.yaml

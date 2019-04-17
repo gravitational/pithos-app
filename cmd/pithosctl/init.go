@@ -19,6 +19,7 @@ package main
 import (
 	"strings"
 
+	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/cluster"
 	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/pithos"
 
 	"github.com/gravitational/rigging"
@@ -45,13 +46,15 @@ func initApp(ccmd *cobra.Command, args []string) error {
 	}
 
 	log.Infof("Replication factor: %v.", replicas)
-	pithosBootCfg.ReplicationFactor = replicas
-	if err = pithosBootCfg.Check(); err != nil {
+	pithosConfig.Bootstrap = &cluster.Bootstrap{
+		ReplicationFactor: replicas,
+	}
+	if err = pithosConfig.Check(); err != nil {
 		return trace.Wrap(err)
 	}
 
 	log.Info("Creating pithos configmap and secret.")
-	pithosControl, err := pithos.NewControl(pithosBootCfg)
+	pithosControl, err := pithos.NewControl(pithosConfig)
 	if err != nil {
 		return trace.Wrap(err)
 	}
@@ -60,7 +63,7 @@ func initApp(ccmd *cobra.Command, args []string) error {
 		return trace.Wrap(err)
 	}
 
-	log.Info("Creating cassandra services + statefulset.")
+	log.Info("Creating cassandra services/configmaps + statefulset.")
 	out, err := rigging.FromFile(rigging.ActionCreate, "/var/lib/gravity/resources/cassandra.yaml")
 	if err != nil && !isAlreadyExistsError(out) {
 		return trace.Wrap(err)
@@ -79,8 +82,8 @@ func initApp(ccmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func determineReplicationFactor() (int, error) {
-	nodes, err := rigging.NodesMatchingLabel(pithosBootCfg.NodeLabel)
+func determineReplicationFactor() (replicationFactor int, err error) {
+	nodes, err := rigging.NodesMatchingLabel(pithosConfig.NodeSelector)
 	if err != nil {
 		return 0, trace.Wrap(err)
 	}
