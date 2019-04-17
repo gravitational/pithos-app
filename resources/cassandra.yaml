@@ -67,6 +67,7 @@ metadata:
   namespace: default
   labels:
     app: pithos
+    product: pithos
 spec:
   clusterIP: None
   ports:
@@ -83,6 +84,7 @@ metadata:
   namespace: default
   labels:
     app: pithos
+    product: pithos
     pithos-role: cassandra
 spec:
   serviceName: cassandra
@@ -90,12 +92,14 @@ spec:
   selector:
     matchLabels:
       app: pithos
+      product: pithos
       pithos-role: cassandra
       component: cassandra
   template:
     metadata:
       labels:
         app: pithos
+        product: pithos
         pithos-role: cassandra
         component: cassandra
     spec:

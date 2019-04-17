@@ -4,6 +4,7 @@ NAME := pithos-app
 OPS_URL ?= https://opscenter.localhost.localdomain:33009
 TELE ?= $(shell which tele)
 GRAVITY ?= $(shell which gravity)
+RUNTIME_VERSION ?= $(shell $(TELE) version | awk '/version:/ {print $$2}')
 
 TOP := $(dir $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST)))
 
@@ -54,7 +55,6 @@ TELE_BUILD_OPTIONS := --insecure \
                 $(IMPORT_IMAGE_FLAGS)
 
 BUILD_DIR := build
-TARBALL := $(BUILD_DIR)/pithos-app.tar.gz
 
 .PHONY: all
 all: clean images
@@ -72,9 +72,6 @@ import: images
 	-$(GRAVITY) app delete --ops-url=$(OPS_URL) $(REPOSITORY)/$(NAME):$(VERSION) --force --insecure $(EXTRA_GRAVITY_OPTIONS)
 	$(GRAVITY) app import $(IMPORT_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) .
 
-.PHONY: export
-export: $(TARBALL)
-
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
@@ -83,7 +80,9 @@ $(TARBALL): import $(BUILD_DIR)
 
 .PHONY: build-app
 build-app: $(BUILD_DIR) images
-	$(TELE) build -o build/installer.tar $(TELE_BUILD_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) resources/app.yaml
+	sed -i "s/version: \"0.0.0+latest\"/version: \"$(RUNTIME_VERSION)\"/" resources/app.yaml
+	$(TELE) build -f -o build/installer.tar $(TELE_BUILD_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) resources/app.yaml
+	sed -i "s/version: \"$(RUNTIME_VERSION)\"/version: \"0.0.0+latest\"/" resources/app.yaml
 
 .PHONY: clean
 clean:
