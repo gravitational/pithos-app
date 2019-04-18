@@ -82,9 +82,9 @@ $(TARBALL): import $(BUILD_DIR)
 
 .PHONY: build-app
 build-app: images | $(BUILD_DIR)
-	sed -i.bak "s/version: \"0.0.0+latest\"/version: \"$(RUNTIME_VERSION)\"/" resources/app.yaml
+	sed -i "s/version: \"0.0.0+latest\"/version: \"$(RUNTIME_VERSION)\"/" resources/app.yaml
 	$(TELE) build -f -o build/installer.tar $(TELE_BUILD_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) resources/app.yaml
-	if [ -f resources/app.yaml.bak ]; then mv resources/app.yaml.bak resources/app.yaml; fi
+	sed -i "s/version: \"$(RUNTIME_VERSION)\"/version: \"0.0.0+latest\"/" resources/app.yaml
 
 .PHONY: build-pithosctl
 build-pithosctl: $(BUILD_DIR)
@@ -98,5 +98,5 @@ build/pithosctl:
 .PHONY: clean
 clean:
 	$(MAKE) -C images clean
-	rm -rf images/{bootstrap,healthz}/bin
+	-rm -rf images/{bootstrap,healthz}/bin
 	-rm -rf $(BUILD_DIR)
