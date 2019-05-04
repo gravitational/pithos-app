@@ -57,6 +57,7 @@ TELE_BUILD_OPTIONS := --insecure \
                 $(IMPORT_IMAGE_FLAGS)
 
 BUILD_DIR := build
+BINARIES_DIR := bin
 
 .PHONY: all
 all: clean images
@@ -94,6 +95,22 @@ build-pithosctl: $(BUILD_DIR)
 .PHONY: build/pithosctl
 build/pithosctl:
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -a -installsuffix cgo -o $@ cmd/pithosctl/*.go
+
+#
+# number of environment variables are expected to be set
+# see https://github.com/gravitational/robotest/blob/master/suite/README.md
+#
+.PHONY: robotest-run-suite
+robotest-run-suite:
+	./scripts/robotest_run_suite.sh $(shell pwd)/upgrade_from
+
+.PHONY: download-binaries
+download-binaries: $(BINARIES_DIR)
+	for name in gravity tele; \
+	do \
+		curl https://get.gravitational.io/telekube/bin/$(GRAVITY_VERSION)/linux/x86_64/$$name -o $(BINARIES_DIR)/$$name; \
+		chmod +x $(BINARIES_DIR)/$$name; \
+	done
 
 .PHONY: clean
 clean:

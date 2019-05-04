@@ -41,7 +41,10 @@ properties([
            description: 'Robotest tag to use.'),
     string(name: 'OPS_URL',
            defaultValue: '',
-           description: 'Ops Center URL to download dependencies from')
+           description: 'Ops Center URL to download dependencies from'),
+    string(name: 'GRAVITY_VERSION',
+           defaultValue: '5.0.33',
+           description: 'gravity/tele binaries version')
   ]),
 ])
 
@@ -73,9 +76,9 @@ timestamps {
         sh """
 export PATH=$(pwd)/bin:${PATH}
 rm -rf ${TELE_STATE_DIR} && mkdir -p ${TELE_STATE_DIR}
-export EXTRA_GRAVITY_OPTIONS="--state-dir ${TELE_STATE_DIR}"
+export EXTRA_GRAVITY_OPTIONS="--state-dir=${TELE_STATE_DIR}"
 tele login ${EXTRA_GRAVITY_OPTIONS} -o ${OPS_URL} --key=${API_KEY}
-make import OPS_URL=$OPS_URL"""
+make build-app OPS_URL=$OPS_URL"""
       }
     }
   }
