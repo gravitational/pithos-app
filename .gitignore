@@ -4,3 +4,5 @@ build
 registry
 pithos.jar
 bin
+state
+wd_suite
