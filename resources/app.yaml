@@ -92,13 +92,23 @@ hooks:
             volumes:
               - name: temp
                 emptyDir: {}
+              - name: gravity-local
+                hostPath:
+                  path: /var/lib/gravity/local
             restartPolicy: OnFailure
             containers:
               - name: bootstrap
                 image: pithos-bootstrap:latest
+                env:
+                  - name: POD_IP
+                    valueFrom:
+                      fieldRef:
+                        fieldPath: status.podIP
                 volumeMounts:
                   - name: temp
                     mountPath: /tmp
+                  - name: gravity-local
+                    mountPath: /var/lib/gravity/local
   update:
     job: |
       apiVersion: batch/v1
@@ -118,6 +128,18 @@ hooks:
               - name: bootstrap
                 image: pithos-hook:latest
                 args: ["update"]
+                env:
+                  - name: POD_IP
+                    valueFrom:
+                      fieldRef:
+                        fieldPath: status.podIP
+                volumeMounts:
+                  - name: gravity-local
+                    mountPath: /var/lib/gravity/local
+            volumes:
+              - name: gravity-local
+                hostPath:
+                  path: /var/lib/gravity/local
   rollback:
     job: |
       apiVersion: batch/v1

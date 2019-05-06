@@ -1,7 +1,10 @@
-export VERSION ?= $(shell git describe --long --tags --always|awk -F'[.-]' '{print $$1 "." $$2 "." $$4}')
+export VERSION ?= $(shell ./version.sh)
 REPOSITORY := gravitational.io
 NAME := pithos-app
 OPS_URL ?= https://opscenter.localhost.localdomain:33009
+TELE ?= $(shell which tele)
+GRAVITY ?= $(shell which gravity)
+RUNTIME_VERSION ?= $(shell $(TELE) version | awk '/^Version:/ {print $$2}')
 
 SRCDIR=/go/src/github.com/gravitational/pithos-app
 DOCKERFLAGS=--rm=true -v $(PWD):$(SRCDIR) -v $(GOPATH)/pkg:/gopath/pkg -w $(SRCDIR)
@@ -32,6 +35,7 @@ IMPORT_OPTIONS := --vendor \
 		--name=$(NAME) \
 		--version=$(VERSION) \
 		--glob=**/*.yaml \
+		--ignore="alerts.yaml" \
 		--ignore=pithos-cfg \
 		--exclude="build" \
 		--exclude="images" \
@@ -49,10 +53,11 @@ TELE_BUILD_OPTIONS := --insecure \
                 --ignore="images" \
                 --ignore="tool" \
                 --ignore="pithos-cfg" \
+                --ignore="alerts.yaml" \
                 $(IMPORT_IMAGE_FLAGS)
 
 BUILD_DIR := build
-TARBALL := $(BUILD_DIR)/pithos-app.tar.gz
+BINARIES_DIR := bin
 
 .PHONY: all
 all: clean images
@@ -67,33 +72,48 @@ images:
 
 .PHONY: import
 import: images
-	-gravity app delete --ops-url=$(OPS_URL) $(REPOSITORY)/$(NAME):$(VERSION) --force --insecure $(EXTRA_GRAVITY_OPTIONS)
-	gravity app import $(IMPORT_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) .
-
-.PHONY: export
-export: $(TARBALL)
+	-$(GRAVITY) app delete --ops-url=$(OPS_URL) $(REPOSITORY)/$(NAME):$(VERSION) --force --insecure $(EXTRA_GRAVITY_OPTIONS)
+	$(GRAVITY) app import $(IMPORT_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) .
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
 $(TARBALL): import $(BUILD_DIR)
-	gravity package export $(REPOSITORY)/$(NAME):$(VERSION) $(TARBALL) $(EXTRA_GRAVITY_OPTIONS)
+	$(GRAVITY) package export $(REPOSITORY)/$(NAME):$(VERSION) $(TARBALL) $(EXTRA_GRAVITY_OPTIONS)
 
 .PHONY: build-app
-build-app: clean images | $(BUILD_DIR)
-	tele build -o build/installer.tar $(TELE_BUILD_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) resources/app.yaml
+build-app: images | $(BUILD_DIR)
+	sed -i "s/version: \"0.0.0+latest\"/version: \"$(RUNTIME_VERSION)\"/" resources/app.yaml
+	$(TELE) build -f -o build/installer.tar $(TELE_BUILD_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) resources/app.yaml
+	sed -i "s/version: \"$(RUNTIME_VERSION)\"/version: \"0.0.0+latest\"/" resources/app.yaml
 
 .PHONY: build-pithosctl
 build-pithosctl: $(BUILD_DIR)
 	docker run $(DOCKERFLAGS) $(BUILDIMAGE) make build/pithosctl
 	for dir in bootstrap healthz; do mkdir -p images/$${dir}/bin; cp build/pithosctl images/$${dir}/bin/; done
 
-.PHONY: pithosctl
+.PHONY: build/pithosctl
 build/pithosctl:
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -a -installsuffix cgo -o $@ cmd/pithosctl/*.go
+
+#
+# number of environment variables are expected to be set
+# see https://github.com/gravitational/robotest/blob/master/suite/README.md
+#
+.PHONY: robotest-run-suite
+robotest-run-suite:
+	./scripts/robotest_run_suite.sh $(shell pwd)/upgrade_from
+
+.PHONY: download-binaries
+download-binaries: $(BINARIES_DIR)
+	for name in gravity tele; \
+	do \
+		curl https://get.gravitational.io/telekube/bin/$(GRAVITY_VERSION)/linux/x86_64/$$name -o $(BINARIES_DIR)/$$name; \
+		chmod +x $(BINARIES_DIR)/$$name; \
+	done
 
 .PHONY: clean
 clean:
 	$(MAKE) -C images clean
-	for dir in bootstrap healthz; do rm -rf images/$${dir}/bin; done
+	-rm -rf images/{bootstrap,healthz}/bin
 	-rm -rf $(BUILD_DIR)
