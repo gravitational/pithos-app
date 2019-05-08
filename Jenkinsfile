@@ -88,6 +88,7 @@ make build-app OPS_URL=$OPS_URL"""
           if (params.RUN_ROBOTEST == 'run') {
             withCredentials([
                 [$class: 'FileBinding', credentialsId:'ROBOTEST_LOG_GOOGLE_APPLICATION_CREDENTIALS', variable: 'GOOGLE_APPLICATION_CREDENTIALS'],
+                [$class: 'StringBinding', credentialsId:'SERGEI_OPS_API_KEY_READ_ONLY', variable: 'API_KEY'],
                 [$class: 'FileBinding', credentialsId:'OPS_SSH_KEY', variable: 'SSH_KEY'],
                 [$class: 'FileBinding', credentialsId:'OPS_SSH_PUB', variable: 'SSH_PUB'],
                 ]) {
