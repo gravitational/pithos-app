@@ -48,6 +48,8 @@ properties([
   ]),
 ])
 
+APP_VERSION = sh(script: 'make what-version', returnStdout: true).trim()
+
 timestamps {
   node {
     stage('checkout') {
