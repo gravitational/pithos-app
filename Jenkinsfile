@@ -74,7 +74,7 @@ timestamps {
       ]) {
         def TELE_STATE_DIR = "${pwd()}/state/${APP_VERSION}"
         sh """
-export PATH=$(pwd)/bin:${PATH}
+export PATH=\$(pwd)/bin:${PATH}
 rm -rf ${TELE_STATE_DIR} && mkdir -p ${TELE_STATE_DIR}
 export EXTRA_GRAVITY_OPTIONS="--state-dir=${TELE_STATE_DIR}"
 tele login ${EXTRA_GRAVITY_OPTIONS} -o ${OPS_URL} --key=${API_KEY}
