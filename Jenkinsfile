@@ -48,8 +48,6 @@ properties([
   ]),
 ])
 
-APP_VERSION = sh(script: 'make what-version', returnStdout: true).trim()
-
 timestamps {
   node {
     stage('checkout') {
@@ -65,6 +63,7 @@ timestamps {
     stage('download gravity/tele binaries') {
       sh "make download-binaries"
     }
+
     stage('build-app') {
       withCredentials([
       [
@@ -75,6 +74,7 @@ timestamps {
       ],
       ]) {
         def TELE_STATE_DIR = "${pwd()}/state/${APP_VERSION}"
+        def APP_VERSION = sh(script: 'make what-version', returnStdout: true).trim()
         sh """
 export PATH=\$(pwd)/bin:${PATH}
 rm -rf ${TELE_STATE_DIR} && mkdir -p ${TELE_STATE_DIR}
