@@ -64,6 +64,8 @@ timestamps {
       sh "make download-binaries"
     }
 
+    APP_VERSION = sh(script: 'make what-version', returnStdout: true).trim()
+
     stage('build-app') {
       withCredentials([
       [
@@ -73,7 +75,7 @@ timestamps {
         passwordVariable: 'AWS_SECRET_ACCESS_KEY',
       ],
       ]) {
-        def APP_VERSION = sh(script: 'make what-version', returnStdout: true).trim()
+        def
         def TELE_STATE_DIR = "${pwd()}/state/${APP_VERSION}"
         sh """
 export PATH=\$(pwd)/bin:${PATH}
