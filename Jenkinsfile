@@ -68,7 +68,7 @@ timestamps {
 
     stage('build-app') {
       withCredentials([
-      [$class: 'FileBinding', credentialsId:'SERGEI_OPS_API_KEY_READ_ONLY', variable: 'API_KEY'],
+      [$class: 'StringBinding', credentialsId:'SERGEI_OPS_API_KEY_READ_ONLY', variable: 'API_KEY'],
       ]) {
         def TELE_STATE_DIR = "${pwd()}/state/${APP_VERSION}"
         sh """
