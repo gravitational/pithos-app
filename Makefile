@@ -78,6 +78,9 @@ import: images
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
+$(BINARIES_DIR):
+	mkdir -p $(BINARIES_DIR)
+
 $(TARBALL): import $(BUILD_DIR)
 	$(GRAVITY) package export $(REPOSITORY)/$(NAME):$(VERSION) $(TARBALL) $(EXTRA_GRAVITY_OPTIONS)
 

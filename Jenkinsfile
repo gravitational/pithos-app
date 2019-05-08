@@ -43,7 +43,7 @@ properties([
            defaultValue: '',
            description: 'Ops Center URL to download dependencies from'),
     string(name: 'GRAVITY_VERSION',
-           defaultValue: '5.0.33',
+           defaultValue: '5.2.12',
            description: 'gravity/tele binaries version')
   ]),
 ])
