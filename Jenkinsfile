@@ -68,12 +68,7 @@ timestamps {
 
     stage('build-app') {
       withCredentials([
-      [
-        $class: 'UsernamePasswordMultiBinding',
-        credentialsId: 'jenkins-aws-s3',
-        usernameVariable: 'AWS_ACCESS_KEY_ID',
-        passwordVariable: 'AWS_SECRET_ACCESS_KEY',
-      ],
+      [$class: 'FileBinding', credentialsId:'SERGEI_OPS_API_KEY_READ_ONLY', variable: 'API_KEY'],
       ]) {
         def TELE_STATE_DIR = "${pwd()}/state/${APP_VERSION}"
         sh """
