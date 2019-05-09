@@ -40,7 +40,7 @@ properties([
            defaultValue: 'stable-gce',
            description: 'Robotest tag to use.'),
     string(name: 'OPS_URL',
-           defaultValue: '',
+           defaultValue: 'https://ci-ops.gravitational.io',
            description: 'Ops Center URL to download dependencies from'),
     string(name: 'GRAVITY_VERSION',
            defaultValue: '5.2.12',
@@ -68,7 +68,7 @@ timestamps {
 
     stage('build-app') {
       withCredentials([
-      [$class: 'StringBinding', credentialsId:'SERGEI_OPS_API_KEY_READ_ONLY', variable: 'API_KEY'],
+      [$class: 'StringBinding', credentialsId:'CI_OPS_API_KEY', variable: 'API_KEY'],
       ]) {
         def TELE_STATE_DIR = "${pwd()}/state/${APP_VERSION}"
         sh """
@@ -88,7 +88,7 @@ make build-app OPS_URL=$OPS_URL"""
           if (params.RUN_ROBOTEST == 'run') {
             withCredentials([
                 [$class: 'FileBinding', credentialsId:'ROBOTEST_LOG_GOOGLE_APPLICATION_CREDENTIALS', variable: 'GOOGLE_APPLICATION_CREDENTIALS'],
-                [$class: 'StringBinding', credentialsId:'SERGEI_OPS_API_KEY_READ_ONLY', variable: 'API_KEY'],
+                [$class: 'StringBinding', credentialsId:'CI_OPS_API_KEY', variable: 'API_KEY'],
                 [$class: 'FileBinding', credentialsId:'OPS_SSH_KEY', variable: 'SSH_KEY'],
                 [$class: 'FileBinding', credentialsId:'OPS_SSH_PUB', variable: 'SSH_PUB'],
                 ]) {
