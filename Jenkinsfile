@@ -40,10 +40,10 @@ properties([
            defaultValue: 'stable-gce',
            description: 'Robotest tag to use.'),
     string(name: 'OPS_URL',
-           defaultValue: '',
+           defaultValue: 'https://ci-ops.gravitational.io',
            description: 'Ops Center URL to download dependencies from'),
     string(name: 'GRAVITY_VERSION',
-           defaultValue: '5.0.33',
+           defaultValue: '5.2.12',
            description: 'gravity/tele binaries version')
   ]),
 ])
@@ -63,33 +63,32 @@ timestamps {
     stage('download gravity/tele binaries') {
       sh "make download-binaries"
     }
+
+    APP_VERSION = sh(script: 'make what-version', returnStdout: true).trim()
+
     stage('build-app') {
       withCredentials([
-      [
-        $class: 'UsernamePasswordMultiBinding',
-        credentialsId: 'jenkins-aws-s3',
-        usernameVariable: 'AWS_ACCESS_KEY_ID',
-        passwordVariable: 'AWS_SECRET_ACCESS_KEY',
-      ],
+      [$class: 'StringBinding', credentialsId:'CI_OPS_API_KEY', variable: 'API_KEY'],
       ]) {
         def TELE_STATE_DIR = "${pwd()}/state/${APP_VERSION}"
         sh """
-export PATH=$(pwd)/bin:${PATH}
+export PATH=\$(pwd)/bin:\${PATH}
 rm -rf ${TELE_STATE_DIR} && mkdir -p ${TELE_STATE_DIR}
 export EXTRA_GRAVITY_OPTIONS="--state-dir=${TELE_STATE_DIR}"
-tele login ${EXTRA_GRAVITY_OPTIONS} -o ${OPS_URL} --key=${API_KEY}
+tele login \${EXTRA_GRAVITY_OPTIONS} -o ${OPS_URL} --token=${API_KEY}
 make build-app OPS_URL=$OPS_URL"""
       }
     }
   }
   throttle(['robotest']) {
     node {
-      stage('build-and-test') {
+      stage('test') {
         parallel (
         robotest : {
           if (params.RUN_ROBOTEST == 'run') {
             withCredentials([
                 [$class: 'FileBinding', credentialsId:'ROBOTEST_LOG_GOOGLE_APPLICATION_CREDENTIALS', variable: 'GOOGLE_APPLICATION_CREDENTIALS'],
+                [$class: 'StringBinding', credentialsId:'CI_OPS_API_KEY', variable: 'API_KEY'],
                 [$class: 'FileBinding', credentialsId:'OPS_SSH_KEY', variable: 'SSH_KEY'],
                 [$class: 'FileBinding', credentialsId:'OPS_SSH_PUB', variable: 'SSH_PUB'],
                 ]) {
