@@ -48,12 +48,13 @@ then
 	        --from-file=cassandra-node.pem=cassandra-node.pem
 fi
 
-pithosctl init
-
 if [ $(/opt/bin/kubectl get nodes -l pithos-role=node -o name | wc -l) -ge 3 ]
 then
-    /opt/bin/kubectl scale statefulset cassandra --replicas=3
+    sed -i 's/replicas: 1/replicas: 3/' /var/lib/gravity/resources/cassandra.yaml
 fi
 
-/opt/bin/kubectl create -f /var/lib/gravity/resources/monitoring.yaml
+pithosctl init
+
+/opt/bin/kubectl apply -f /var/lib/gravity/resources/monitoring.yaml
+/opt/bin/kubectl apply -f /var/lib/gravity/resources/pithosctl.yaml
 /opt/bin/gravity resource create -f /var/lib/gravity/resources/alerts.yaml

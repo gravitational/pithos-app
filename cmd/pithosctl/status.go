@@ -18,6 +18,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"math"
 	"os"
 	"text/tabwriter"
@@ -26,21 +27,32 @@ import (
 	"github.com/alecthomas/units"
 	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/cassandra"
 	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/cluster"
+	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/defaults"
 
 	"github.com/gravitational/trace"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var statusCmd = &cobra.Command{
-	Use:          "status",
-	Short:        "HTTP listener exposing cluster status",
-	SilenceUsage: true,
-	RunE:         status,
-}
+var (
+	statusCmd = &cobra.Command{
+		Use:          "status",
+		Short:        "HTTP listener exposing cluster status",
+		SilenceUsage: true,
+		RunE:         status,
+	}
+	shortOutput          bool
+	minimumLoadThreshold int64
+)
 
 func init() {
+	const defaultShortOutput = false
+
 	pithosctlCmd.AddCommand(statusCmd)
+	statusCmd.PersistentFlags().BoolVarP(&shortOutput, "short", "s", defaultShortOutput, "Output only overall cluster status and reason if unhealthy")
+	statusCmd.PersistentFlags().Int64Var(&minimumLoadThreshold, "threshold", defaults.Threshold,
+		`Set minimum threshold for checking load between nodes in cluster. On empty(small) cluster difference in load
+         between nodes can be significant and status check fails`)
 }
 
 func status(ccmd *cobra.Command, args []string) error {
@@ -52,7 +64,9 @@ func status(ccmd *cobra.Command, args []string) error {
 	if err != nil {
 		return trace.Wrap(err)
 	}
-	printStatus(clusterStatus)
+	if err := printStatus(clusterStatus); err != nil {
+		return trace.Wrap(err)
+	}
 	return nil
 }
 
@@ -66,7 +80,19 @@ func Status() (*cluster.Status, error) {
 	return status, nil
 }
 
-func printStatus(status *cluster.Status) {
+func printStatus(status *cluster.Status) error {
+	output := os.Stdout
+	if !shortOutput {
+		printClusterStatus(status, output)
+		fmt.Fprintln(output)
+	}
+	if err := printOverallStatus(status, output); err != nil {
+		return trace.Wrap(err)
+	}
+	return nil
+}
+
+func printClusterStatus(status *cluster.Status, output io.Writer) {
 	w := new(tabwriter.Writer)
 
 	var (
@@ -76,7 +102,7 @@ func printStatus(status *cluster.Status) {
 		flags    uint
 		padchar  byte = '\t'
 	)
-	w.Init(os.Stdout, minwidth, tabwidth, padding, padchar, flags)
+	w.Init(output, minwidth, tabwidth, padding, padchar, flags)
 	fmt.Fprintln(w, "NAME\tREADY\tSTATUS\tIP\tNODE\tAGE")
 
 	for _, pod := range status.PodsStatus {
@@ -91,13 +117,16 @@ func printStatus(status *cluster.Status) {
 			node.Address, node.Load, node.Owns, node.HostID)
 	}
 
-	reason, isHealthy := isClusterHealthy(status)
-	fmt.Fprintf(w, "\nCluster status: %s\n", getStatusString(isHealthy))
-	if !isHealthy {
-		fmt.Fprintf(w, "Reason: %s\n", reason)
-	}
-
 	w.Flush()
+}
+
+func printOverallStatus(status *cluster.Status, output io.Writer) error {
+	reason, isHealthy := isClusterHealthy(status)
+	fmt.Fprintf(output, "Cluster status: %s\n", getStatusString(isHealthy))
+	if !isHealthy {
+		return trace.Errorf("Cluster is unhealthy. Reason: %s", reason)
+	}
+	return nil
 }
 
 // shortHumanDuration represents pod creation timestamp in
@@ -177,8 +206,10 @@ func isClusterHealthy(status *cluster.Status) (unhealthyReason string, healthy b
 				return fmt.Sprintf("cannot parse load from cassandra node %s", nodeJ.Address), false
 			}
 
-			if math.Abs((float64(loadI-loadJ))/math.Max(float64(loadI), float64(loadJ))) > 0.2 {
-				return fmt.Sprintf("cassandra load on node (pod %s, %s) is not equal to load on node (pod %s, %s)", nodeI.Address, nodeI.Load, nodeJ.Address, nodeJ.Load), false
+			if math.Min(float64(loadI), float64(loadJ)) > float64(minimumLoadThreshold) {
+				if math.Abs((float64(loadI-loadJ))/math.Max(float64(loadI), float64(loadJ))) > 0.2 {
+					return fmt.Sprintf("cassandra load on node (pod %s, %s) is not equal to load on node (pod %s, %s)", nodeI.Address, nodeI.Load, nodeJ.Address, nodeJ.Load), false
+				}
 			}
 		}
 	}
