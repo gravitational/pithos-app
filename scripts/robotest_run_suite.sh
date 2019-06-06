@@ -75,10 +75,7 @@ function build_volume_mounts {
 export EXTRA_VOLUME_MOUNTS=$(build_volume_mounts)
 
 suite="$(build_install_suite)"
-suite="$suite $(build_install_suite 'redhat:7' 'devicemapper')"
 suite="$suite $(build_upgrade_suite)"
-
-echo $suite
 
 mkdir -p $UPGRADE_FROM_DIR
 tele login --ops=$OPS_URL --key="$OPS_APIKEY"
