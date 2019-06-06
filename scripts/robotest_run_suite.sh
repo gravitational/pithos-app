@@ -83,7 +83,7 @@ echo $suite
 mkdir -p $UPGRADE_FROM_DIR
 tele login --ops=$OPS_URL --key="$OPS_APIKEY"
 for release in ${!UPGRADE_MAP[@]}; do
-  tele pull stolon-app:$release --output=$UPGRADE_FROM_DIR/installer_$release.tar
+  tele pull pithos-app:$release --output=$UPGRADE_FROM_DIR/installer_$release.tar
 done
 
 docker pull $ROBOTEST_REPO
