@@ -51,8 +51,8 @@ func init() {
 	pithosctlCmd.AddCommand(statusCmd)
 	statusCmd.PersistentFlags().BoolVarP(&shortOutput, "short", "s", defaultShortOutput, "Output only overall cluster status and reason if unhealthy")
 	statusCmd.PersistentFlags().Int64Var(&minimumLoadThreshold, "threshold", defaults.Threshold,
-		`Set minimum threshold for checking load between nodes in cluster. On empty(small) cluster difference in load
-         between nodes can be significant and status check fails`)
+		`Minimum threshold (in bytes) to compute load across the cluster.
+Setting it to a too small value might result in frequent status failures on smaller clusters.`)
 }
 
 func status(ccmd *cobra.Command, args []string) error {
@@ -205,16 +205,26 @@ func isClusterHealthy(status *cluster.Status) (unhealthyReason string, healthy b
 			if err != nil {
 				return fmt.Sprintf("cannot parse load from cassandra node %s", nodeJ.Address), false
 			}
-
-			if math.Min(float64(loadI), float64(loadJ)) > float64(minimumLoadThreshold) {
-				if math.Abs((float64(loadI-loadJ))/math.Max(float64(loadI), float64(loadJ))) > 0.2 {
-					return fmt.Sprintf("cassandra load on node (pod %s, %s) is not equal to load on node (pod %s, %s)", nodeI.Address, nodeI.Load, nodeJ.Address, nodeJ.Load), false
-				}
+			if isLoadOverThreshold(loadI, loadJ) {
+				return reasonUnequalLoad(nodeI, nodeJ), false
 			}
 		}
 	}
 
 	return "", true
+}
+
+func isLoadOverThreshold(loadA, loadB int64) bool {
+	if math.Min(float64(loadA), float64(loadB)) > float64(minimumLoadThreshold) {
+		if math.Abs((float64(loadA-loadB))/math.Max(float64(loadA), float64(loadB))) > 0.2 {
+			return true
+		}
+	}
+	return false
+}
+
+func reasonUnequalLoad(nodeA, nodeB *cassandra.Status) string {
+	return fmt.Sprintf("cassandra load on node (pod %s, %s) is not equal to load on node (pod %s, %s)", nodeA.Address, nodeA.Load, nodeB.Address, nodeB.Load)
 }
 
 func getStatusString(status bool) string {

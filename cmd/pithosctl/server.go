@@ -28,7 +28,7 @@ import (
 
 var serverCmd = &cobra.Command{
 	Use:          "server",
-	Short:        "HTTP listener",
+	Short:        "Serve pithos cluster status",
 	SilenceUsage: true,
 	RunE:         server,
 }

@@ -19,7 +19,7 @@ export ROBOTEST_REPO=quay.io/gravitational/robotest-suite:$ROBOTEST_VERSION
 export WAIT_FOR_INSTALLER=true
 export INSTALLER_URL=$(pwd)/build/installer.tar
 export GRAVITY_URL=$(pwd)/bin/gravity
-export TELE=$TOP_DIR/bin/tele
+export TELE=$(pwd)/bin/tele
 export DEPLOY_TO=${DEPLOY_TO:-gce}
 export TAG=$(git rev-parse --short HEAD)
 export GCL_PROJECT_ID=${GCL_PROJECT_ID:-"kubeadm-167321"}
@@ -44,8 +44,7 @@ function build_upgrade_suite {
   local cluster_size='"flavor":"three","nodes":3,"role":"node"'
   for release in ${!UPGRADE_MAP[@]}; do
     for os in ${UPGRADE_MAP[$release]}; do
-      suite+=$(build_upgrade_step $os $release 'devicemapper' $cluster_size)
-      suite+=" $(build_upgrade_step $os $release 'overlay2' $cluster_size)"
+      suite+=" $(build_upgrade_step $os $release 'overlay' $cluster_size)"
     done
   done
   echo $suite
@@ -78,9 +77,11 @@ suite="$(build_install_suite)"
 suite="$suite $(build_upgrade_suite)"
 
 mkdir -p $UPGRADE_FROM_DIR
-tele login --ops=$OPS_URL --key="$OPS_APIKEY"
+tele login --ops=$OPS_URL --token="$OPS_APIKEY"
 for release in ${!UPGRADE_MAP[@]}; do
-  tele pull pithos-app:$release --output=$UPGRADE_FROM_DIR/installer_$release.tar
+    if [ ! -f $UPGRADE_FROM_DIR/installer_$release.tar ]; then
+        tele pull pithos-app:$release --output=$UPGRADE_FROM_DIR/installer_$release.tar
+    fi
 done
 
 docker pull $ROBOTEST_REPO
