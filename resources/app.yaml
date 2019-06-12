@@ -138,15 +138,16 @@ hooks:
         name: pithos-app-update
         namespace: default
       spec:
+        parallelism: 1
+        completions: 1
         template:
           metadata:
             name: pithos-app-update
           spec:
-            parallelism: 1
-            completions: 1
-            restartPolicy: Never
+            restartPolicy: OnFailure
+            hostNetwork: true
             containers:
-              - name: bootstrap
+              - name: update
                 image: pithos-hook:latest
                 args: ["update"]
                 env:
@@ -189,15 +190,15 @@ hooks:
         name: pithos-app-rollback
         namespace: default
       spec:
+        parallelism: 1
+        completions: 1
         template:
           metadata:
             name: pithos-app-rollback
           spec:
-            parallelism: 1
-            completions: 1
-            restartPolicy: Never
+            restartPolicy: OnFailure
             containers:
-              - name: bootstrap
+              - name: rollback
                 image: pithos-hook:latest
                 args: ["rollback"]
   uninstall:
@@ -214,5 +215,5 @@ hooks:
           spec:
             restartPolicy: OnFailure
             containers:
-              - name: bootstrap
+              - name: uninstall
                 image: pithos-uninstall:latest
