@@ -11,6 +11,7 @@ CASSANDRA_TAG := cassandra:$(VERSION)
 PROXY_TAG := pithos-proxy:$(VERSION)
 HOOK_TAG := pithos-hook:$(VERSION)
 HEALTHZ_TAG := pithos-healthz:$(VERSION)
+PITHOSCTL_TAG := pithosctl:$(VERSION)
 
 TOOL_DIR := ../tool
 
@@ -18,7 +19,7 @@ TOOL_DIR := ../tool
 all: images
 
 .PHONY: images
-images: bootstrap uninstall cassandra pithos proxy hook healthz
+images: bootstrap uninstall cassandra pithos proxy hook healthz pithosctl
 	docker tag $(BOOTSTRAP_TAG) pithos-bootstrap:latest
 	docker tag $(UNINSTALL_TAG) pithos-uninstall:latest
 	docker tag $(PITHOS_TAG) pithos:latest
@@ -26,6 +27,7 @@ images: bootstrap uninstall cassandra pithos proxy hook healthz
 	docker tag $(PROXY_TAG) pithos-proxy:latest
 	docker tag $(HOOK_TAG) pithos-hook:latest
 	docker tag $(HEALTHZ_TAG) pithos-healthz:latest
+	docker tag $(PITHOSCTL_TAG) pithosctl:latest
 
 .PHONY: build-pithosctl
 build-pithosctl:
@@ -53,6 +55,10 @@ proxy:
 .PHONY: pithos
 pithos:
 	$(MAKE) -C pithos TAG=$(PITHOS_TAG)
+
+.PHONY: pithosctl
+pithosctl: build-pithosctl
+	docker build --pull -t $(PITHOSCTL_TAG) pithosctl
 
 .PHONY: hook
 hook:

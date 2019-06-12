@@ -23,4 +23,6 @@ const (
 	CassandraPodSelector = "app=pithos,component=cassandra"
 	// PithosNodeSelector defines label selector to select nodes for pithos application
 	PithosNodeSelector = "pithos-role=node"
+	// Threshold is minimum bytes to consider load between nodes unevenly distributed
+	Threshold int64 = 1073741824 // 1GiB
 )
