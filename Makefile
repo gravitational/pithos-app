@@ -74,8 +74,10 @@ images:
 
 .PHONY: import
 import: images
+	sed -i "s/version: \"0.0.0+latest\"/version: \"$(RUNTIME_VERSION)\"/" resources/app.yaml
 	-$(GRAVITY) app delete --ops-url=$(OPS_URL) $(REPOSITORY)/$(NAME):$(VERSION) --force --insecure $(EXTRA_GRAVITY_OPTIONS)
 	$(GRAVITY) app import $(IMPORT_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) .
+	sed -i "s/version: \"$(RUNTIME_VERSION)\"/version: \"0.0.0+latest\"/" resources/app.yaml
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
@@ -94,12 +96,12 @@ build-app: images | $(BUILD_DIR)
 
 .PHONY: build-pithosctl
 build-pithosctl: $(BUILD_DIR)
-	docker run $(DOCKERFLAGS) $(BUILDIMAGE) make build/pithosctl
+	docker run $(DOCKERFLAGS) $(BUILDIMAGE) make build-pithosctl-docker
 	for dir in bootstrap healthz pithosctl; do mkdir -p images/$${dir}/bin; cp build/pithosctl images/$${dir}/bin/; done
 
-.PHONY: build/pithosctl
-build/pithosctl:
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -a -installsuffix cgo -o $@ cmd/pithosctl/*.go
+.PHONY: build-pithosctl-docker
+build-pithosctl-docker:
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -a -installsuffix cgo -o build/pithosctl cmd/pithosctl/*.go
 
 #
 # number of environment variables are expected to be set
