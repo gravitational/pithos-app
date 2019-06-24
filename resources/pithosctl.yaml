@@ -1,0 +1,45 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pithosctl
+  namespace: default
+  labels:
+    product: pithos
+    component: pithosctl
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    product: pithos
+    component: pithosctl
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: pithosctl
+  namespace: default
+  labels:
+    component: pithosctl
+    product: pithos
+spec:
+  selector:
+    matchLabels:
+      product: pithos
+      component: pithosctl
+  replicas: 1
+  template:
+    metadata:
+      namespace: default
+      labels:
+        component: pithosctl
+        product: pithos
+    spec:
+      serviceAccountName: pithos
+      containers:
+        - name: pithosctl
+          image: pithosctl:latest
+          command: ["/bin/bash", "-c", "--"]
+          args: ["while true; do sleep 30; done;"]

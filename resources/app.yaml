@@ -1,3 +1,4 @@
+---
 apiVersion: bundle.gravitational.io/v2
 kind: Bundle
 metadata:
@@ -104,6 +105,26 @@ hooks:
                     mountPath: /tmp
                   - name: gravity-local
                     mountPath: /var/lib/gravity/local
+  postInstall:
+    job: |
+      apiVersion: batch/v1
+      kind: Job
+      metadata:
+        name: pithos-app-post-install
+        namespace: default
+      spec:
+        parallelism: 1
+        completions: 1
+        backoffLimit: 20
+        template:
+          metadata:
+            name: pithos-app-post-install
+          spec:
+            restartPolicy: OnFailure
+            containers:
+              - name: post-install
+                image: pithosctl:latest
+                command: ["/usr/local/bin/pithosctl", "status", "--short"]
   update:
     job: |
       apiVersion: batch/v1
@@ -112,15 +133,15 @@ hooks:
         name: pithos-app-update
         namespace: default
       spec:
+        parallelism: 1
+        completions: 1
         template:
           metadata:
             name: pithos-app-update
           spec:
-            parallelism: 1
-            completions: 1
-            restartPolicy: Never
+            restartPolicy: OnFailure
             containers:
-              - name: bootstrap
+              - name: update
                 image: pithos-hook:latest
                 args: ["update"]
                 volumeMounts:
@@ -130,6 +151,26 @@ hooks:
               - name: gravity-local
                 hostPath:
                   path: /var/lib/gravity/local
+  postUpdate:
+    job: |
+      apiVersion: batch/v1
+      kind: Job
+      metadata:
+        name: pithos-app-post-update
+        namespace: default
+      spec:
+        parallelism: 1
+        completions: 1
+        backoffLimit: 20
+        template:
+          metadata:
+            name: pithos-app-post-update
+          spec:
+            restartPolicy: OnFailure
+            containers:
+              - name: post-update
+                image: pithosctl:latest
+                command: ["/usr/local/bin/pithosctl", "status", "--short"]
   rollback:
     job: |
       apiVersion: batch/v1
@@ -138,15 +179,15 @@ hooks:
         name: pithos-app-rollback
         namespace: default
       spec:
+        parallelism: 1
+        completions: 1
         template:
           metadata:
             name: pithos-app-rollback
           spec:
-            parallelism: 1
-            completions: 1
-            restartPolicy: Never
+            restartPolicy: OnFailure
             containers:
-              - name: bootstrap
+              - name: rollback
                 image: pithos-hook:latest
                 args: ["rollback"]
   uninstall:
@@ -163,5 +204,5 @@ hooks:
           spec:
             restartPolicy: OnFailure
             containers:
-              - name: bootstrap
+              - name: uninstall
                 image: pithos-uninstall:latest
