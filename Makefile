@@ -4,7 +4,7 @@ NAME := pithos-app
 OPS_URL ?= https://opscenter.localhost.localdomain:33009
 TELE ?= $(shell which tele)
 GRAVITY ?= $(shell which gravity)
-RUNTIME_VERSION ?= $(shell $(TELE) version | awk '/^version:/ {print $$2}')
+RUNTIME_VERSION ?= $(shell $(TELE) version | awk '/^[vV]ersion:/ {print $$2}')
 
 SRCDIR=/go/src/github.com/gravitational/pithos-app
 DOCKERFLAGS=--rm=true -v $(PWD):$(SRCDIR) -v $(GOPATH)/pkg:/gopath/pkg -w $(SRCDIR)
@@ -20,6 +20,9 @@ CONTAINERS := pithos-bootstrap:$(VERSION) \
 	pithos-hook:$(VERSION) \
 	pithos-healthz:$(VERSION) \
 	pithosctl:$(VERSION)
+
+FILE_LIST := $(shell ls -1A)
+WHITELISTED_RESOURCE_NAMES := resources vendor
 
 IMPORT_IMAGE_FLAGS := --set-image=pithos-bootstrap:$(VERSION) \
 	--set-image=pithos-uninstall:$(VERSION) \
@@ -37,13 +40,9 @@ IMPORT_OPTIONS := --vendor \
 		--name=$(NAME) \
 		--version=$(VERSION) \
 		--glob=**/*.yaml \
+		$(foreach resource, $(filter-out $(WHITELISTED_RESOURCE_NAMES), $(FILE_LIST)), --exclude="$(resource)") \
 		--ignore="alerts.yaml" \
-		--ignore=pithos-cfg \
-		--exclude="build" \
-		--exclude="images" \
-		--exclude="Makefile" \
-		--exclude=".git" \
-		--exclude="wd_suite" \
+		--ignore="pithos-cfg" \
 		$(IMPORT_IMAGE_FLAGS)
 
 TELE_BUILD_OPTIONS := --insecure \
@@ -51,9 +50,7 @@ TELE_BUILD_OPTIONS := --insecure \
                 --name=$(NAME) \
                 --version=$(VERSION) \
                 --glob=**/*.yaml \
-                --ignore=".git" \
-                --ignore="images" \
-                --ignore="tool" \
+				$(foreach resource, $(filter-out $(WHITELISTED_RESOURCE_NAMES), $(FILE_LIST)), --ignore="$(resource)") \
                 --ignore="pithos-cfg" \
                 --ignore="alerts.yaml" \
                 $(IMPORT_IMAGE_FLAGS)

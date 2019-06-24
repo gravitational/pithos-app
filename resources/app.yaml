@@ -110,14 +110,15 @@ hooks:
       apiVersion: batch/v1
       kind: Job
       metadata:
-        name: stolon-app-post-install
+        name: pithos-app-post-install
         namespace: default
       spec:
         parallelism: 1
         completions: 1
+        backoffLimit: 20
         template:
           metadata:
-            name: stolon-app-post-install
+            name: pithos-app-post-install
           spec:
             restartPolicy: OnFailure
             containers:
@@ -155,14 +156,15 @@ hooks:
       apiVersion: batch/v1
       kind: Job
       metadata:
-        name: stolon-app-post-update
+        name: pithos-app-post-update
         namespace: default
       spec:
         parallelism: 1
         completions: 1
+        backoffLimit: 20
         template:
           metadata:
-            name: stolon-app-post-update
+            name: pithos-app-post-update
           spec:
             restartPolicy: OnFailure
             containers:
