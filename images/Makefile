@@ -13,7 +13,7 @@ HOOK_TAG := pithos-hook:$(VERSION)
 HEALTHZ_TAG := pithos-healthz:$(VERSION)
 PITHOSCTL_TAG := pithosctl:$(VERSION)
 
-TOOL_DIR := ../tool
+IMAGES_WITH_PITHOSCTL := bootstrap healthz pithosctl
 
 .PHONY: all
 all: images
@@ -33,9 +33,10 @@ images: bootstrap uninstall cassandra pithos proxy hook healthz pithosctl
 build-pithosctl:
 	$(MAKE) -C ../ build-pithosctl
 
-.PHONY: bootstrap
-bootstrap: build-pithosctl
-	docker build --pull -t $(BOOTSTRAP_TAG) bootstrap
+TAG_VARIABLE_NAME = $(shell echo '$@' | tr '[:lower:]' '[:upper:]')_TAG
+.PHONY: $(IMAGES_WITH_PITHOSCTL)
+$(IMAGES_WITH_PITHOSCTL): build-pithosctl
+	docker build --pull -t $($(TAG_VARIABLE_NAME)) $@
 
 .PHONY: uninstall
 uninstall:
@@ -56,10 +57,6 @@ proxy:
 pithos:
 	$(MAKE) -C pithos TAG=$(PITHOS_TAG)
 
-.PHONY: pithosctl
-pithosctl: build-pithosctl
-	docker build --pull -t $(PITHOSCTL_TAG) pithosctl
-
 .PHONY: hook
 hook:
 	$(eval CHANGESET = $(shell echo $$VERSION | sed -e 's/[\.]//g'))
@@ -67,10 +64,6 @@ hook:
 		echo "CHANGESET is not set"; exit 1; \
 	fi;
 	docker build --pull --build-arg CHANGESET=pithos-$(CHANGESET) -t $(HOOK_TAG) hook
-
-.PHONY: healthz
-healthz: build-pithosctl
-	docker build --pull -t $(HEALTHZ_TAG) healthz
 
 .PHONY: clean
 clean:
