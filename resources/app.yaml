@@ -121,6 +121,7 @@ hooks:
             name: pithos-app-post-install
           spec:
             restartPolicy: OnFailure
+            hostNetwork: true
             containers:
               - name: post-install
                 image: pithosctl:latest
@@ -140,6 +141,7 @@ hooks:
             name: pithos-app-update
           spec:
             restartPolicy: OnFailure
+            hostNetwork: true
             containers:
               - name: update
                 image: pithos-hook:latest
@@ -167,6 +169,7 @@ hooks:
             name: pithos-app-post-update
           spec:
             restartPolicy: OnFailure
+            hostNetwork: true
             containers:
               - name: post-update
                 image: pithosctl:latest
