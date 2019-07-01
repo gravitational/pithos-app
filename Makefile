@@ -126,3 +126,4 @@ clean:
 	$(MAKE) -C images clean
 	-rm -rf images/{bootstrap,healthz,pithosctl}/bin
 	-rm -rf $(BUILD_DIR)
+	-rm -rf wd_suite
