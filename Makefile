@@ -73,11 +73,11 @@ images:
 .PHONY: import
 import: images
 	sed -i "s/version: \"0.0.0+latest\"/version: \"$(RUNTIME_VERSION)\"/" resources/app.yaml
-	sed -i "s/gravitational.io/cluster-ssl-app:0.0.0+latest/gravitational.io/cluster-ssl-app:$(CLUSTER_SSL_APP_VERSION)/" resources/app.yaml
+	sed -i "s#gravitational.io/cluster-ssl-app:0.0.0+latest#gravitational.io/cluster-ssl-app:$(CLUSTER_SSL_APP_VERSION)#" resources/app.yaml
 	-$(GRAVITY) app delete --ops-url=$(OPS_URL) $(REPOSITORY)/$(NAME):$(VERSION) --force --insecure $(EXTRA_GRAVITY_OPTIONS)
 	$(GRAVITY) app import $(IMPORT_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) .
 	sed -i "s/version: \"$(RUNTIME_VERSION)\"/version: \"0.0.0+latest\"/" resources/app.yaml
-	sed -i "s/gravitational.io/cluster-ssl-app:$(CLUSTER_SSL_APP_VERSION)/gravitational.io/cluster-ssl-app:0.0.0+latest/" resources/app.yaml
+	sed -i "s#gravitational.io/cluster-ssl-app:$(CLUSTER_SSL_APP_VERSION)#gravitational.io/cluster-ssl-app:0.0.0+latest#" resources/app.yaml
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
@@ -91,10 +91,10 @@ $(TARBALL): import $(BUILD_DIR)
 .PHONY: build-app
 build-app: images | $(BUILD_DIR)
 	sed -i "s/version: \"0.0.0+latest\"/version: \"$(RUNTIME_VERSION)\"/" resources/app.yaml
-	sed -i "s/gravitational.io/cluster-ssl-app:0.0.0+latest/gravitational.io/cluster-ssl-app:$(CLUSTER_SSL_APP_VERSION)/" resources/app.yaml
+	sed -i "s#gravitational.io/cluster-ssl-app:0.0.0+latest#gravitational.io/cluster-ssl-app:$(CLUSTER_SSL_APP_VERSION)#" resources/app.yaml
 	$(TELE) build -f -o build/installer.tar $(TELE_BUILD_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) resources/app.yaml
 	sed -i "s/version: \"$(RUNTIME_VERSION)\"/version: \"0.0.0+latest\"/" resources/app.yaml
-	sed -i "s/gravitational.io/cluster-ssl-app:$(CLUSTER_SSL_APP_VERSION)/gravitational.io/cluster-ssl-app:0.0.0+latest/" resources/app.yaml
+	sed -i "s#gravitational.io/cluster-ssl-app:$(CLUSTER_SSL_APP_VERSION)#gravitational.io/cluster-ssl-app:0.0.0+latest#" resources/app.yaml
 
 .PHONY: build-pithosctl
 build-pithosctl: $(BUILD_DIR)
