@@ -51,7 +51,7 @@ func NewClient(kubeConfig string) (*Client, error) {
 	}, nil
 }
 
-// Pods returns stolon pods matching the specified label
+// Pods returns pithos pods matching the specified label
 func (c *Client) Pods(selector, namespace string) ([]v1.Pod, error) {
 	labelSelector, err := labels.Parse(selector)
 	if err != nil {
