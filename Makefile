@@ -23,7 +23,7 @@ CONTAINERS := pithos-bootstrap:$(VERSION) \
 	pithosctl:$(VERSION)
 
 FILE_LIST := $(shell ls -1A)
-WHITELISTED_RESOURCE_NAMES := resources vendor
+WHITELISTED_RESOURCE_NAMES := resources
 
 IMPORT_IMAGE_FLAGS := --set-image=pithos-bootstrap:$(VERSION) \
 	--set-image=pithos-uninstall:$(VERSION) \
@@ -41,9 +41,11 @@ IMPORT_OPTIONS := --vendor \
 		--name=$(NAME) \
 		--version=$(VERSION) \
 		--glob=**/*.yaml \
-		$(foreach resource, $(filter-out $(WHITELISTED_RESOURCE_NAMES), $(FILE_LIST)), --exclude="$(resource)") \
+		--include="resources" \
+		--include="registry" \
 		--ignore="alerts.yaml" \
 		--ignore="pithos-cfg" \
+		--ignore="vendor/**/*.yaml" \
 		$(IMPORT_IMAGE_FLAGS)
 
 TELE_BUILD_OPTIONS := --insecure \
