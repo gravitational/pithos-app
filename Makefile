@@ -42,9 +42,11 @@ IMPORT_OPTIONS := --vendor \
 		--name=$(NAME) \
 		--version=$(VERSION) \
 		--glob=**/*.yaml \
-		$(foreach resource, $(filter-out $(WHITELISTED_RESOURCE_NAMES), $(FILE_LIST)), --exclude="$(resource)") \
+		--include="resources" \
+		--include="registry" \
+		--ignore="pithos-cfg" \
+		--ignore="vendor/**/*.yaml" \
 		--ignore="alerts.yaml" \
-		--ignore=pithos-cfg \
 		$(IMPORT_IMAGE_FLAGS)
 
 TELE_BUILD_OPTIONS := --insecure \
