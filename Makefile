@@ -32,9 +32,6 @@ IMPORT_IMAGE_FLAGS := --set-image=pithos-bootstrap:$(VERSION) \
 	--set-image=pithos-healthz:$(VERSION) \
 	--set-image=pithosctl:$(VERSION)
 
-FILE_LIST := $(shell ls -1A)
-WHITELISTED_RESOURCE_NAMES := resources vendor
-
 IMPORT_OPTIONS := --vendor \
 		--ops-url=$(OPS_URL) \
 		--insecure \
@@ -54,8 +51,7 @@ TELE_BUILD_OPTIONS := --insecure \
 		--name=$(NAME) \
 		--version=$(VERSION) \
 		--glob=**/*.yaml \
-		$(foreach resource, $(filter-out $(WHITELISTED_RESOURCE_NAMES), $(FILE_LIST)), --ignore="$(resource)") \
-		--ignore="pithos-cfg" \
+		--ignore="pithos-cfg/*.yaml" \
 		--ignore="alerts.yaml" \
 		$(IMPORT_IMAGE_FLAGS)
 
