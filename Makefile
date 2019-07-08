@@ -22,9 +22,6 @@ CONTAINERS := pithos-bootstrap:$(VERSION) \
 	pithos-healthz:$(VERSION) \
 	pithosctl:$(VERSION)
 
-FILE_LIST := $(shell ls -1A)
-WHITELISTED_RESOURCE_NAMES := resources
-
 IMPORT_IMAGE_FLAGS := --set-image=pithos-bootstrap:$(VERSION) \
 	--set-image=pithos-uninstall:$(VERSION) \
 	--set-image=cassandra:$(VERSION) \
@@ -49,14 +46,13 @@ IMPORT_OPTIONS := --vendor \
 		$(IMPORT_IMAGE_FLAGS)
 
 TELE_BUILD_OPTIONS := --insecure \
-                --repository=$(OPS_URL) \
-                --name=$(NAME) \
-                --version=$(VERSION) \
-                --glob=**/*.yaml \
-				$(foreach resource, $(filter-out $(WHITELISTED_RESOURCE_NAMES), $(FILE_LIST)), --ignore="$(resource)") \
-                --ignore="pithos-cfg" \
-                --ignore="alerts.yaml" \
-                $(IMPORT_IMAGE_FLAGS)
+		--repository=$(OPS_URL) \
+		--name=$(NAME) \
+		--version=$(VERSION) \
+		--glob=**/*.yaml \
+		--ignore="pithos-cfg/*.yaml" \
+		--ignore="alerts.yaml" \
+		$(IMPORT_IMAGE_FLAGS)
 
 BUILD_DIR := build
 BINARIES_DIR := bin
