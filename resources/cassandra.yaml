@@ -89,6 +89,8 @@ metadata:
 spec:
   serviceName: cassandra
   replicas: 1
+  updateStrategy:
+    type: RollingUpdate
   selector:
     matchLabels:
       app: pithos
