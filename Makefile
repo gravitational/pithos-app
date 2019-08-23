@@ -20,7 +20,6 @@ CONTAINERS := pithos-bootstrap:$(VERSION) \
 	pithos:$(VERSION) \
 	pithos-proxy:$(VERSION) \
 	pithos-hook:$(VERSION) \
-	pithos-healthz:$(VERSION) \
 	pithosctl:$(VERSION)
 
 IMPORT_IMAGE_FLAGS := --set-image=pithos-bootstrap:$(VERSION) \
@@ -29,7 +28,6 @@ IMPORT_IMAGE_FLAGS := --set-image=pithos-bootstrap:$(VERSION) \
 	--set-image=pithos:$(VERSION) \
 	--set-image=pithos-proxy:$(VERSION) \
 	--set-image=pithos-hook:$(VERSION) \
-	--set-image=pithos-healthz:$(VERSION) \
 	--set-image=pithosctl:$(VERSION)
 
 IMPORT_OPTIONS := --vendor \
@@ -98,7 +96,7 @@ build-app: images | $(BUILD_DIR)
 .PHONY: build-pithosctl
 build-pithosctl: $(BUILD_DIR)
 	docker run $(DOCKERFLAGS) $(BUILDIMAGE) make build-pithosctl-docker
-	for dir in bootstrap healthz pithosctl; do mkdir -p images/$${dir}/bin; cp build/pithosctl images/$${dir}/bin/; done
+	for dir in bootstrap pithosctl; do mkdir -p images/$${dir}/bin; cp build/pithosctl images/$${dir}/bin/; done
 
 .PHONY: build-pithosctl-docker
 build-pithosctl-docker:
@@ -123,6 +121,6 @@ download-binaries: $(BINARIES_DIR)
 .PHONY: clean
 clean:
 	$(MAKE) -C images clean
-	-rm -rf images/{bootstrap,healthz,pithosctl}/bin
+	-rm -rf images/{bootstrap,pithosctl}/bin
 	-rm -rf $(BUILD_DIR)
 	-rm -rf wd_suite
