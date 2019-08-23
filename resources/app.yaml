@@ -14,7 +14,7 @@ systemOptions:
   docker:
     storageDriver: overlay
   runtime:
-    version: "0.0.0+latest"
+    version: "5.0.34"
 
 installer:
   flavors:
