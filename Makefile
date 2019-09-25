@@ -10,7 +10,7 @@ CLUSTER_SSL_APP_VERSION ?= "0.0.0+latest"
 
 SRCDIR=/go/src/github.com/gravitational/pithos-app
 DOCKERFLAGS=--rm=true -v $(PWD):$(SRCDIR) -v $(GOPATH)/pkg:/gopath/pkg -w $(SRCDIR)
-BUILDIMAGE=quay.io/gravitational/debian-venti:go1.11.5-stretch
+BUILDIMAGE=quay.io/gravitational/debian-venti:go1.12.9-buster
 
 EXTRA_GRAVITY_OPTIONS ?=
 

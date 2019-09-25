@@ -30,7 +30,8 @@ apt-get install -y \
     curl \
     gawk \
     python \
-    jq
+    jq \
+    dumb-init
 
 CASSANDRA_PATH="cassandra/${CASSANDRA_VERSION}/apache-cassandra-${CASSANDRA_VERSION}-bin.tar.gz"
 CASSANDRA_DOWNLOAD="http://www.apache.org/dyn/closer.cgi?path=/${CASSANDRA_PATH}&as_json=1"
@@ -112,4 +113,6 @@ rm -rf \
     /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/nashorn.jar \
     /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/oblique-fonts \
     /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/plugin.jar \
-    /usr/lib/jvm/java-8-openjdk-amd64/man
+    /usr/lib/jvm/java-8-openjdk-amd64/man \
+    /var/lib/apt/lists/*
+
