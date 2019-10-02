@@ -46,7 +46,8 @@ function build_upgrade_suite {
   local cluster_size='"flavor":"three","nodes":3,"role":"node"'
   for release in ${!UPGRADE_MAP[@]}; do
     for os in ${UPGRADE_MAP[$release]}; do
-      suite+=" $(build_upgrade_step $os $release 'overlay' $cluster_size)"
+      suite+=" $(build_upgrade_step $os $release 'overlay2' $cluster_size)"
+      suite+=" $(build_upgrade_step $os $release 'devicemapper' $cluster_size)"
     done
   done
   echo $suite

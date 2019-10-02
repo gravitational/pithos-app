@@ -5,7 +5,8 @@ OPS_URL ?= https://opscenter.localhost.localdomain:33009
 TELE ?= $(shell which tele)
 GRAVITY ?= $(shell which gravity)
 RUNTIME_VERSION ?= $(shell $(TELE) version | awk '/^[vV]ersion:/ {print $$2}')
-GRAVITY_VERSION ?= 5.2.12
+INTERMEDIATE_RUNTIME_VERSION ?= 5.2.15
+GRAVITY_VERSION ?= 5.5.21
 CLUSTER_SSL_APP_VERSION ?= "0.0.0+latest"
 
 SRCDIR=/go/src/github.com/gravitational/pithos-app
@@ -51,6 +52,7 @@ TELE_BUILD_OPTIONS := --insecure \
 		--glob=**/*.yaml \
 		--ignore="pithos-cfg/*.yaml" \
 		--ignore="alerts.yaml" \
+		--upgrade-via=$(INTERMEDIATE_RUNTIME_VERSION) \
 		$(IMPORT_IMAGE_FLAGS)
 
 BUILD_DIR := build
