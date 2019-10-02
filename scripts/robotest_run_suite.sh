@@ -80,10 +80,9 @@ suite="$(build_install_suite)"
 suite="$suite $(build_upgrade_suite)"
 
 mkdir -p $UPGRADE_FROM_DIR
-tele login --ops=$OPS_URL --token="$OPS_APIKEY"
 for release in ${!UPGRADE_MAP[@]}; do
     if [ ! -f $UPGRADE_FROM_DIR/installer_$release.tar ]; then
-        tele pull pithos-app:$release --output=$UPGRADE_FROM_DIR/installer_$release.tar
+        tele pull $EXTRA_GRAVITY_OPTIONS pithos-app:$release --output=$UPGRADE_FROM_DIR/installer_$release.tar
     fi
 done
 
