@@ -7,20 +7,21 @@ RUN apt-get update && \
     git checkout $PITHOS_VERSION && \
     LEIN_SILENT=true lein uberjar
 
-FROM quay.io/gravitational/debian-grande:stretch
+FROM ubuntu:bionic
+
+ENV DEBIAN_FRONTEND noninteractive
 
 COPY --from=builder /tmp/pithos/target/pithos-0.7.6-SNAPSHOT-standalone.jar /pithos.jar
 ADD run.sh /run.sh
 ADD aws.sh /usr/local/bin/aws.sh
 
 RUN apt-get update && apt-get -qq -y install \
-        openjdk-8-jre-headless awscli aws-shell groff curl net-tools && \
+        openjdk-8-jre-headless awscli aws-shell groff curl net-tools dumb-init && \
+    rm -rf /var/lib/apt/lists/* && \
     useradd -ms /bin/bash pithos && \
     chown -R pithos /run.sh /pithos.jar && \
     chmod +x /run.sh && \
     chmod +x /usr/local/bin/aws.sh && \
     aws configure set default.s3.signature_version s3
-
-RUN test -f /cleanup.sh && sh /cleanup.sh
 
 CMD /run.sh

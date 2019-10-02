@@ -35,7 +35,7 @@ ignored = ["github.com/gravitational/pithos-app/images*"]
 
 [[constraint]]
   name = "github.com/gravitational/rigging"
-  version = "0.0.12"
+  version = "5.5.2"
 
 [[constraint]]
   name = "github.com/minio/minio-go"
@@ -48,16 +48,16 @@ ignored = ["github.com/gravitational/pithos-app/images*"]
 
 [[override]]
   name = "k8s.io/api"
-  branch = "release-1.9"
+  branch = "release-1.13"
 
 [[override]]
   name = "k8s.io/apimachinery"
-  branch = "release-1.9"
+  branch = "release-1.13"
 
 [[override]]
   name = "k8s.io/client-go"
-  branch = "release-6.0"
+  branch = "release-10.0"
 
 [[override]]
   name = "k8s.io/kubernetes"
-  branch = "release-1.9"
+  branch = "release-1.13"

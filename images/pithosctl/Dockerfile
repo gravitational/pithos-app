@@ -1,4 +1,4 @@
-FROM quay.io/gravitational/debian-grande:stretch
+FROM quay.io/gravitational/debian-grande:buster
 
 ADD bin/pithosctl /usr/local/bin/
 

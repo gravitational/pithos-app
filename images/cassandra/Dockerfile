@@ -3,7 +3,7 @@ WORKDIR /usr/src/app
 COPY java/ .
 RUN mvn -q clean package
 
-FROM quay.io/gravitational/debian-grande:stretch
+FROM ubuntu:bionic
 
 ARG CASSANDRA_VERSION
 ARG JOLOKIA_VERSION
@@ -30,7 +30,5 @@ VOLUME ["/$CASSANDRA_DATA"]
 # 9042: CQL
 # 9160: thrift service
 EXPOSE 7000 7001 7199 9042 9160
-
-RUN test -f /cleanup.sh && sh /cleanup.sh && rm /cleanup.sh
 
 ENTRYPOINT ["/usr/bin/dumb-init", "/bin/bash", "/run.sh"]
