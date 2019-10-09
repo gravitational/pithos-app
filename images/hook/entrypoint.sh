@@ -17,6 +17,15 @@ if [ $1 = "update" ]; then
     rig delete configmaps/pithos-alerts --resource-namespace=monitoring --force
     rig delete configmaps/cassandra --force
 
+    ## copy telegraf secret from monitoring namespace
+    if kubectl --namespace=monitoring get secret telegraf-influxdb-creds >/dev/null 2>&1;
+    then
+	    kubectl --namespace=monitoring get secret telegraf-influxdb-creds --export -o yaml |\
+	    kubectl --namespace=default apply -f -
+    else
+	    kubectl --namespace=default apply -f /var/lib/gravity/resources/secrets.yaml
+    fi
+
     rig upsert -f /var/lib/gravity/resources/cassandra.yaml --debug
     if [ $(kubectl get nodes -l pithos-role=node -o name | wc -l) -ge 3 ]
     then
