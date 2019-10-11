@@ -155,8 +155,6 @@ spec:
                 fieldRef:
                   fieldPath: status.podIP
           ports:
-            - containerPort: 7000
-              name: intra-node
             - containerPort: 7001
               name: tls-intra-node
             - containerPort: 7199
@@ -1156,7 +1154,7 @@ data:
 
     # enable or disable client/server encryption.
     client_encryption_options:
-        enabled: false
+        enabled: true
         # If enabled and optional is set to true encrypted and unencrypted connections are handled.
         optional: false
         keystore: /etc/ssl/cassandra/keystore
