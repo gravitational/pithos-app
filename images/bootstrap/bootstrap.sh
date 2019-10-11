@@ -3,6 +3,15 @@
 set -o errexit
 set -o nounset
 
+## copy telegraf secret from monitoring namespace
+if /opt/bin/kubectl --namespace=monitoring get secret telegraf-influxdb-creds >/dev/null 2>&1;
+then
+	/opt/bin/kubectl --namespace=monitoring get secret telegraf-influxdb-creds --export -o yaml |\
+	/opt/bin/kubectl --namespace=default apply -f -
+else
+	/opt/bin/kubectl --namespace=default apply -f /var/lib/gravity/resources/secrets.yaml
+fi
+
 ## generate cassandra specific keys
 
 keytool -genkey \
