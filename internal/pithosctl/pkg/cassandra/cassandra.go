@@ -19,9 +19,9 @@ package cassandra
 import (
 	"bufio"
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
-	"unicode"
 
 	"github.com/gravitational/trace"
 )
@@ -59,7 +59,7 @@ type Status struct {
 	// Load represents disk usage for data of the cassandra node
 	Load string
 	// Owns represents percentage of data owned by the cassandra node
-	Owns float32
+	Owns float64
 	// HostID represents unique ID of the cassandra node in the ring
 	HostID string
 }
@@ -110,57 +110,50 @@ func GetStatus(statusOutput string) (map[string]*Status, error) {
 }
 
 func processNode(line string) (*Status, error) {
-	const (
-		numberOfColumns      = 8
-		numberOfStatusFields = 2
-	)
+	reNodeStatus := regexp.MustCompile(`^(?P<status>[A-Z])(?P<state>[A-Z])\s+?(?P<ip>(?:[0-9]{1,3}\.){3}[0-9]{1,3})\s+(?P<load>[0-9\.\?]+)\s+(?P<load_units>[A-Za-z]+)?\s+(?P<tokens>[0-9]+)\s+(?P<owns>[0-9\.%]+)\s+(?P<uuid>[a-f\-0-9]+)\s+(?P<rack>.*)$`)
+	fields := reNodeStatus.FindAllStringSubmatch(line, -1)
 
-	f := func(c rune) bool {
-		return !unicode.IsLetter(c) && !unicode.IsNumber(c) && c != '.' && c != '-'
-	}
-	fields := strings.FieldsFunc(line, f)
-
-	if len(fields) != numberOfColumns {
-		return nil, trace.Errorf("invalid 'nodetool status' output: expected %v columns but got %v", len(fields), numberOfColumns)
-	}
-
-	ownsPercentage, err := strconv.ParseFloat(fields[5], 32)
+	ownsPercentage, err := strconv.ParseFloat(fields[0][7], 32)
 	if err != nil {
 		return nil, trace.Wrap(err)
 	}
 
-	if len(fields[0]) != numberOfStatusFields {
-		return nil, trace.Errorf("invalid 'nodetool status' output: expected %v status columns but got %v", len(fields[0]), numberOfStatusFields)
-	}
 	return &Status{
-		Status:  getNodeStatus(fields[0][0]),
-		State:   getNodeState(fields[0][1]),
-		Address: fields[1],
-		Load:    fmt.Sprintf("%s%s", fields[2], fields[3]),
-		Owns:    float32(ownsPercentage),
-		HostID:  fields[6],
+		Status:  getNodeStatus(fields[0][1]),
+		State:   getNodeState(fields[0][2]),
+		Address: fields[0][3],
+		Load:    getNodeLoad(fields[0][4], fields[0][5]),
+		Owns:    ownsPercentage,
+		HostID:  fields[0][8],
 	}, nil
 }
 
-func getNodeStatus(b byte) NodeStatus {
-	switch b {
-	case 85:
+func getNodeLoad(load, unit string) string {
+	if load == "?" {
+		return "0KiB"
+	}
+	return fmt.Sprintf("%s%s", load, unit)
+}
+
+func getNodeStatus(status string) NodeStatus {
+	switch status {
+	case "U":
 		return NodeStatusUp
-	case 68:
+	case "D":
 		return NodeStatusDown
 	}
 	return NodeStatusUnknown
 }
 
-func getNodeState(b byte) NodeState {
-	switch b {
-	case 78:
+func getNodeState(state string) NodeState {
+	switch state {
+	case "N":
 		return NodeStateNormal
-	case 77:
+	case "M":
 		return NodeStateMoving
-	case 74:
+	case "J":
 		return NodeStateJoining
-	case 76:
+	case "L":
 		return NodeStateLeaving
 	}
 	return NodeStateUnknown

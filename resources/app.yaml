@@ -8,13 +8,13 @@ metadata:
 
 dependencies:
   apps:
-    - gravitational.io/cluster-ssl-app:0.0.0+latest
+    - gravitational.io/cluster-ssl-app:0.8.2-5.5.24
 
 systemOptions:
   docker:
     storageDriver: overlay
   runtime:
-    version: "0.0.0+latest"
+    version: "5.2.12"
 
 installer:
   flavors:
@@ -118,6 +118,7 @@ hooks:
         name: pithos-app-post-install
         namespace: default
       spec:
+        backoffLimit: 10
         parallelism: 1
         completions: 1
         template:
@@ -170,6 +171,7 @@ hooks:
         name: pithos-app-post-update
         namespace: default
       spec:
+        backoffLimit: 10
         parallelism: 1
         completions: 1
         template:
