@@ -1144,7 +1144,7 @@ data:
         protocol: TLS
         algorithm: SunX509
         store_type: JKS
-        cipher_suites: [TLS_AES_128_GCM_SHA256,TLS_AES_256_GCM_SHA384]
+        cipher_suites: ["TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256","TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256","TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384","TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384","TLS_DHE_RSA_WITH_AES_128_GCM_SHA256","TLS_DHE_RSA_WITH_AES_256_GCM_SHA384"]
 
     # enable or disable client/server encryption.
     client_encryption_options:
@@ -1161,7 +1161,7 @@ data:
         protocol: TLS
         algorithm: SunX509
         store_type: JKS
-        cipher_suites: [TLS_AES_128_GCM_SHA256,TLS_AES_256_GCM_SHA384]
+        cipher_suites: ["TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256","TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256","TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384","TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384","TLS_DHE_RSA_WITH_AES_128_GCM_SHA256","TLS_DHE_RSA_WITH_AES_256_GCM_SHA384"]
 
     # internode_compression controls whether traffic between nodes is
     # compressed.
