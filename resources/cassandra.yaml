@@ -1131,35 +1131,37 @@ data:
     # the keystore and truststore.  For instructions on generating these files, see:
     # http://download.oracle.com/javase/6/docs/technotes/guides/security/jsse/JSSERefGuide.html#CreateKeystore
     #
+    # enable or disable client/server encryption.
     server_encryption_options:
         internode_encryption: all
         keystore: /etc/ssl/cassandra/keystore
         keystore_password: cassandra
+        # Set trustore and truststore_password if require_client_auth is true
+        require_client_auth: true
         truststore: /etc/ssl/cassandra/sbx.truststore
         truststore_password: cassandra
         # More advanced defaults below:
-        # protocol: TLS
-        # algorithm: SunX509
-        # store_type: JKS
-        # cipher_suites: [TLS_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_256_CBC_SHA,TLS_DHE_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA]
-        require_client_auth: true
+        protocol: TLS
+        algorithm: SunX509
+        store_type: JKS
+        cipher_suites: ["TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256","TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256","TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384","TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384","TLS_DHE_RSA_WITH_AES_128_GCM_SHA256","TLS_DHE_RSA_WITH_AES_256_GCM_SHA384"]
 
     # enable or disable client/server encryption.
     client_encryption_options:
-        enabled: false
+        enabled: true
         # If enabled and optional is set to true encrypted and unencrypted connections are handled.
-        optional: false
+        optional: true
         keystore: /etc/ssl/cassandra/keystore
         keystore_password: cassandra
-        require_client_auth: true
         # Set trustore and truststore_password if require_client_auth is true
+        require_client_auth: true
         truststore: /etc/ssl/cassandra/sbx.truststore
         truststore_password: cassandra
         # More advanced defaults below:
-        # protocol: TLS
-        # algorithm: SunX509
-        # store_type: JKS
-        # cipher_suites: [TLS_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_256_CBC_SHA,TLS_DHE_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA]
+        protocol: TLS
+        algorithm: SunX509
+        store_type: JKS
+        cipher_suites: ["TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256","TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256","TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384","TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384","TLS_DHE_RSA_WITH_AES_128_GCM_SHA256","TLS_DHE_RSA_WITH_AES_256_GCM_SHA384"]
 
     # internode_compression controls whether traffic between nodes is
     # compressed.
