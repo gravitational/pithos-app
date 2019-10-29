@@ -82,6 +82,7 @@ data:
       default-region: 'G1'
       cluster: 'cassandra.default.svc.cluster.local'
       keyspace: 'storage'
+      tls: true
       hints:
         replication:
           class: SimpleStrategy
@@ -105,9 +106,11 @@ data:
         metastore:
           cluster: 'cassandra.default.svc.cluster.local'
           keyspace: 'storage'
+          tls: true
         storage-classes:
           standard:
             cluster: 'cassandra.default.svc.cluster.local'
+            tls: true
             keyspace: 'storage'
             max-chunk: '128k'
             max-block-chunks: 1024
