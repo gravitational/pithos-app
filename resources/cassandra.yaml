@@ -1154,7 +1154,7 @@ data:
         keystore: /etc/ssl/cassandra/keystore
         keystore_password: cassandra
         # Set trustore and truststore_password if require_client_auth is true
-        require_client_auth: true
+        require_client_auth: false
         truststore: /etc/ssl/cassandra/sbx.truststore
         truststore_password: cassandra
         # More advanced defaults below:

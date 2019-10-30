@@ -121,6 +121,11 @@ spec:
         volumeMounts:
           - name: pithos-cfg
             mountPath: /etc/pithos
+          - name: cassandra-ssl
+            mountPath: /etc/cassandra-ssl
+        env:
+          - name: CASSANDRA_CERT_FILE
+            value: /etc/cassandra-ssl/cassandra-node.cer
       - image: pithos-proxy:latest
         name: proxy
         ports:
@@ -156,3 +161,6 @@ spec:
         - name: cluster-default-ssl
           secret:
             secretName: cluster-default-ssl
+        - name: cassandra-ssl
+          secret:
+            secretName: cassandra-ssl
