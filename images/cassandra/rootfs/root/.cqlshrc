@@ -9,3 +9,4 @@ certfile = /etc/ssl/cassandra/cassandra-node.pem
 validate = true
 userkey = /etc/ssl/cassandra/cassandra-node.pem
 usercert = /etc/ssl/cassandra/cassandra-node.pem
+version = TLSv1_2
