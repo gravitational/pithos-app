@@ -1,5 +1,5 @@
 FROM clojure:openjdk-8-lein as builder
-ARG PITHOS_VERSION=c47c5dcee8c6b52b5d7b6bc997685e1ede19d25a
+ARG PITHOS_VERSION=446ee832d10087c3ce85aa7df7b2af085db3efbc
 RUN apt-get update && \
     apt-get install -qq -y git && \
     git clone https://github.com/gravitational/pithos.git && \
