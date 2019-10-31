@@ -110,7 +110,7 @@ func GetStatus(statusOutput string) (map[string]*Status, error) {
 }
 
 func processNode(line string) (*Status, error) {
-	reNodeStatus := regexp.MustCompile(`^(?P<status>[A-Z])(?P<state>[A-Z])\s+?(?P<ip>(?:[0-9]{1,3}\.){3}[0-9]{1,3})\s+(?P<load>[0-9\.\?]+)\s+(?P<load_units>[A-Za-z]+)?\s+(?P<tokens>[0-9]+)\s+(?P<owns>[0-9\.%]+)\s+(?P<uuid>[a-f\-0-9]+)\s+(?P<rack>.*)$`)
+	reNodeStatus := regexp.MustCompile(`^(?P<status>[A-Z])(?P<state>[A-Z])\s+?(?P<ip>(?:[0-9]{1,3}\.){3}[0-9]{1,3})\s+(?P<load>[0-9\.\?]+)\s+(?P<load_units>[A-Za-z]+)?\s+(?P<tokens>[0-9]+)\s+(?P<owns>[0-9\.]+)%\s+(?P<uuid>[a-f\-0-9]+)\s+(?P<rack>.*)$`)
 	fields := reNodeStatus.FindAllStringSubmatch(line, -1)
 
 	ownsPercentage, err := strconv.ParseFloat(fields[0][7], 32)
