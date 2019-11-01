@@ -118,6 +118,7 @@ hooks:
         name: pithos-app-post-install
         namespace: default
       spec:
+        backoffLimit: 10
         parallelism: 1
         completions: 1
         template:
@@ -170,6 +171,7 @@ hooks:
         name: pithos-app-post-update
         namespace: default
       spec:
+        backoffLimit: 10
         parallelism: 1
         completions: 1
         template:
