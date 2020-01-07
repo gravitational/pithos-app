@@ -1,0 +1,20 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pithos-app-pre-update
+  namespace: default
+spec:
+  backoffLimit: 10
+  parallelism: 1
+  completions: 1
+  template:
+    metadata:
+      name: pithos-app-pre-update
+    spec:
+      restartPolicy: OnFailure
+      hostNetwork: true
+      containers:
+        - name: pre-update
+          image: pithosctl:latest
+          command: ["/usr/local/bin/pithosctl", "status", "--short"]

@@ -1,6 +1,11 @@
 #!/bin/bash
 set -e
 
+# Check cluster state before starting upgrade
+kubectl delete -f /var/lib/gravity/resources/preUpdate.yaml --ignore-not-found
+kubectl create -f /var/lib/gravity/resources/preUpdate.yaml
+kubectl wait --for=condition=complete --timeout=120s job/pithos-app-pre-update 
+
 echo "Assuming changeset from the environment: $RIG_CHANGESET"
 # note that rig does not take explicit changeset ID
 # taking it from the environment variables
