@@ -3,6 +3,7 @@ set -e
 
 # Check cluster state before starting upgrade
 kubectl patch statefulset cassandra --type=json -p='[{"op": "remove", "path": "/spec/template/spec/containers/2"}]' || true
+kubectl delete pod -lcomponent=cassandra
 kubectl delete -f /var/lib/gravity/resources/preUpdate.yaml --ignore-not-found
 kubectl create -f /var/lib/gravity/resources/preUpdate.yaml
 kubectl wait --for=condition=complete --timeout=120s job/pithos-app-pre-update
