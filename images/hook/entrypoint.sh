@@ -2,9 +2,10 @@
 set -e
 
 # Check cluster state before starting upgrade
+kubectl patch statefulset cassandra --type=json -p='[{"op": "remove", "path": "/spec/template/spec/containers/2"}]' || true
 kubectl delete -f /var/lib/gravity/resources/preUpdate.yaml --ignore-not-found
 kubectl create -f /var/lib/gravity/resources/preUpdate.yaml
-kubectl wait --for=condition=complete --timeout=120s job/pithos-app-pre-update 
+kubectl wait --for=condition=complete --timeout=120s job/pithos-app-pre-update
 
 echo "Assuming changeset from the environment: $RIG_CHANGESET"
 # note that rig does not take explicit changeset ID
@@ -25,10 +26,10 @@ if [ $1 = "update" ]; then
     ## copy telegraf secret from monitoring namespace
     if kubectl --namespace=monitoring get secret telegraf-influxdb-creds >/dev/null 2>&1;
     then
-	    kubectl --namespace=monitoring get secret telegraf-influxdb-creds --export -o yaml |\
-	    kubectl --namespace=default apply -f -
+      kubectl --namespace=monitoring get secret telegraf-influxdb-creds --export -o yaml |\
+        kubectl --namespace=default apply -f -
     else
-	    kubectl --namespace=default apply -f /var/lib/gravity/resources/secrets.yaml
+      kubectl --namespace=default apply -f /var/lib/gravity/resources/secrets.yaml
     fi
 
     rig upsert -f /var/lib/gravity/resources/cassandra.yaml --debug
