@@ -73,11 +73,10 @@ metadata:
     app: pithos
     product: pithos
 spec:
-  type: NodePort
+  type: ClusterIP
   ports:
     - port: 443
       targetPort: 18443
-      nodePort: 32002
       name: https
   selector:
     app: pithos
