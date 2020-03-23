@@ -1,4 +1,26 @@
 ---
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: cassandra
+  annotations:
+    seccomp.security.alpha.kubernetes.io/allowedProfileNames: 'docker/default'
+    seccomp.security.alpha.kubernetes.io/defaultProfileName:  'docker/default'
+spec:
+  privileged: false
+  seLinux:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  runAsUser:
+    rule: RunAsAny
+  fsGroup:
+    rule: RunAsAny
+  allowedCapabilities:
+  - IPC_LOCK
+  volumes:
+  - '*'
+---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -16,7 +38,7 @@ rules:
     resources:
       - podsecuritypolicies
     resourceNames:
-      - privileged
+      - cassandra
     verbs:
       - use
   - apiGroups:
@@ -107,9 +129,6 @@ spec:
     spec:
       terminationGracePeriodSeconds: 1800
       securityContext:
-        capabilities:
-          add:
-            - IPC_LOCK
         runAsUser: 0
       serviceAccountName: cassandra
       nodeSelector:
@@ -128,6 +147,10 @@ spec:
         - image: cassandra:latest
           name: cassandra
           imagePullPolicy: Always
+          securityContext:
+            capabilities:
+              add:
+                - IPC_LOCK
           lifecycle:
             preStop:
               exec:
@@ -994,7 +1017,7 @@ data:
     #
     # Warning: before enabling this property make sure to ntp is installed
     # and the times are synchronized between the nodes.
-    cross_node_timeout: false
+    cross_node_timeout: true
 
     # Set socket timeout for streaming operation.
     # The stream session is failed if no data is received by any of the
