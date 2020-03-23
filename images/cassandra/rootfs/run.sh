@@ -157,7 +157,7 @@ sed -ri 's/- class_name: SEED_PROVIDER/- class_name: '"$CASSANDRA_SEED_PROVIDER"
 
 # send gc to stdout
 if [[ $CASSANDRA_GC_STDOUT == 'true' ]]; then
-  sed -ri 's/ -Xloggc:\/var\/log\/cassandra\/gc\.log//' $CASSANDRA_CONF_DIR/cassandra-env.sh
+  sed -i '/-Xloggc/d' $CASSANDRA_CONF_DIR/cassandra-env.sh
 fi
 
 # enable RMI and JMX to work on one port
@@ -179,4 +179,6 @@ fi
 chmod 700 "${CASSANDRA_DATA}"
 chown -c -R cassandra "${CASSANDRA_DATA}" "${CASSANDRA_CONF_DIR}"
 
-su cassandra -c "$CASSANDRA_HOME/bin/cassandra -f"
+setcap cap_ipc_lock=+ep /usr/sbin/gosu
+setcap cap_ipc_lock=+ep /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
+gosu cassandra $CASSANDRA_HOME/bin/cassandra -f

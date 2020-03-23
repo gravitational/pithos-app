@@ -31,7 +31,9 @@ apt-get install -y \
     gawk \
     python \
     jq \
-    dumb-init
+    dumb-init \
+    gosu \
+    libcap2-bin
 
 CASSANDRA_PATH="cassandra/${CASSANDRA_VERSION}/apache-cassandra-${CASSANDRA_VERSION}-bin.tar.gz"
 CASSANDRA_DOWNLOAD="http://www.apache.org/dyn/closer.cgi?path=/${CASSANDRA_PATH}&as_json=1"
