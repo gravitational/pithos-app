@@ -114,6 +114,11 @@ data:
             keyspace: 'storage'
             max-chunk: '128k'
             max-block-chunks: 1024
+            socket-options:
+              read-timeout-millis: 50000
+            pooling-options:
+              max-connections-per-host: 10
+              connection-thresholds: 1
             hints:
               replication:
                 class: SimpleStrategy
