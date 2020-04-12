@@ -8,13 +8,13 @@ metadata:
 
 dependencies:
   apps:
-    - gravitational.io/cluster-ssl-app:0.8.2-5.5.40
+    - gravitational.io/cluster-ssl-app:0.0.0+latest
 
 systemOptions:
   docker:
     storageDriver: overlay
   runtime:
-    version: "5.5.40"
+    version: "0.0.0+latest"
 
 installer:
   flavors:
