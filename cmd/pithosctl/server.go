@@ -26,12 +26,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var serverCmd = &cobra.Command{
-	Use:          "server",
-	Short:        "Serve pithos cluster status",
-	SilenceUsage: true,
-	RunE:         server,
-}
+var (
+	serverCmd = &cobra.Command{
+		Use:          "server",
+		Short:        "Serve pithos cluster status",
+		SilenceUsage: true,
+		RunE:         server,
+	}
+)
 
 func init() {
 	pithosctlCmd.AddCommand(serverCmd)
