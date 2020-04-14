@@ -61,7 +61,7 @@ func (h *HealthzConfig) CheckAndSetDefaults() error {
 
 // Healthz defines configuration for pithos server health checks
 type Healthz struct {
-	// Bucket defines bucket used for health checks
+	// Bucket defines S3 bucket used for health checks
 	Bucket string
 	// Client represent minio.io S3 client
 	Client *minio.Client
@@ -93,9 +93,9 @@ func initClient(config HealthzConfig) (*minio.Client, error) {
 	return client, nil
 }
 
-// Prepare creates bucket and object if they are not exist
+// Prepare creates bucket and object if they do not exist
 func (h *Healthz) Prepare() error {
-	if err := h.createBucket(); err != nil {
+	if err := h.createBucketIfNotExist(); err != nil {
 		return trace.Wrap(err)
 	}
 
@@ -114,7 +114,7 @@ func (h *Healthz) bucketExists() (bool, error) {
 	return found, nil
 }
 
-func (h *Healthz) createBucket() error {
+func (h *Healthz) createBucketIfNotExist() error {
 	bucketFound, err := h.bucketExists()
 	if err != nil {
 		return trace.Wrap(err)

@@ -25,7 +25,7 @@ const (
 	PithosNodeSelector = "pithos-role=node"
 	// Threshold is minimum bytes to consider load between nodes unevenly distributed
 	Threshold int64 = 1073741824 // 1GiB
-	// HealthzBucket is the name of the bucked used for health checks
+	// HealthzBucket is the name of the S3 bucket used for health checks
 	HealthzBucket = "healthz"
 	// HealthzEndpoint is the address of pithos server used for health checks
 	HealthzEndpoint = "localhost:18080"

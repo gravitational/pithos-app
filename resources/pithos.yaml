@@ -171,10 +171,11 @@ spec:
         livenessProbe:
           httpGet:
             path: /healthz
-            port: 8080
+            port: 8081
           initialDelaySeconds: 120
           periodSeconds: 60
-          # a little bith higher than configured timeout in pithos.conf
+          # slightly higher than the timeout configured in pithos.conf
+          # https://github.com/gravitational/pithos-app/blob/master/resources/pithos-cfg/config.yaml.template#L118
           # read-timeout-millis: 30000
           timeoutSeconds: 32
       volumes:

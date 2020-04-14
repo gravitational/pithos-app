@@ -70,9 +70,9 @@ func healthz(ccmd *cobra.Command, args []string) error {
 		return trace.Wrap(err)
 	}
 
-	log.Info("Starting endpoint.")
+	log.WithField("endpoint", endpoint).Info("Start server.")
 	handler := http.NewServeMux()
-	server := &http.Server{Addr: ":8080", Handler: handler}
+	server := &http.Server{Addr: ":8081", Handler: handler}
 
 	handler.HandleFunc("/healthz", healthzHandler)
 

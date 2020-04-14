@@ -69,7 +69,6 @@ func bindFlagEnv(flagSet *flag.FlagSet) error {
 				if err := cmdFlag.Value.Set(value); err != nil {
 					return trace.Wrap(err)
 				}
-
 			}
 		}
 	}
