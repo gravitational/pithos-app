@@ -12,6 +12,7 @@ import (
 	"github.com/gravitational/trace"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	flag "github.com/spf13/pflag"
 )
 
 var (
@@ -24,6 +25,13 @@ var (
 		Run: func(ccmd *cobra.Command, args []string) {
 			ccmd.HelpFunc()(ccmd, args)
 		},
+	}
+
+	envs = map[string]string{
+		"AWS_ACCESS_KEY_ID":     "access-key",
+		"AWS_SECRET_ACCESS_KEY": "secret-access-key",
+		"ENDPOINT":              "endpoint",
+		"BUCKET":                "bucket",
 	}
 )
 
@@ -50,4 +58,19 @@ func init() {
 		log.Infof("Caught signal: %v.", sig)
 		cancel()
 	}()
+}
+
+// bindFlagEnv binds environment variables to command flags
+func bindFlagEnv(flagSet *flag.FlagSet) error {
+	for env, flag := range envs {
+		cmdFlag := flagSet.Lookup(flag)
+		if cmdFlag != nil {
+			if value := os.Getenv(env); value != "" {
+				if err := cmdFlag.Value.Set(value); err != nil {
+					return trace.Wrap(err)
+				}
+			}
+		}
+	}
+	return nil
 }
