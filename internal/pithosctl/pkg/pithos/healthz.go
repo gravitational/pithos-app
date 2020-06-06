@@ -142,6 +142,12 @@ func (h *Healthz) createObject() error {
 }
 
 func (h *Healthz) GetObject() error {
-	_, err := h.Client.GetObject(h.Bucket, objectName, minio.GetObjectOptions{})
+	reader, err := h.Client.GetObject(h.Bucket, objectName, minio.GetObjectOptions{})
+	if err != nil {
+		return trace.Wrap(err)
+	}
+
+	var data []byte
+	_, err = reader.Read(data)
 	return trace.Wrap(err)
 }

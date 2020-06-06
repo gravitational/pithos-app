@@ -160,6 +160,9 @@ if [[ $CASSANDRA_GC_STDOUT == 'true' ]]; then
   sed -i '/-Xloggc/d' $CASSANDRA_CONF_DIR/cassandra-env.sh
 fi
 
+# print heap histogram on OutOfMemoryError
+sed -ri "/^#.*cassandra.printHeapHistogramOnOutOfMemoryError/s/^# //" $CASSANDRA_CONF_DIR/cassandra-env.sh
+
 # enable RMI and JMX to work on one port
 echo "JVM_OPTS=\"\$JVM_OPTS -Djava.rmi.server.hostname=$POD_IP\"" >> $CASSANDRA_CONF_DIR/cassandra-env.sh
 
