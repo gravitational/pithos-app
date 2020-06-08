@@ -146,6 +146,7 @@ func (h *Healthz) GetObject() error {
 	if err != nil {
 		return trace.Wrap(err)
 	}
+	defer reader.Close()
 
 	var data []byte
 	_, err = reader.Read(data)
