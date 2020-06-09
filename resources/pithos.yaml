@@ -125,6 +125,16 @@ spec:
         env:
           - name: CASSANDRA_CERT_FILE
             value: /etc/cassandra-ssl/cassandra-node.cer
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          # slightly higher than the timeout configured in pithos.conf
+          # https://github.com/gravitational/pithos-app/blob/master/resources/pithos-cfg/config.yaml.template#L118
+          # read-timeout-millis: 30000
+          timeoutSeconds: 32
       - image: pithos-proxy:latest
         name: proxy
         ports:
@@ -168,16 +178,6 @@ spec:
               secretKeyRef:
                 name: pithos-keys
                 key: master.secret
-        livenessProbe:
-          httpGet:
-            path: /healthz
-            port: 8081
-          initialDelaySeconds: 120
-          periodSeconds: 60
-          # slightly higher than the timeout configured in pithos.conf
-          # https://github.com/gravitational/pithos-app/blob/master/resources/pithos-cfg/config.yaml.template#L118
-          # read-timeout-millis: 30000
-          timeoutSeconds: 32
       volumes:
         - name: pithos-cfg
           configMap:
