@@ -16,6 +16,7 @@ spec:
     rule: RunAsAny
   fsGroup:
     rule: RunAsAny
+  readOnlyRootFilesystem: false
   allowedCapabilities:
   - IPC_LOCK
   volumes:
@@ -148,6 +149,7 @@ spec:
           name: cassandra
           imagePullPolicy: Always
           securityContext:
+            readOnlyRootFilesystem: false
             capabilities:
               add:
                 - IPC_LOCK
