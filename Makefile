@@ -5,7 +5,7 @@ OPS_URL ?= https://opscenter.localhost.localdomain:33009
 TELE ?= $(shell which tele)
 GRAVITY ?= $(shell which gravity)
 RUNTIME_VERSION ?= $(shell $(TELE) version | awk '/^[vV]ersion:/ {print $$2}')
-INTERMEDIATE_RUNTIME_VERSION ?= 5.2.15
+INTERMEDIATE_RUNTIME_VERSION ?=
 GRAVITY_VERSION ?= 5.5.21
 CLUSTER_SSL_APP_VERSION ?= "0.0.0+latest"
 
@@ -14,6 +14,11 @@ DOCKERFLAGS=--rm=true -v $(PWD):$(SRCDIR) -v $(GOPATH)/pkg:/gopath/pkg -w $(SRCD
 BUILDIMAGE=quay.io/gravitational/debian-venti:go1.12.9-buster
 
 EXTRA_GRAVITY_OPTIONS ?=
+TELE_BUILD_EXTRA_OPTIONS ?=
+# if variable is not empty add an extra parameter to tele build
+ifneq ($(INTERMEDIATE_RUNTIME_VERSION),)
+	TELE_BUILD_EXTRA_OPTIONS +=  --upgrade-via=$(INTERMEDIATE_RUNTIME_VERSION)
+endif
 
 CONTAINERS := pithos-bootstrap:$(VERSION) \
 	pithos-uninstall:$(VERSION) \
@@ -33,7 +38,6 @@ IMPORT_IMAGE_FLAGS := --set-image=pithos-bootstrap:$(VERSION) \
 
 IMPORT_OPTIONS := --vendor \
 		--ops-url=$(OPS_URL) \
-		--insecure \
 		--repository=$(REPOSITORY) \
 		--name=$(NAME) \
 		--version=$(VERSION) \
@@ -45,14 +49,13 @@ IMPORT_OPTIONS := --vendor \
 		--ignore="alerts.yaml" \
 		$(IMPORT_IMAGE_FLAGS)
 
-TELE_BUILD_OPTIONS := --insecure \
-		--repository=$(OPS_URL) \
+TELE_BUILD_OPTIONS := --repository=$(OPS_URL) \
 		--name=$(NAME) \
 		--version=$(VERSION) \
 		--glob=**/*.yaml \
 		--ignore="pithos-cfg/*.yaml" \
 		--ignore="alerts.yaml" \
-		--upgrade-via=$(INTERMEDIATE_RUNTIME_VERSION) \
+		$(TELE_BUILD_EXTRA_OPTIONS) \
 		$(IMPORT_IMAGE_FLAGS)
 
 BUILD_DIR := build
@@ -73,7 +76,7 @@ images:
 import: images
 	sed -i "s/version: \"0.0.0+latest\"/version: \"$(RUNTIME_VERSION)\"/" resources/app.yaml
 	sed -i "s#gravitational.io/cluster-ssl-app:0.0.0+latest#gravitational.io/cluster-ssl-app:$(CLUSTER_SSL_APP_VERSION)#" resources/app.yaml
-	-$(GRAVITY) app delete --ops-url=$(OPS_URL) $(REPOSITORY)/$(NAME):$(VERSION) --force --insecure $(EXTRA_GRAVITY_OPTIONS)
+	-$(GRAVITY) app delete --ops-url=$(OPS_URL) $(REPOSITORY)/$(NAME):$(VERSION) --force $(EXTRA_GRAVITY_OPTIONS)
 	$(GRAVITY) app import $(IMPORT_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) .
 	sed -i "s/version: \"$(RUNTIME_VERSION)\"/version: \"0.0.0+latest\"/" resources/app.yaml
 	sed -i "s#gravitational.io/cluster-ssl-app:$(CLUSTER_SSL_APP_VERSION)#gravitational.io/cluster-ssl-app:0.0.0+latest#" resources/app.yaml
@@ -91,7 +94,7 @@ $(TARBALL): import $(BUILD_DIR)
 build-app: images | $(BUILD_DIR)
 	sed -i "s/version: \"0.0.0+latest\"/version: \"$(RUNTIME_VERSION)\"/" resources/app.yaml
 	sed -i "s#gravitational.io/cluster-ssl-app:0.0.0+latest#gravitational.io/cluster-ssl-app:$(CLUSTER_SSL_APP_VERSION)#" resources/app.yaml
-	$(TELE) build -f -o build/installer.tar $(TELE_BUILD_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) resources/app.yaml
+	-$(TELE) build -f -o build/installer.tar $(TELE_BUILD_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) resources/app.yaml
 	sed -i "s/version: \"$(RUNTIME_VERSION)\"/version: \"0.0.0+latest\"/" resources/app.yaml
 	sed -i "s#gravitational.io/cluster-ssl-app:$(CLUSTER_SSL_APP_VERSION)#gravitational.io/cluster-ssl-app:0.0.0+latest#" resources/app.yaml
 
@@ -126,3 +129,7 @@ clean:
 	-rm -rf images/{bootstrap,pithosctl}/bin
 	-rm -rf $(BUILD_DIR)
 	-rm -rf wd_suite
+
+.PHONY: push
+push:
+	$(TELE) push -f $(EXTRA_GRAVITY_OPTIONS) $(BUILD_DIR)/installer.tar
