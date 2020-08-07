@@ -36,8 +36,9 @@ apt-get install -y \
     libcap2-bin
 
 CASSANDRA_PATH="cassandra/${CASSANDRA_VERSION}/apache-cassandra-${CASSANDRA_VERSION}-bin.tar.gz"
-CASSANDRA_DOWNLOAD="http://www.apache.org/dyn/closer.cgi?path=/${CASSANDRA_PATH}&as_json=1"
-CASSANDRA_MIRROR=`curl -L ${CASSANDRA_DOWNLOAD} | grep -oP "(?<=\"preferred\": \")[^\"]+"`
+# CASSANDRA_DOWNLOAD="http://www.apache.org/dyn/closer.cgi?path=/${CASSANDRA_PATH}&as_json=1"
+# CASSANDRA_MIRROR=`curl -L ${CASSANDRA_DOWNLOAD} | grep -oP "(?<=\"preferred\": \")[^\"]+"`
+CASSANDRA_MIRROR=https://archive.apache.org/dist/
 
 echo "Downloading Apache Cassandra from $CASSANDRA_MIRROR$CASSANDRA_PATH..."
 curl -L $CASSANDRA_MIRROR$CASSANDRA_PATH \
