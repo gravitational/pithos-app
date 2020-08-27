@@ -111,6 +111,10 @@ spec:
       serviceAccountName: pithos
       nodeSelector:
         pithos-role: node
+      securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
+          fsGroup: 1000
       containers:
       - image: pithos:latest
         name: pithos
