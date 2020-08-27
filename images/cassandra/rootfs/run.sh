@@ -21,6 +21,8 @@ CASSANDRA_CFG=$CASSANDRA_CONF_DIR/cassandra.yaml
 
 mkdir -p $CASSANDRA_CONF_DIR_RO
 cp -L $CASSANDRA_CONF_DIR_RO/* $CASSANDRA_CONF_DIR
+chown -R 1000:1000 $CASSANDRA_CONF_DIR
+chmod -R a+rX $CASSANDRA_CONF_DIR
 chmod +w $CASSANDRA_CONF_DIR/*
 
 # we are doing StatefulSet or just setting our seeds
@@ -182,6 +184,4 @@ fi
 chmod 700 "${CASSANDRA_DATA}"
 chown -c -R cassandra "${CASSANDRA_DATA}" "${CASSANDRA_CONF_DIR}"
 
-setcap cap_ipc_lock=+ep /usr/sbin/gosu
-setcap cap_ipc_lock=+ep /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
-gosu cassandra $CASSANDRA_HOME/bin/cassandra -f
+$CASSANDRA_HOME/bin/cassandra -f
