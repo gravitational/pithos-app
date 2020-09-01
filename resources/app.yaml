@@ -21,11 +21,6 @@ installer:
     prompt: "How many nodes will you need?"
     default: one
     items:
-      - name: "one"
-        description: "single node"
-        nodes:
-          - profile: node
-            count: 1
       - name: "three"
         description: "three node cluster"
         nodes:
