@@ -38,9 +38,8 @@ apt-get install -y \
 CASSANDRA_PATH="cassandra/${CASSANDRA_VERSION}/apache-cassandra-${CASSANDRA_VERSION}-bin.tar.gz"
 CASSANDRA_DOWNLOAD="https://archive.apache.org/dist/${CASSANDRA_PATH}"
 
-echo "Downloading Apache Cassandra from $CASSANDRA_MIRROR$CASSANDRA_PATH..."
-curl -L $CASSANDRA_DOWNLOAD \
-    | tar -xzf - -C /usr/local
+echo "Downloading Apache Cassandra from $CASSANDRA_DOWNLOAD..."
+curl -L $CASSANDRA_DOWNLOAD | tar -xzf - -C /usr/local
 
 mkdir -p /cassandra_data/data
 mkdir -p /etc/cassandra
