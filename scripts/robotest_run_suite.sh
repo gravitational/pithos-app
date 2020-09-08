@@ -82,7 +82,9 @@ suite="$suite $(build_upgrade_suite)"
 mkdir -p $UPGRADE_FROM_DIR
 for release in ${!UPGRADE_MAP[@]}; do
     if [ ! -f $UPGRADE_FROM_DIR/installer_$release.tar ]; then
-        tele pull $EXTRA_GRAVITY_OPTIONS pithos-app:$release --output=$UPGRADE_FROM_DIR/installer_$release.tar
+        #tele pull $EXTRA_GRAVITY_OPTIONS pithos-app:$release --output=$UPGRADE_FROM_DIR/installer_$release.tar
+        aws s3 cp s3://builds.gravitational.io/pithos/pithos-app-1.10.41.tar
+        mv pithos-app-1.10.41.tar $UPGRADE_FROM_DIR/installer_$release.tar
     fi
 done
 
