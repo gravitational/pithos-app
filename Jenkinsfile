@@ -56,7 +56,7 @@ properties([
            defaultValue: '0.8.3',
            description: 'cluster-ssl-app version'),
     string(name: 'INTERMEDIATE_RUNTIME_VERSION',
-           defaultValue: '5.2.17',
+           defaultValue: '6.1.36',
            description: 'Version of runtime to upgrade with'),
     string(name: 'EXTRA_GRAVITY_OPTIONS',
            defaultValue: '',
