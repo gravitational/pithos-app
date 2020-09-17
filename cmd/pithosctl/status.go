@@ -56,6 +56,11 @@ Setting it to a too small value might result in frequent status failures on smal
 }
 
 func status(ccmd *cobra.Command, args []string) error {
+	err := setReplicationFactor(&pithosConfig)
+	if err != nil {
+		return trace.Wrap(err)
+	}
+
 	if err := pithosConfig.Check(); err != nil {
 		return trace.Wrap(err)
 	}

@@ -9,6 +9,7 @@ import (
 	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/cluster"
 	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/defaults"
 
+	"github.com/gravitational/rigging"
 	"github.com/gravitational/trace"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -72,5 +73,21 @@ func bindFlagEnv(flagSet *flag.FlagSet) error {
 			}
 		}
 	}
+	return nil
+}
+
+func setReplicationFactor(config *cluster.Config) (err error) {
+	nodes, err := rigging.NodesMatchingLabel(pithosConfig.NodeSelector)
+	if err != nil {
+		return trace.Wrap(err)
+	}
+
+	replicationFactor := 1
+	if len(nodes.Items) >= 3 {
+		replicationFactor = 3
+	}
+
+	log.Infof("Replication factor: %v.", replicationFactor)
+	config.ReplicationFactor = replicationFactor
 	return nil
 }

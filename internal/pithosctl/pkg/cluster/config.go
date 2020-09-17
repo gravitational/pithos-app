@@ -30,56 +30,56 @@ type Config struct {
 	Namespace string
 	// NodeSelector defines the filter for kubernetes nodes where cassandra should start
 	NodeSelector string
-	// Keys defines list of S3 keys which should be created during bootstrap
-	Keys []AccessKey
 	// CassandraPodSelector defines labels to select cassandra pods
 	CassandraPodSelector string
-	// Bootstrap represents bootstrapping configuration for pithos application
-	Bootstrap *Bootstrap
+	// PithosConfigMapName defines configmap name for pithos application
+	PithosConfigMapName string
+	// ReplicationFactor defines replication factor for cassandra keyspace
+	ReplicationFactor int
+	// Keystore represents configuration for S3 keys storage
+    Keystore Keystore `yaml:"keystore"`
+    // Bucketstore represents configuration for S3 buckets storage
+    Bucketstore Bucketstore `yaml:"bucketstore"`
+}
+
+// Keystore represents configuration for S3 keys storage
+type Keystore struct {
+    Keys map[string]AccessKey `yaml:"keys"`
+}
+
+// Bucketstore represents configuration for buckets storage
+type Bucketstore struct {
+  Hints struct {
+    Replication struct {
+      ReplicationFactor int `yaml:"replication_factor"`
+    }
+  }
 }
 
 // Check checks configuration parameters
 func (p *Config) Check() error {
 	var errors []error
-	if err := p.Bootstrap.Check(); err != nil {
-		errors = append(errors, err)
-	}
 	if p.Namespace == "" {
 		errors = append(errors, trace.BadParameter("namespace is required"))
 	}
 	if p.NodeSelector == "" {
 		errors = append(errors, trace.BadParameter("label is required"))
 	}
+	if p.ReplicationFactor < 1 {
+		return trace.BadParameter("replication factor must be >= 1")
+	}
 	return trace.NewAggregate(errors...)
 }
 
-// Bootstrap represents bootstrapping configuration for pithos application
-type Bootstrap struct {
-	// ReplicationFactor defines replication factor for cassandra keyspace
-	ReplicationFactor int
-}
-
-// Check checks configuration parameters
-func (b *Bootstrap) Check() error {
-	if b == nil {
-		return nil
-	}
-	if b.ReplicationFactor < 1 {
-		return trace.BadParameter("replication factor must be >= 1")
-	}
-	return nil
-}
-
-// AccessKey defines pithos S3 access key configuration
+// AccesKey defines S3 key configuration
 type AccessKey struct {
-	// Key defines S3 access key
-	Key KeyString
 	// Secret defines S3 secret access key
-	Secret KeyString
+	Secret KeyString `yaml:"secret"`
 	// Master parameter for key will allow access to all buckets
-	Master bool
+	Master bool `yaml:"master"`
 	// Tenant defines S3 user name
-	Tenant string
+	Tenant string `yaml:"tenant"`
+
 }
 
 // KeyString is helper type for converting string into base64-encoded format
@@ -93,4 +93,9 @@ func (k KeyString) EncodeBase64() string {
 // String is a string representation of KeyString type
 func (k KeyString) String() string {
 	return string(k)
+}
+
+// BucketStore defines configuration for S3 buckets storage
+type BucketsStore struct {
+
 }

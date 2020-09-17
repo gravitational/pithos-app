@@ -19,7 +19,7 @@ package kubernetes
 import (
 	"github.com/gravitational/rigging"
 	"github.com/gravitational/trace"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
@@ -68,6 +68,16 @@ func (c *Client) Pods(selector, namespace string) ([]v1.Pod, error) {
 	}
 
 	return podList.Items, nil
+}
+
+// PithosConfigMap return configmap containing pithos configuration
+func (c *Client) PithosConfigMap(configMapName, namespace string) (*v1.ConfigMap, error) {
+    configMap, err := c.CoreV1().ConfigMaps(namespace).Get(configMapName, metav1.GetOptions{})
+    if err ! nil {
+        return nil, rigging.ConvertError(err)
+    }
+
+    return configMap, nil
 }
 
 // GetClientConfig returns client configuration,

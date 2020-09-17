@@ -86,7 +86,7 @@ data:
       hints:
         replication:
           class: SimpleStrategy
-          replication_factor: {{ .Bootstrap.ReplicationFactor }}
+          replication_factor: {{ .ReplicationFactor }}
 
 
     ## regions
@@ -122,4 +122,4 @@ data:
             hints:
               replication:
                 class: SimpleStrategy
-                replication_factor: {{ .Bootstrap.ReplicationFactor }}
+                replication_factor: {{ .ReplicationFactor }}

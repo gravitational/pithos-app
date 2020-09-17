@@ -19,7 +19,6 @@ package main
 import (
 	"strings"
 
-	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/cluster"
 	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/pithos"
 
 	"github.com/gravitational/rigging"
@@ -40,15 +39,11 @@ func init() {
 }
 
 func initApp(ccmd *cobra.Command, args []string) error {
-	replicas, err := determineReplicationFactor()
+	err := setReplicationFactor(&pithosConfig)
 	if err != nil {
 		return trace.Wrap(err)
 	}
 
-	log.Infof("Replication factor: %v.", replicas)
-	pithosConfig.Bootstrap = &cluster.Bootstrap{
-		ReplicationFactor: replicas,
-	}
 	if err = pithosConfig.Check(); err != nil {
 		return trace.Wrap(err)
 	}
@@ -80,18 +75,6 @@ func initApp(ccmd *cobra.Command, args []string) error {
 		return trace.Wrap(err)
 	}
 	return nil
-}
-
-func determineReplicationFactor() (replicationFactor int, err error) {
-	nodes, err := rigging.NodesMatchingLabel(pithosConfig.NodeSelector)
-	if err != nil {
-		return 0, trace.Wrap(err)
-	}
-
-	if len(nodes.Items) >= 3 {
-		return 3, nil
-	}
-	return 1, nil
 }
 
 func isAlreadyExistsError(output []byte) bool {
