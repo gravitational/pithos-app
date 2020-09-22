@@ -76,7 +76,7 @@ func (c *DeploymentControl) Delete(ctx context.Context, cascade bool) error {
 		return ConvertError(err)
 	}
 
-	pods := c.Client.CoreV1().Pods(c.Deployment.Namespace)
+	pods := c.Client.Core().Pods(c.Deployment.Namespace)
 	currentPods, err := c.collectPods(currentDeployment)
 	if err != nil {
 		return trace.Wrap(err)
@@ -144,7 +144,7 @@ func (c *DeploymentControl) nodeSelector() labels.Selector {
 }
 
 func (c *DeploymentControl) Status() error {
-	deployments := c.Client.ExtensionsV1beta1().Deployments(c.Deployment.Namespace)
+	deployments := c.Client.Extensions().Deployments(c.Deployment.Namespace)
 	currentDeployment, err := deployments.Get(c.Deployment.Name, metav1.GetOptions{})
 	if err != nil {
 		return ConvertError(err)
@@ -170,10 +170,26 @@ func (c *DeploymentControl) collectPods(deployment *appsv1.Deployment) (map[stri
 	if deployment.Spec.Selector != nil {
 		labels = deployment.Spec.Selector.MatchLabels
 	}
-	pods, err := CollectPods(deployment.Namespace, labels, c.FieldLogger, c.Client, func(ref metav1.OwnerReference) bool {
+	replicaSets, err := CollectReplicaSets(deployment.Namespace, labels, c.FieldLogger, c.Client, func(ref metav1.OwnerReference) bool {
 		return ref.Kind == KindDeployment && ref.UID == deployment.UID
 	})
-	return pods, ConvertError(err)
+	if err != nil {
+		return nil, ConvertError(err)
+	}
+
+	pods := make(map[string]v1.Pod)
+	for _, replicaSet := range replicaSets {
+		podMap, err := CollectPods(replicaSet.Namespace, labels, c.FieldLogger, c.Client, func(ref metav1.OwnerReference) bool {
+			return ref.Kind == KindReplicaSet && ref.UID == replicaSet.UID
+		})
+		if err != nil {
+			return nil, ConvertError(err)
+		}
+		for _, pod := range podMap {
+			pods[pod.ObjectMeta.Name] = pod
+		}
+	}
+	return pods, nil
 }
 
 func updateTypeMetaDeployment(r *appsv1.Deployment) {

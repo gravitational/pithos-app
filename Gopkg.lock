@@ -106,12 +106,12 @@
   version = "v0.2.0"
 
 [[projects]]
-  digest = "1:1fcd3648f682617114850b8ef8d2ce305c36a9a921d44d3d7bdeea0e5fb87f51"
+  branch = "sergei/5.5.x/label_rework"
+  digest = "1:c1c6f2b587a2c8c1ea9139cbd07a211e6e42858f13b887a54c483c4751c81af0"
   name = "github.com/gravitational/rigging"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "0603fff198aa8700e3fef976c551ab47baa025ac"
-  version = "5.6.0"
+  revision = "1eb0d71b2cd9b24afd92d79618b522633adc713a"
 
 [[projects]]
   digest = "1:f26f8e9e1cf3d865e0850c38fe42f94cc6105b2a30f3960b5ae8fc8282a8591f"
@@ -395,7 +395,7 @@
   revision = "ebce17126a01f5fe02364d88c899816bcc2a8165"
 
 [[projects]]
-  digest = "1:47ddb5be73e959bd73931c04911cd05e3f45d7f7c978a45eb817e1fb85e21da4"
+  digest = "1:02c3ed06de7c59e855ef79e7607aa2f1c47aef0d77a83d8a58d4a56060ac84c6"
   name = "k8s.io/apiextensions-apiserver"
   packages = [
     "pkg/apis/apiextensions",
@@ -406,8 +406,8 @@
     "pkg/features",
   ]
   pruneopts = "NUT"
-  revision = "53c4693659ed354d76121458fb819202dd1635fa"
-  version = "kubernetes-1.14.0"
+  revision = "e8460a76b3ad783b7b2f1bb45ad61ea0ebf197ed"
+  version = "kubernetes-1.13.11"
 
 [[projects]]
   branch = "release-1.13"
@@ -593,6 +593,7 @@
     "github.com/minio/minio-go",
     "github.com/sirupsen/logrus",
     "github.com/spf13/cobra",
+    "github.com/spf13/pflag",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/labels",
