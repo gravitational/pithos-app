@@ -40,10 +40,11 @@ func init() {
 }
 
 func server(ccmd *cobra.Command, args []string) error {
-	err := setReplicationFactor(&pithosConfig)
+	replicationFactor, err := determineReplicationFactor(pithosConfig)
 	if err != nil {
 		return trace.Wrap(err)
 	}
+	pithosConfig.ReplicationFactor = replicationFactor
 
 	if err := pithosConfig.Check(); err != nil {
 		return trace.Wrap(err)

@@ -16,19 +16,40 @@ limitations under the License.
 
 package main
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/defaults"
+	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/pithos"
+
+	"github.com/gravitational/trace"
+	"github.com/spf13/cobra"
+)
 
 var updateCmd = &cobra.Command{
-	Use: "update",
-	Short: "Update pithos application components",
+	Use:          "update",
+	Short:        "Update pithos application components",
 	SilenceUsage: true,
-	RunE: updateApp,
+	RunE:         updateApp,
 }
 
 func init() {
 	pithosctlCmd.AddCommand(updateCmd)
+	pithosctlCmd.PersistentFlags().StringVar(&pithosConfig.PithosSecret, "pithos-secret", defaults.PithosSecret, "Secret name storing S3 keys.")
 }
 
 func updateApp(ccmd *cobra.Command, args []string) error {
+	replicationFactor, err := determineReplicationFactor(pithosConfig)
+	if err != nil {
+		return trace.Wrap(err)
+	}
+	pithosConfig.ReplicationFactor = replicationFactor
+
+	if err := pithosConfig.Check(); err != nil {
+		return trace.Wrap(err)
+	}
+
+	err = pithos.Update(ctx, &pithosConfig)
+	if err != nil {
+		return trace.Wrap(err)
+	}
 	return nil
 }

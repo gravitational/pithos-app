@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+	"io"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/cluster"
 	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/defaults"
+	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/kubernetes"
 
 	"github.com/gravitational/rigging"
 	"github.com/gravitational/trace"
@@ -17,12 +19,22 @@ import (
 )
 
 var (
+	// kubeConfig defines path to kubernetes configuration file
+	kubeConfig   string
 	pithosConfig cluster.Config
 	ctx          context.Context
+	// verbosity determines verbosity level for output
+	verbosity string
 
 	pithosctlCmd = &cobra.Command{
 		Use:   "",
 		Short: "Utility to manage pithos application",
+		PersistentPreRunE: func(ccmd *cobra.Command, args []string) error {
+			if err := setUpLogs(os.Stdout, verbosity); err != nil {
+				return err
+			}
+			return nil
+		},
 		Run: func(ccmd *cobra.Command, args []string) {
 			ccmd.HelpFunc()(ccmd, args)
 		},
@@ -44,10 +56,14 @@ func main() {
 }
 
 func init() {
+	cobra.OnInitialize(initKubeClient)
+
+	pithosctlCmd.PersistentFlags().StringVar(&kubeConfig, "kubeconfig", "", "Path to Kubernetes configuration file.")
 	pithosctlCmd.PersistentFlags().StringVarP(&pithosConfig.Namespace, "namespace", "n", defaults.Namespace, "Kubernetes namespace for pithos application.")
 	pithosctlCmd.PersistentFlags().StringVar(&pithosConfig.NodeSelector, "nodeSelector", defaults.PithosNodeSelector, "Label(s) to select nodes for pithos application.")
 	pithosctlCmd.PersistentFlags().StringVar(&pithosConfig.CassandraPodSelector, "cassandraPodsSelector",
 		defaults.CassandraPodSelector, "Label(s) to select cassandra pods. Format is the same as used in `kubectl --selector`.")
+	pithosctlCmd.PersistentFlags().StringVarP(&verbosity, "verbosity", "v", log.InfoLevel.String(), "Log level (debug, info).")
 
 	var cancel context.CancelFunc
 	ctx, cancel = context.WithCancel(context.TODO())
@@ -76,10 +92,23 @@ func bindFlagEnv(flagSet *flag.FlagSet) error {
 	return nil
 }
 
-func setReplicationFactor(config *cluster.Config) (err error) {
-	nodes, err := rigging.NodesMatchingLabel(pithosConfig.NodeSelector)
+func exitWithError(err error) {
+	log.Error(trace.DebugReport(err))
+	os.Exit(255)
+}
+
+func initKubeClient() {
+	client, err := kubernetes.NewClient(kubeConfig)
 	if err != nil {
-		return trace.Wrap(err)
+		exitWithError(err)
+	}
+	pithosConfig.KubeClient = client
+}
+
+func determineReplicationFactor(config cluster.Config) (int, error) {
+	nodes, err := rigging.NodesMatchingLabel(config.KubeClient.Clientset, pithosConfig.NodeSelector)
+	if err != nil {
+		return 0, trace.Wrap(err)
 	}
 
 	replicationFactor := 1
@@ -87,7 +116,17 @@ func setReplicationFactor(config *cluster.Config) (err error) {
 		replicationFactor = 3
 	}
 
-	log.Infof("Replication factor: %v.", replicationFactor)
-	config.ReplicationFactor = replicationFactor
+	log.Debugf("Replication factor: %v.", replicationFactor)
+	return replicationFactor, nil
+}
+
+//setUpLogs sets the log output ans the log level
+func setUpLogs(out io.Writer, level string) error {
+	log.SetOutput(out)
+	lvl, err := log.ParseLevel(level)
+	if err != nil {
+		return trace.Wrap(err)
+	}
+	log.SetLevel(lvl)
 	return nil
 }

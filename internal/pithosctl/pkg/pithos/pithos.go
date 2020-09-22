@@ -45,55 +45,36 @@ const (
 
 // Control defines configuration for operations
 type Control struct {
-	cfg    cluster.Config
-	client kubernetes.Client
+	cfg cluster.Config
 }
 
 // NewControl creates new pithos bootstrap controller
 func NewControl(pithosConfig cluster.Config) (*Control, error) {
-	client, err := kubernetes.NewClient(pithosConfig.KubeConfig)
-	if err != nil {
-		return nil, trace.Wrap(err)
-	}
-	return &Control{cfg: pithosConfig, client: *client}, nil
+	return &Control{cfg: pithosConfig}, nil
 }
 
 // CreateResources creates kubernetes resources for pithos application
 func (c *Control) CreateResources(ctx context.Context) error {
 	log.Infoln("Creating pithos-cfg configmap.")
 
-	masterKey, err := generateAccessKey(masterTenantName, true)
+	keys := make(map[cluster.KeyString]cluster.AccessKey, 2)
+	keyName, masterKey, err := generateAccessKey(masterTenantName, true)
 	if err != nil {
 		return trace.Wrap(err)
 	}
-	c.cfg.Keys = append(c.cfg.Keys, *masterKey)
+	keys[keyName] = *masterKey
 
-	tenantKey, err := generateAccessKey(regularTenantName, false)
+	keyName, tenantKey, err := generateAccessKey(regularTenantName, false)
 	if err != nil {
 		return trace.Wrap(err)
 	}
-	c.cfg.Keys = append(c.cfg.Keys, *tenantKey)
+	keys[keyName] = *tenantKey
 
-	configTemplate, err := template.ParseFiles(templateFile)
-	if err != nil {
+	if err = createConfigMap(ctx, c.cfg); err != nil {
 		return trace.Wrap(err)
 	}
 
 	buffer := &bytes.Buffer{}
-	if err = configTemplate.Execute(buffer, c.cfg); err != nil {
-		return trace.Wrap(err)
-	}
-
-	configMap, err := rigging.ParseConfigMap(buffer)
-	if err != nil {
-		return trace.Wrap(err)
-	}
-
-	if err = createConfigMap(ctx, configMap, c.client); err != nil {
-		return trace.Wrap(err)
-	}
-
-	buffer.Reset()
 	if err = secretTemplate.Execute(buffer, c.cfg); err != nil {
 		return trace.Wrap(err)
 	}
@@ -103,7 +84,7 @@ func (c *Control) CreateResources(ctx context.Context) error {
 		return trace.Wrap(err)
 	}
 
-	if err = createSecret(ctx, secret, c.client); err != nil {
+	if err = createSecret(ctx, secret, *c.cfg.KubeClient); err != nil {
 		return trace.Wrap(err)
 	}
 	return nil
@@ -123,8 +104,8 @@ func (c *Control) InitCassandraTables(ctx context.Context) error {
 	}
 
 	jobConfig := rigging.JobConfig{
-		job,
-		c.client.Clientset,
+		Job:       job,
+		Clientset: c.cfg.KubeClient.Clientset,
 	}
 
 	jobControl, err := rigging.NewJobControl(jobConfig)
@@ -139,10 +120,25 @@ func (c *Control) InitCassandraTables(ctx context.Context) error {
 	return rigging.PollStatus(ctx, retryAttempts, retryPeriod, jobControl)
 }
 
-func createConfigMap(ctx context.Context, configMap *v1.ConfigMap, client kubernetes.Client) error {
+func createConfigMap(ctx context.Context, config cluster.Config) error {
+	configTemplate, err := template.ParseFiles(templateFile)
+	if err != nil {
+		return trace.Wrap(err)
+	}
+
+	buffer := &bytes.Buffer{}
+	if err = configTemplate.Execute(buffer, config); err != nil {
+		return trace.Wrap(err)
+	}
+
+	configMap, err := rigging.ParseConfigMap(buffer)
+	if err != nil {
+		return trace.Wrap(err)
+	}
+
 	configMapConfig := rigging.ConfigMapConfig{
 		ConfigMap: configMap,
-		Client:    client.Clientset,
+		Client:    config.KubeClient.Clientset,
 	}
 	configMapControl, err := rigging.NewConfigMapControl(configMapConfig)
 	if err != nil {
@@ -179,10 +175,10 @@ metadata:
   namespace: {{.Namespace}}
 type: Opaque
 data:
-{{- range .Keys}}
-  {{if .Master}}master.key: {{.Key.EncodeBase64}}
-  master.secret: {{.Secret.EncodeBase64}}{{else -}}
-  tenant.key: {{.Key.EncodeBase64}}
-  tenant.secret: {{.Secret.EncodeBase64}}{{end}}
+{{- range $name, $value := .Keystore.Keys}}
+  {{if $value.Master}}master.key: {{$name.EncodeBase64}}
+  master.secret: {{$value.Secret.EncodeBase64}}{{else -}}
+  tenant.key: {{$name.EncodeBase64}}
+  tenant.secret: {{$value.Secret.EncodeBase64}}{{end}}
 {{- end}}
 `))

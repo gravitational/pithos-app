@@ -19,41 +19,33 @@ package cluster
 import (
 	"encoding/base64"
 
+	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/kubernetes"
+
 	"github.com/gravitational/trace"
 )
 
 // Config describes pithos application configuration
 type Config struct {
-	// KubeConfig defines path to kubernetes config file
-	KubeConfig string
+	// KubeClient defines kubernetes client
+	KubeClient *kubernetes.Client
 	// Namespace defines kubernetes namespace for pithos application components
 	Namespace string
 	// NodeSelector defines the filter for kubernetes nodes where cassandra should start
 	NodeSelector string
 	// CassandraPodSelector defines labels to select cassandra pods
 	CassandraPodSelector string
-	// PithosConfigMapName defines configmap name for pithos application
-	PithosConfigMapName string
+	// PithosSecret defines secret name storing S3 keys
+	PithosSecret string
 	// ReplicationFactor defines replication factor for cassandra keyspace
+	// ReplicationFactor is ignored by pithos during upgrade and could be set to any value
 	ReplicationFactor int
 	// Keystore represents configuration for S3 keys storage
-    Keystore Keystore `yaml:"keystore"`
-    // Bucketstore represents configuration for S3 buckets storage
-    Bucketstore Bucketstore `yaml:"bucketstore"`
+	Keystore Keystore `yaml:"keystore"`
 }
 
 // Keystore represents configuration for S3 keys storage
 type Keystore struct {
-    Keys map[string]AccessKey `yaml:"keys"`
-}
-
-// Bucketstore represents configuration for buckets storage
-type Bucketstore struct {
-  Hints struct {
-    Replication struct {
-      ReplicationFactor int `yaml:"replication_factor"`
-    }
-  }
+	Keys map[KeyString]AccessKey `yaml:"keys"`
 }
 
 // Check checks configuration parameters
@@ -66,6 +58,7 @@ func (p *Config) Check() error {
 		errors = append(errors, trace.BadParameter("label is required"))
 	}
 	if p.ReplicationFactor < 1 {
+
 		return trace.BadParameter("replication factor must be >= 1")
 	}
 	return trace.NewAggregate(errors...)
@@ -79,7 +72,6 @@ type AccessKey struct {
 	Master bool `yaml:"master"`
 	// Tenant defines S3 user name
 	Tenant string `yaml:"tenant"`
-
 }
 
 // KeyString is helper type for converting string into base64-encoded format
@@ -93,9 +85,4 @@ func (k KeyString) EncodeBase64() string {
 // String is a string representation of KeyString type
 func (k KeyString) String() string {
 	return string(k)
-}
-
-// BucketStore defines configuration for S3 buckets storage
-type BucketsStore struct {
-
 }

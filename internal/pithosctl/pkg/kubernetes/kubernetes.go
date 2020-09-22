@@ -71,13 +71,13 @@ func (c *Client) Pods(selector, namespace string) ([]v1.Pod, error) {
 }
 
 // PithosConfigMap return configmap containing pithos configuration
-func (c *Client) PithosConfigMap(configMapName, namespace string) (*v1.ConfigMap, error) {
-    configMap, err := c.CoreV1().ConfigMaps(namespace).Get(configMapName, metav1.GetOptions{})
-    if err ! nil {
-        return nil, rigging.ConvertError(err)
-    }
+func (c *Client) PithosSecret(secretName, namespace string) (*v1.Secret, error) {
+	secret, err := c.CoreV1().Secrets(namespace).Get(secretName, metav1.GetOptions{})
+	if err != nil {
+		return nil, rigging.ConvertError(err)
+	}
 
-    return configMap, nil
+	return secret, nil
 }
 
 // GetClientConfig returns client configuration,

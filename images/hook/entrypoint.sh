@@ -16,6 +16,7 @@ if [ $1 = "update" ]; then
     rig delete configmaps/rollups-pithos --resource-namespace=monitoring --force
     rig delete configmaps/pithos-alerts --resource-namespace=monitoring --force
     rig delete configmaps/cassandra --force
+    rig delete configmaps/pithos-cfg --force
     rig delete jobs/cassandra-alter-compaction --force
 
     ## copy telegraf secret from monitoring namespace

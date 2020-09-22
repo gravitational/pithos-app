@@ -60,11 +60,11 @@ data:
     # being defined inline.
     keystore:
       keys:
-    {{- range .Keys}}
-        {{.Key}}:
-          master: {{.Master}}
-          tenant: '{{.Tenant}}'
-          secret: '{{.Secret}}'
+    {{- range $key, $value := .Keystore.Keys}}
+        {{$key}}:
+          master: {{$value.Master}}
+          tenant: '{{$value.Tenant}}'
+          secret: '{{$value.Secret}}'
     {{- end}}
 
 
