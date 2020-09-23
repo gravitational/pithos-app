@@ -70,6 +70,8 @@ func (c *Control) CreateResources(ctx context.Context) error {
 	}
 	keys[keyName] = *tenantKey
 
+	c.cfg.Keystore.Keys = keys
+
 	if err = createConfigMap(ctx, c.cfg); err != nil {
 		return trace.Wrap(err)
 	}
