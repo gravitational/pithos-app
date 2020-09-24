@@ -58,13 +58,13 @@ func (c *Control) CreateResources(ctx context.Context) error {
 	log.Infoln("Creating pithos-cfg configmap.")
 
 	keys := make(map[cluster.KeyString]cluster.AccessKey, 2)
-	keyName, masterKey, err := generateAccessKey(masterTenantName, true)
+	keyName, masterKey, err := generateAccessKey(masterKeyType)
 	if err != nil {
 		return trace.Wrap(err)
 	}
 	keys[keyName] = *masterKey
 
-	keyName, tenantKey, err := generateAccessKey(regularTenantName, false)
+	keyName, tenantKey, err := generateAccessKey(regularTenantName)
 	if err != nil {
 		return trace.Wrap(err)
 	}

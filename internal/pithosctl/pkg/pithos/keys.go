@@ -31,10 +31,14 @@ const (
 	secretKeyLength = 20
 )
 
-func generateAccessKey(tenant string, master bool) (keyName cluster.KeyString, key *cluster.AccessKey, err error) {
+func generateAccessKey(keyType string) (keyName cluster.KeyString, key *cluster.AccessKey, err error) {
 	accessKey := &cluster.AccessKey{
-		Master: master,
-		Tenant: tenant,
+		Tenant: regularTenantName,
+	}
+
+	if keyType == masterKeyType {
+		accessKey.Master = true
+		accessKey.Tenant = masterTenantName
 	}
 
 	keyName, accessKey.Secret, err = generateKeyAndSecret()

@@ -11,7 +11,6 @@ import (
 	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/defaults"
 	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/kubernetes"
 
-	"github.com/gravitational/rigging"
 	"github.com/gravitational/trace"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -19,10 +18,10 @@ import (
 )
 
 var (
-	// kubeConfig defines path to kubernetes configuration file
-	kubeConfig   string
-	pithosConfig cluster.Config
-	ctx          context.Context
+	// kubeConfigPath defines path to kubernetes configuration file
+	kubeConfigPath string
+	pithosConfig   cluster.Config
+	ctx            context.Context
 	// verbosity determines verbosity level for output
 	verbosity string
 
@@ -58,7 +57,7 @@ func main() {
 func init() {
 	cobra.OnInitialize(initKubeClient)
 
-	pithosctlCmd.PersistentFlags().StringVar(&kubeConfig, "kubeconfig", "", "Path to Kubernetes configuration file.")
+	pithosctlCmd.PersistentFlags().StringVar(&kubeConfigPath, "kubeconfig", "", "Path to Kubernetes configuration file.")
 	pithosctlCmd.PersistentFlags().StringVarP(&pithosConfig.Namespace, "namespace", "n", defaults.Namespace, "Kubernetes namespace for pithos application.")
 	pithosctlCmd.PersistentFlags().StringVar(&pithosConfig.NodeSelector, "nodeSelector", defaults.PithosNodeSelector, "Label(s) to select nodes for pithos application.")
 	pithosctlCmd.PersistentFlags().StringVar(&pithosConfig.CassandraPodSelector, "cassandraPodsSelector",
@@ -98,29 +97,14 @@ func exitWithError(err error) {
 }
 
 func initKubeClient() {
-	client, err := kubernetes.NewClient(kubeConfig)
+	client, err := kubernetes.NewClient(kubeConfigPath)
 	if err != nil {
 		exitWithError(err)
 	}
 	pithosConfig.KubeClient = client
 }
 
-func determineReplicationFactor(config cluster.Config) (int, error) {
-	nodes, err := rigging.NodesMatchingLabel(config.KubeClient.Clientset, pithosConfig.NodeSelector)
-	if err != nil {
-		return 0, trace.Wrap(err)
-	}
-
-	replicationFactor := 1
-	if len(nodes.Items) >= 3 {
-		replicationFactor = 3
-	}
-
-	log.Debugf("Replication factor: %v.", replicationFactor)
-	return replicationFactor, nil
-}
-
-//setUpLogs sets the log output ans the log level
+// setUpLogs sets the log output ans the log level
 func setUpLogs(out io.Writer, level string) error {
 	log.SetOutput(out)
 	lvl, err := log.ParseLevel(level)

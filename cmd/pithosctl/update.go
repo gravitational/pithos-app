@@ -33,22 +33,15 @@ var updateCmd = &cobra.Command{
 
 func init() {
 	pithosctlCmd.AddCommand(updateCmd)
-	pithosctlCmd.PersistentFlags().StringVar(&pithosConfig.PithosSecret, "pithos-secret", defaults.PithosSecret, "Secret name storing S3 keys.")
+	pithosctlCmd.PersistentFlags().StringVar(&pithosConfig.PithosSecret, "secret", defaults.PithosSecret, "Secret name storing S3 keys.")
 }
 
 func updateApp(ccmd *cobra.Command, args []string) error {
-	replicationFactor, err := determineReplicationFactor(pithosConfig)
-	if err != nil {
-		return trace.Wrap(err)
-	}
-	pithosConfig.ReplicationFactor = replicationFactor
-
-	if err := pithosConfig.Check(); err != nil {
+	if err := pithosConfig.CheckAndSetDefaults(); err != nil {
 		return trace.Wrap(err)
 	}
 
-	err = pithos.Update(ctx, &pithosConfig)
-	if err != nil {
+	if err := pithos.Update(ctx, &pithosConfig); err != nil {
 		return trace.Wrap(err)
 	}
 	return nil

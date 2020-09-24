@@ -32,18 +32,22 @@ const (
 
 // Update performs update of pithos application
 func Update(ctx context.Context, config *cluster.Config) error {
-	pithosSecret, err := config.KubeClient.PithosSecret(config.PithosSecret, config.Namespace)
+	pithosSecret, err := config.KubeClient.GetSecret(config.PithosSecret, config.Namespace)
 	if err != nil {
 		return trace.Wrap(err)
 	}
 
+	var keyName cluster.KeyString
+	var accessKey *cluster.AccessKey
 	config.Keystore.Keys = make(map[cluster.KeyString]cluster.AccessKey, 2)
-	if err = parseSecret(pithosSecret, config, masterKeyType); err != nil {
+	if keyName, accessKey, err = parseSecret(pithosSecret, masterKeyType); err != nil {
 		return trace.Wrap(err)
 	}
-	if err = parseSecret(pithosSecret, config, tenantKeyType); err != nil {
+	config.Keystore.Keys[keyName] = *accessKey
+	if keyName, accessKey, err = parseSecret(pithosSecret, tenantKeyType); err != nil {
 		return trace.Wrap(err)
 	}
+	config.Keystore.Keys[keyName] = *accessKey
 
 	if err = createConfigMap(ctx, *config); err != nil {
 		return trace.Wrap(err)
@@ -52,20 +56,19 @@ func Update(ctx context.Context, config *cluster.Config) error {
 	return nil
 }
 
-func parseSecret(secret *v1.Secret, config *cluster.Config, keyType string) error {
+func parseSecret(secret *v1.Secret, keyType string) (key cluster.KeyString, accessKey *cluster.AccessKey, err error) {
 	keyName := keyType + ".key"
 	secretName := keyType + ".secret"
 	keyValue, exist := secret.Data[keyName]
 	if !exist {
-		return trace.Errorf("secret %v does not contain data with the key %v", config.PithosSecret, keyName)
+		return "", nil, trace.NotFound("secret %v does not contain data with the key %v", secret.GetName(), keyName)
 	}
 	secretValue, exist := secret.Data[secretName]
 	if !exist {
-		return trace.Errorf("secret %v does not contain data with the key %v", config.PithosSecret, secretName)
+		return "", nil, trace.NotFound("secret %v does not contain data with the key %v", secret.GetName(), secretName)
 	}
 
-	accessKey := cluster.AccessKey{
-		Master: false,
+	accessKey = &cluster.AccessKey{
 		Tenant: regularTenantName,
 		Secret: cluster.KeyString(secretValue),
 	}
@@ -74,7 +77,7 @@ func parseSecret(secret *v1.Secret, config *cluster.Config, keyType string) erro
 		accessKey.Master = true
 		accessKey.Tenant = masterTenantName
 	}
-	config.Keystore.Keys[cluster.KeyString(keyValue)] = accessKey
 
-	return nil
+	key = cluster.KeyString(keyValue)
+	return key, accessKey, nil
 }

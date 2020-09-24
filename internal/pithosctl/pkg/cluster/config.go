@@ -22,6 +22,7 @@ import (
 	"github.com/gravitational/pithos-app/internal/pithosctl/pkg/kubernetes"
 
 	"github.com/gravitational/trace"
+	log "github.com/sirupsen/logrus"
 )
 
 // Config describes pithos application configuration
@@ -37,7 +38,6 @@ type Config struct {
 	// PithosSecret defines secret name storing S3 keys
 	PithosSecret string
 	// ReplicationFactor defines replication factor for cassandra keyspace
-	// ReplicationFactor is ignored by pithos during upgrade and could be set to any value
 	ReplicationFactor int
 	// Keystore represents configuration for S3 keys storage
 	Keystore Keystore `yaml:"keystore"`
@@ -48,19 +48,29 @@ type Keystore struct {
 	Keys map[KeyString]AccessKey `yaml:"keys"`
 }
 
-// Check checks configuration parameters
-func (p *Config) Check() error {
+// CheckAndSetDefaults checks configuration parameters and set defaults
+func (p *Config) CheckAndSetDefaults() error {
 	var errors []error
+	if p.KubeClient == nil {
+		// explicitly return early here because having kubernetes client is crusial
+		return trace.BadParameter("kubernetes client is not initialized")
+
+	}
 	if p.Namespace == "" {
 		errors = append(errors, trace.BadParameter("namespace is required"))
 	}
 	if p.NodeSelector == "" {
-		errors = append(errors, trace.BadParameter("label is required"))
+		errors = append(errors, trace.BadParameter("nodes label selector is required"))
 	}
-	if p.ReplicationFactor < 1 {
 
-		return trace.BadParameter("replication factor must be >= 1")
+	replicationFactor, err := p.determineReplicationFactor()
+	if err != nil {
+		errors = append(errors, trace.Wrap(err, "can not determine replication factor"))
+	} else if replicationFactor < 1 {
+		errors = append(errors, trace.BadParameter("replication factor must be higher or equal 1; nodes label selector is misconfigured"))
 	}
+	p.ReplicationFactor = replicationFactor
+
 	return trace.NewAggregate(errors...)
 }
 
@@ -85,4 +95,19 @@ func (k KeyString) EncodeBase64() string {
 // String is a string representation of KeyString type
 func (k KeyString) String() string {
 	return string(k)
+}
+
+func (c *Config) determineReplicationFactor() (int, error) {
+	nodes, err := c.KubeClient.NodesMatchingLabel(c.NodeSelector)
+	if err != nil {
+		return 0, trace.Wrap(err)
+	}
+
+	replicationFactor := 1
+	if len(nodes.Items) >= 3 {
+		replicationFactor = 3
+	}
+
+	log.Debugf("Replication factor: %v.", replicationFactor)
+	return replicationFactor, nil
 }

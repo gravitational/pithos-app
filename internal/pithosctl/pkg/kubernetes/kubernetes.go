@@ -70,14 +70,24 @@ func (c *Client) Pods(selector, namespace string) ([]v1.Pod, error) {
 	return podList.Items, nil
 }
 
-// PithosConfigMap return configmap containing pithos configuration
-func (c *Client) PithosSecret(secretName, namespace string) (*v1.Secret, error) {
+// GetSecret returns configmap containing pithos configuration
+func (c *Client) GetSecret(secretName, namespace string) (*v1.Secret, error) {
 	secret, err := c.CoreV1().Secrets(namespace).Get(secretName, metav1.GetOptions{})
 	if err != nil {
 		return nil, rigging.ConvertError(err)
 	}
 
 	return secret, nil
+}
+
+// NodesMatchingLabel returns nodes matching specific labels
+func (c *Client) NodesMatchingLabel(selector string) (*v1.NodeList, error) {
+	nodes, err := c.CoreV1().Nodes().List(metav1.ListOptions{LabelSelector: selector})
+	if err != nil {
+		return nil, rigging.ConvertError(err)
+	}
+
+	return nodes, nil
 }
 
 // GetClientConfig returns client configuration,
