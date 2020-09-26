@@ -28,6 +28,9 @@ if [ $1 = "update" ]; then
 	    kubectl --namespace=default apply -f /var/lib/gravity/resources/secrets.yaml
     fi
 
+	# update resources with pithosctl
+	/usr/local/bin/pithosctl update
+
     rig upsert -f /var/lib/gravity/resources/cassandra.yaml --debug
     if [ $(kubectl get nodes -l pithos-role=node -o name | wc -l) -ge 3 ]
     then
