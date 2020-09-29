@@ -52,7 +52,7 @@ type Keystore struct {
 func (p *Config) CheckAndSetDefaults() error {
 	var errors []error
 	if p.KubeClient == nil {
-		// explicitly return early here because having kubernetes client is crusial
+		// explicitly return early here because having kubernetes client is crucial
 		return trace.BadParameter("kubernetes client is not initialized")
 
 	}
@@ -67,14 +67,14 @@ func (p *Config) CheckAndSetDefaults() error {
 	if err != nil {
 		errors = append(errors, trace.Wrap(err, "can not determine replication factor"))
 	} else if replicationFactor < 1 {
-		errors = append(errors, trace.BadParameter("replication factor must be higher or equal 1; nodes label selector is misconfigured"))
+		errors = append(errors, trace.BadParameter("replication factor must be greater than 0; nodes label selector is misconfigured"))
 	}
 	p.ReplicationFactor = replicationFactor
 
 	return trace.NewAggregate(errors...)
 }
 
-// AccesKey defines S3 key configuration
+// AccessKey defines S3 key configuration
 type AccessKey struct {
 	// Secret defines S3 secret access key
 	Secret KeyString `yaml:"secret"`

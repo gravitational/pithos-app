@@ -104,7 +104,7 @@ func initKubeClient() {
 	pithosConfig.KubeClient = client
 }
 
-// setUpLogs sets the log output ans the log level
+// setUpLogs sets the log output and the log level
 func setUpLogs(out io.Writer, level string) error {
 	log.SetOutput(out)
 	lvl, err := log.ParseLevel(level)

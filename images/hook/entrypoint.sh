@@ -28,7 +28,7 @@ if [ $1 = "update" ]; then
 	    kubectl --namespace=default apply -f /var/lib/gravity/resources/secrets.yaml
     fi
 
-	# update resources with pithosctl
+	# update `pithos-cfg` configmap
 	/usr/local/bin/pithosctl update
 
     rig upsert -f /var/lib/gravity/resources/cassandra.yaml --debug
