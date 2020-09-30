@@ -19,7 +19,7 @@ package kubernetes
 import (
 	"github.com/gravitational/rigging"
 	"github.com/gravitational/trace"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
@@ -68,6 +68,26 @@ func (c *Client) Pods(selector, namespace string) ([]v1.Pod, error) {
 	}
 
 	return podList.Items, nil
+}
+
+// GetSecret returns configmap containing pithos configuration
+func (c *Client) GetSecret(secretName, namespace string) (*v1.Secret, error) {
+	secret, err := c.CoreV1().Secrets(namespace).Get(secretName, metav1.GetOptions{})
+	if err != nil {
+		return nil, rigging.ConvertError(err)
+	}
+
+	return secret, nil
+}
+
+// NodesMatchingLabel returns nodes matching specific labels
+func (c *Client) NodesMatchingLabel(selector string) (*v1.NodeList, error) {
+	nodes, err := c.CoreV1().Nodes().List(metav1.ListOptions{LabelSelector: selector})
+	if err != nil {
+		return nil, rigging.ConvertError(err)
+	}
+
+	return nodes, nil
 }
 
 // GetClientConfig returns client configuration,
