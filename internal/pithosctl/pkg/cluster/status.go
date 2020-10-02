@@ -28,12 +28,7 @@ import (
 
 // GetStatus returns the status of cassandra cluster
 func GetStatus(config Config) (*Status, error) {
-	client, err := kubernetes.NewClient(config.KubeConfig)
-	if err != nil {
-		return nil, trace.Wrap(err)
-	}
-
-	podsList, err := getPods(client, config)
+	podsList, err := getPods(config.KubeClient, config)
 	if err != nil {
 		return nil, trace.Wrap(err)
 	}
@@ -63,7 +58,7 @@ func GetStatus(config Config) (*Status, error) {
 		podsStatus = append(podsStatus, podStatus)
 
 		if !isCassandraStatusParsed {
-			nodesStatus, err = getCassandraStatus(client, pod)
+			nodesStatus, err = getCassandraStatus(config.KubeClient, pod)
 			if err != nil {
 				return nil, trace.Wrap(err)
 			}

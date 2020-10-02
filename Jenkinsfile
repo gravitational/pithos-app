@@ -50,17 +50,20 @@ properties([
            defaultValue: 'CI_OPS_API_KEY',
            description: 'Jenkins\' key containing the Ops Center Credentials'),
     string(name: 'GRAVITY_VERSION',
-           defaultValue: '7.0.12',
+           defaultValue: '5.5.52',
            description: 'gravity/tele binaries version'),
     string(name: 'CLUSTER_SSL_APP_VERSION',
-           defaultValue: '0.8.2-5.5.21',
+           defaultValue: '0.8.3',
            description: 'cluster-ssl-app version'),
     string(name: 'INTERMEDIATE_RUNTIME_VERSION',
-           defaultValue: '5.2.15',
+           defaultValue: '5.2.17',
            description: 'Version of runtime to upgrade with'),
     string(name: 'EXTRA_GRAVITY_OPTIONS',
            defaultValue: '',
            description: 'Gravity options to add when calling tele'),
+    string(name: 'TELE_BUILD_EXTRA_OPTIONS',
+           defaultValue: '',
+           description: 'Extraoptions to add when calling tele build'),
     booleanParam(name: 'ADD_GRAVITY_VERSION',
                  defaultValue: false,
                  description: 'Appends "-${GRAVITY_VERSION}" to the tag to be published'),
@@ -115,7 +118,6 @@ node {
         withEnv(MAKE_ENV) {
           sh """
   rm -rf ${TELE_STATE_DIR} && mkdir -p ${TELE_STATE_DIR}
-  tele logout ${EXTRA_GRAVITY_OPTIONS}
   tele login ${EXTRA_GRAVITY_OPTIONS} -o ${OPS_URL} --token=${API_KEY}
   make build-app"""
         }

@@ -101,7 +101,7 @@ build-app: images | $(BUILD_DIR)
 .PHONY: build-pithosctl
 build-pithosctl: $(BUILD_DIR)
 	docker run $(DOCKERFLAGS) $(BUILDIMAGE) make build-pithosctl-docker
-	for dir in bootstrap pithosctl; do mkdir -p images/$${dir}/bin; cp build/pithosctl images/$${dir}/bin/; done
+	for dir in bootstrap pithosctl hook; do mkdir -p images/$${dir}/bin; cp build/pithosctl images/$${dir}/bin/; done
 
 .PHONY: build-pithosctl-docker
 build-pithosctl-docker:
@@ -126,7 +126,7 @@ download-binaries: $(BINARIES_DIR)
 .PHONY: clean
 clean:
 	$(MAKE) -C images clean
-	-rm -rf images/{bootstrap,pithosctl}/bin
+	-rm -rf images/{bootstrap,pithosctl,hook}/bin
 	-rm -rf $(BUILD_DIR)
 	-rm -rf wd_suite
 

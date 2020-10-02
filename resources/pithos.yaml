@@ -5,7 +5,20 @@ metadata:
   name: pithos
   namespace: default
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: pithos
+  namespace: default
+rules:
+  - apiGroups:
+      - ""
+    verbs:
+      - list
+    resources:
+      - nodes
+---
+apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: pithos
@@ -40,8 +53,6 @@ rules:
       - endpoints
       - events
       - pods
-      - persistentvolumes
-      - persistentvolumeclaims
       - services
   - apiGroups:
       - ""
@@ -51,7 +62,7 @@ rules:
       - pods/exec
 ---
 kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: pithos
   namespace: default
@@ -61,6 +72,20 @@ subjects:
     namespace: default
 roleRef:
   kind: Role
+  name: pithos
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: pithos
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: pithos
+    namespace: default
+roleRef:
+  kind: ClusterRole
   name: pithos
   apiGroup: rbac.authorization.k8s.io
 ---
@@ -99,7 +124,7 @@ spec:
       product: pithos
       pithos-role: pithos
       component: pithos
-  replicas: 1
+  replicas: 2
   template:
     metadata:
       labels:
