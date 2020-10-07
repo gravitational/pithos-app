@@ -49,7 +49,7 @@ IMPORT_OPTIONS := --vendor \
 		--ignore="alerts.yaml" \
 		$(IMPORT_IMAGE_FLAGS)
 
-TELE_BUILD_OPTIONS := --repository=$(OPS_URL) \
+TELE_BUILD_OPTIONS := --hub=$(OPS_URL) \
 		--name=$(NAME) \
 		--version=$(VERSION) \
 		--glob=**/*.yaml \
