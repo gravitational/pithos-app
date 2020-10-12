@@ -39,9 +39,7 @@ spec:
     spec:
       serviceAccountName: pithos
       securityContext:
-          runAsUser: 1000
-          runAsGroup: 1000
-          fsGroup: 1000
+          runAsUser: -1
       containers:
         - name: pithosctl
           image: pithosctl:latest

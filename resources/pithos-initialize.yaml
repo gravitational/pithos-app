@@ -10,9 +10,7 @@ spec:
     spec:
       restartPolicy: OnFailure
       securityContext:
-          runAsUser: 1000
-          runAsGroup: 1000
-          fsGroup: 1000
+          runAsUser: -1
       containers:
         - image: cassandra:latest
           name: pithos-initialize

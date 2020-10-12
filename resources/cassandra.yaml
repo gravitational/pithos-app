@@ -143,15 +143,15 @@ spec:
                       - cassandra
               topologyKey: kubernetes.io/hostname
       securityContext:
+          # 1000 is the cassandra user UID inside the cassandra container
           runAsUser: 1000
-          runAsGroup: 1000
-          fsGroup: 1000
       initContainers:
         - name: fix-perms
-          image: quay.io/gravitational/debian-tall:0.0.1
+          image: quay.io/gravitational/debian-tall:buster
           securityContext:
             runAsUser: 0
             runAsGroup: 0
+          # 1000 is the cassandra user UID inside the cassandra container
           command:
           - chown
           - -R

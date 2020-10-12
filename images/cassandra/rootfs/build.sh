@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 # Copyright 2018 The Kubernetes Authors.
 #
@@ -15,6 +15,7 @@
 # limitations under the License.
 
 
+set -o trace
 set -o errexit
 set -o nounset
 set -o pipefail
@@ -120,7 +121,7 @@ rm -rf \
 
 touch /etc/cron.d/cassandra /var/run/crond.pid
 
-chown 1000:1000 /init.cql /etc/cron.d/cassandra /var/run/crond.pid
+chown cassandra /init.cql /etc/cron.d/cassandra /var/run/crond.pid
 chmod 666 /var/run/crond.pid
 
 setcap cap_setuid=ep $(which cron)
