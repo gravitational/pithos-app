@@ -40,7 +40,7 @@ func init() {
 }
 
 func server(ccmd *cobra.Command, args []string) error {
-	if err := pithosConfig.Check(); err != nil {
+	if err := pithosConfig.CheckAndSetDefaults(); err != nil {
 		return trace.Wrap(err)
 	}
 

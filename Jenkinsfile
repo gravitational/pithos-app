@@ -115,7 +115,6 @@ node {
         withEnv(MAKE_ENV) {
           sh """
   rm -rf ${TELE_STATE_DIR} && mkdir -p ${TELE_STATE_DIR}
-  tele logout ${EXTRA_GRAVITY_OPTIONS}
   tele login ${EXTRA_GRAVITY_OPTIONS} -o ${OPS_URL} --token=${API_KEY}
   make build-app"""
         }
