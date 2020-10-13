@@ -19,17 +19,8 @@ if [ $1 = "update" ]; then
     rig delete configmaps/pithos-cfg --force
     rig delete jobs/cassandra-alter-compaction --force
 
-    ## copy telegraf secret from monitoring namespace
-    if kubectl --namespace=monitoring get secret telegraf-influxdb-creds >/dev/null 2>&1;
-    then
-	    kubectl --namespace=monitoring get secret telegraf-influxdb-creds --export -o yaml |\
-	    kubectl --namespace=default apply -f -
-    else
-	    kubectl --namespace=default apply -f /var/lib/gravity/resources/secrets.yaml
-    fi
-
-	# update `pithos-cfg` configmap
-	/usr/local/bin/pithosctl update
+    # update `pithos-cfg` configmap
+    /usr/local/bin/pithosctl update
 
     rig upsert -f /var/lib/gravity/resources/cassandra.yaml --debug
     if [ $(kubectl get nodes -l pithos-role=node -o name | wc -l) -ge 3 ]
@@ -38,8 +29,8 @@ if [ $1 = "update" ]; then
     fi
 
     rig upsert -f /var/lib/gravity/resources/pithos.yaml --debug
-    rig upsert -f /var/lib/gravity/resources/monitoring.yaml --debug
-    /opt/bin/gravity resource create -f /var/lib/gravity/resources/alerts.yaml
+    # temporarely disable alerts until we adapt them to prometheus
+    # /opt/bin/gravity resource create -f /var/lib/gravity/resources/alerts.yaml
 
     echo "Checking status"
     rig status $RIG_CHANGESET --retry-attempts=120 --retry-period=2s --debug

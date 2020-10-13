@@ -64,6 +64,6 @@ fi
 
 pithosctl init
 
-/opt/bin/kubectl apply -f /var/lib/gravity/resources/monitoring.yaml
 /opt/bin/kubectl apply -f /var/lib/gravity/resources/pithosctl.yaml
-/opt/bin/gravity resource create -f /var/lib/gravity/resources/alerts.yaml
+# temporarely disable alerts until we adapt them to prometheus
+# /opt/bin/gravity resource create -f /var/lib/gravity/resources/alerts.yaml
