@@ -110,10 +110,10 @@ build-pithosctl-docker:
 #
 # number of environment variables are expected to be set
 # see https://github.com/gravitational/robotest/blob/master/suite/README.md
-#
+
 .PHONY: robotest-run-suite
 robotest-run-suite:
-	./scripts/robotest_run_suite.sh $(shell pwd)/upgrade_from
+	./robotest/run.sh pr
 
 .PHONY: download-binaries
 download-binaries: $(BINARIES_DIR)
