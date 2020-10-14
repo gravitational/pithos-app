@@ -31,6 +31,7 @@ if [ $1 = "update" ]; then
     rig upsert -f /var/lib/gravity/resources/pithos.yaml --debug
     # temporarely disable alerts until we adapt them to prometheus
     # /opt/bin/gravity resource create -f /var/lib/gravity/resources/alerts.yaml
+    gravity resource rm alert cassandra-load
 
     echo "Checking status"
     rig status $RIG_CHANGESET --retry-attempts=120 --retry-period=2s --debug
