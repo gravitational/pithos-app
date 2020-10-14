@@ -1,6 +1,8 @@
 FROM nginx:latest
 
 ## add permissions
+RUN mkdir /var/cache/nginx/client_temp
+
 RUN chown -R nginx /var/cache/nginx && \
     chown -R nginx /var/log/nginx && \
     chown -R nginx /etc/nginx/conf.d
