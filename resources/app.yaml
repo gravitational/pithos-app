@@ -179,7 +179,7 @@ hooks:
             containers:
               - name: pre-update
                 image: quay.io/gravitational/debian-tall:buster
-                command: ["/usr/bin/gravity", "resource", "rm", "alert", "cassandra-load"]'
+                command: ["/usr/bin/gravity", "resource", "rm", "alert", "cassandra-load"]
                 volumeMounts:
                   - name: gravity
                     mountPath: /usr/bin/gravity
