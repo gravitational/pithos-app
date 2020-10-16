@@ -136,6 +136,8 @@ spec:
       serviceAccountName: pithos
       nodeSelector:
         pithos-role: node
+      securityContext:
+          runAsUser: -1
       containers:
       - image: pithos:latest
         name: pithos
@@ -162,6 +164,8 @@ spec:
           timeoutSeconds: 32
       - image: pithos-proxy:latest
         name: proxy
+        securityContext:
+          runAsUser: 101 # nginx users hard-coded in the container
         ports:
           - containerPort: 18443
             name: https

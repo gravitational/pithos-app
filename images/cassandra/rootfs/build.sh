@@ -15,6 +15,7 @@
 # limitations under the License.
 
 
+set -o trace
 set -o errexit
 set -o nounset
 set -o pipefail
@@ -32,7 +33,6 @@ apt-get install -y \
     python \
     jq \
     dumb-init \
-    gosu \
     libcap2-bin
 
 CASSANDRA_PATH="cassandra/${CASSANDRA_VERSION}/apache-cassandra-${CASSANDRA_VERSION}-bin.tar.gz"
@@ -66,7 +66,7 @@ adduser --disabled-password --no-create-home --gecos '' --disabled-login telegra
 chown telegraf: /usr/bin/telegraf
 chown -R telegraf: /etc/telegraf
 
-echo "Dwonloading jmxterm..."
+echo "Downloading jmxterm..."
 curl -L https://sourceforge.net/projects/cyclops-group/files/jmxterm/1.0.0/jmxterm-1.0.0-uber.jar/download -o /jmxterm.jar
 
 rm -rf \
@@ -119,3 +119,13 @@ rm -rf \
     /usr/lib/jvm/java-8-openjdk-amd64/man \
     /var/lib/apt/lists/*
 
+touch /etc/cron.d/cassandra /var/run/crond.pid
+
+chown cassandra /init.cql /etc/cron.d/cassandra /var/run/crond.pid
+chmod 666 /var/run/crond.pid
+
+setcap cap_setuid=ep $(which cron)
+setcap cap_setgid=ep $(which cron)
+chmod ug+s $(which cron)
+
+setcap cap_ipc_lock=+ep /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java

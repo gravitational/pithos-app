@@ -1,5 +1,5 @@
 ---
-apiVersion: policy/v1beta1
+apiVersion: extensions/v1beta1
 kind: PodSecurityPolicy
 metadata:
   name: cassandra
@@ -129,8 +129,6 @@ spec:
         component: cassandra
     spec:
       terminationGracePeriodSeconds: 1800
-      securityContext:
-        runAsUser: 0
       serviceAccountName: cassandra
       nodeSelector:
         pithos-role: node
@@ -144,6 +142,24 @@ spec:
                     values:
                       - cassandra
               topologyKey: kubernetes.io/hostname
+      securityContext:
+          # 1000 is the cassandra user UID inside the cassandra container
+          runAsUser: 1000
+      initContainers:
+        - name: fix-perms
+          image: quay.io/gravitational/debian-tall:buster
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+          # 1000 is the cassandra user UID inside the cassandra container
+          command:
+          - chown
+          - -R
+          - 1000:1000
+          - /cassandra_data
+          volumeMounts:
+          - name: data
+            mountPath: /cassandra_data
       containers:
         - image: cassandra:latest
           name: cassandra

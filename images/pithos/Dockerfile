@@ -26,4 +26,8 @@ RUN apt-get update && apt-get -qq -y install \
 COPY --from=builder /tmp/pithos/target/pithos-0.7.6-SNAPSHOT-standalone.jar /pithos.jar
 RUN chown pithos /pithos.jar
 
+RUN chown -R pithos /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security
+
+RUN chown -R pithos /etc/ssl/certs/java/cacerts
+
 CMD /run.sh

@@ -10,6 +10,8 @@ spec:
     spec:
       serviceAccountName: cassandra
       restartPolicy: OnFailure
+      securityContext:
+          runAsUser: -1
       containers:
         - image: cassandra:latest
           name: cassandra-alter-compaction
