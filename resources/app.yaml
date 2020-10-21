@@ -158,6 +158,40 @@ hooks:
               - name: gravity-local
                 hostPath:
                   path: /var/lib/gravity/local
+  preUpdate:
+    job: |
+      apiVersion: batch/v1
+      kind: Job
+      metadata:
+        name: pithos-app-pre-update
+        namespace: default
+      spec:
+        backoffLimit: 10
+        parallelism: 1
+        completions: 1
+        template:
+          metadata:
+            name: pithos-app-pre-update
+          spec:
+            restartPolicy: OnFailure
+            nodeSelector:
+              gravitational.io/k8s-role: master
+            containers:
+              - name: pre-update
+                image: quay.io/gravitational/debian-tall:buster
+                command: ["/opt/bin/gravity", "resource", "rm", "alert", "cassandra-load"]
+                env:
+                  - name: POD_IP
+                    valueFrom:
+                      fieldRef:
+                        fieldPath: status.podIP
+                volumeMounts:
+                  - name: gravity-local
+                    mountPath: /var/lib/gravity/local
+            volumes:
+              - name: gravity-local
+                hostPath:
+                  path: /var/lib/gravity/local
   postUpdate:
     job: |
       apiVersion: batch/v1

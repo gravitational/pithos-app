@@ -31,19 +31,22 @@ const (
 	secretKeyLength = 20
 )
 
-func generateAccessKey(tenant string, master bool) (*cluster.AccessKey, error) {
+func generateAccessKey(keyType string) (keyName cluster.KeyString, key *cluster.AccessKey, err error) {
 	accessKey := &cluster.AccessKey{
-		Master: master,
-		Tenant: tenant,
+		Tenant: regularTenantName,
 	}
 
-	var err error
-	accessKey.Key, accessKey.Secret, err = generateKeyAndSecret()
+	if keyType == masterKeyType {
+		accessKey.Master = true
+		accessKey.Tenant = masterTenantName
+	}
+
+	keyName, accessKey.Secret, err = generateKeyAndSecret()
 	if err != nil {
-		return nil, trace.Wrap(err)
+		return "", nil, trace.Wrap(err)
 	}
 
-	return accessKey, nil
+	return keyName, accessKey, nil
 }
 
 func generateKeyAndSecret() (key cluster.KeyString, secret cluster.KeyString, err error) {

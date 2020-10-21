@@ -35,11 +35,8 @@ properties([
            defaultValue: '1',
            description: 'How many times to repeat each test.'),
     string(name: 'ROBOTEST_VERSION',
-           defaultValue: 'stable-gce',
+           defaultValue: '2.1.1',
            description: 'Robotest tag to use.'),
-    booleanParam(name: 'ROBOTEST_RUN_UPGRADE',
-           defaultValue: false,
-           description: 'Run the upgrade suite as part of robotest'),
     string(name: 'OPS_URL',
            defaultValue: 'https://ci-ops.gravitational.io',
            description: 'Ops Center URL to download dependencies from'),
@@ -47,13 +44,13 @@ properties([
            defaultValue: 'CI_OPS_API_KEY',
            description: 'Jenkins\' key containing the Ops Center Credentials'),
     string(name: 'GRAVITY_VERSION',
-           defaultValue: '7.0.16',
+           defaultValue: '7.0.20',
            description: 'gravity/tele binaries version'),
     string(name: 'CLUSTER_SSL_APP_VERSION',
            defaultValue: '0.8.3',
            description: 'cluster-ssl-app version'),
     string(name: 'INTERMEDIATE_RUNTIME_VERSION',
-           defaultValue: '6.1.36',
+           defaultValue: '6.1.39',
            description: 'Version of runtime to upgrade with'),
     string(name: 'EXTRA_GRAVITY_OPTIONS',
            defaultValue: '',
@@ -115,7 +112,6 @@ node {
         withEnv(MAKE_ENV) {
           sh """
   rm -rf ${TELE_STATE_DIR} && mkdir -p ${TELE_STATE_DIR}
-  tele logout ${EXTRA_GRAVITY_OPTIONS}
   tele login ${EXTRA_GRAVITY_OPTIONS} -o ${OPS_URL} --token=${API_KEY}
   make build-app"""
         }
@@ -138,8 +134,7 @@ node {
               make robotest-run-suite \
                 AWS_KEYPAIR=ops \
                 AWS_REGION=us-east-1 \
-                ROBOTEST_VERSION=$ROBOTEST_VERSION \
-                RUN_UPGRADE=${params.ROBOTEST_RUN_UPGRADE ? 1 : 0}"""
+                ROBOTEST_VERSION=$ROBOTEST_VERSION"""
             }
         }
       } else {

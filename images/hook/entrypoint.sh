@@ -16,15 +16,11 @@ if [ $1 = "update" ]; then
     rig delete configmaps/rollups-pithos --resource-namespace=monitoring --force
     rig delete configmaps/pithos-alerts --resource-namespace=monitoring --force
     rig delete configmaps/cassandra --force
+    rig delete configmaps/pithos-cfg --force
+    rig delete jobs/cassandra-alter-compaction --force
 
-    ## copy telegraf secret from monitoring namespace
-    if kubectl --namespace=monitoring get secret telegraf-influxdb-creds >/dev/null 2>&1;
-    then
-	    kubectl --namespace=monitoring get secret telegraf-influxdb-creds --export -o yaml |\
-	    kubectl --namespace=default apply -f -
-    else
-	    kubectl --namespace=default apply -f /var/lib/gravity/resources/secrets.yaml
-    fi
+    # update `pithos-cfg` configmap
+    /usr/local/bin/pithosctl update
 
     rig upsert -f /var/lib/gravity/resources/cassandra.yaml --debug
     if [ $(kubectl get nodes -l pithos-role=node -o name | wc -l) -ge 3 ]
@@ -33,13 +29,15 @@ if [ $1 = "update" ]; then
     fi
 
     rig upsert -f /var/lib/gravity/resources/pithos.yaml --debug
-    rig upsert -f /var/lib/gravity/resources/monitoring.yaml --debug
-    /opt/bin/gravity resource create -f /var/lib/gravity/resources/alerts.yaml
+    # temporarely disable alerts until we adapt them to prometheus
+    # /opt/bin/gravity resource create -f /var/lib/gravity/resources/alerts.yaml
 
     echo "Checking status"
     rig status $RIG_CHANGESET --retry-attempts=120 --retry-period=2s --debug
     echo "Updating cassandra compaction settings for storage.block column family"
-    kubectl apply -f /var/lib/gravity/resources/cassandra-alter-compaction.yaml
+    rig upsert -f /var/lib/gravity/resources/cassandra-alter-compaction.yaml
+    echo "Checking status after applying the job"
+    rig status $RIG_CHANGESET --retry-attempts=120 --retry-period=2s --debug
     echo "Freezing"
     rig freeze
 elif [ $1 = "rollback" ]; then

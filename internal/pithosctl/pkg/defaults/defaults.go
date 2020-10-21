@@ -29,4 +29,6 @@ const (
 	HealthzBucket = "healthz"
 	// HealthzEndpoint is the address of pithos server used for health checks
 	HealthzEndpoint = "localhost:18080"
+	// PithosSecret is the name of kubernetes secret storing pithos S3 keys
+	PithosSecret = "pithos-keys"
 )
