@@ -11,7 +11,7 @@ properties([
   disableConcurrentBuilds(),
   parameters([
     string(name: 'TAG',
-           defaultValue: 'master',
+           defaultValue: env.BRANCH_NAME,
            description: 'Git tag to build'),
     choice(choices: ["run", "skip"].join("\n"),
            description: 'Run or skip robotest system wide tests.',
