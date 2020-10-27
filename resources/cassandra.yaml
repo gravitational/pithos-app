@@ -96,6 +96,9 @@ spec:
   ports:
     - port: 9042
       name: cql
+    - port: 3000
+      targetPort: 9273
+      name: cassandra-metrics
   selector:
     app: pithos
     pithos-role: cassandra
@@ -212,31 +215,10 @@ spec:
           env:
             - name: CRON_SCHEDULE
               value: "15 2 * * *"
-            - name: INFLUXDB_TELEGRAF_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: telegraf-influxdb-creds
-                  key: username
-            - name: INFLUXDB_TELEGRAF_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: telegraf-influxdb-creds
-                  key: password
         - image: cassandra:latest
           name: cassandra-metrics
           command: ["/usr/bin/dumb-init", "/usr/sbin/start-telegraf.sh"]
           imagePullPolicy: Always
-          env:
-            - name: INFLUXDB_TELEGRAF_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: telegraf-influxdb-creds
-                  key: username
-            - name: INFLUXDB_TELEGRAF_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: telegraf-influxdb-creds
-                  key: password
       volumes:
         - name: config
           configMap:
