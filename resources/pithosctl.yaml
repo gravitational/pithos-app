@@ -38,6 +38,8 @@ spec:
         product: pithos
     spec:
       serviceAccountName: pithos
+      securityContext:
+          runAsUser: -1
       containers:
         - name: pithosctl
           image: pithosctl:latest

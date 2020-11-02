@@ -7,6 +7,9 @@ if [[ $NUM_NODES -gt 2 ]]; then
 	REPLICATION_FACTOR=3
 fi
 
-sed -i 's/REPLICATION_FACTOR/'"${REPLICATION_FACTOR}"'/g' /init.cql
+# this sed command needs to happen in two steps or `sed` will fail because
+# of the read-only root filesystem
+sed 's/REPLICATION_FACTOR/'"${REPLICATION_FACTOR}"'/g' /init.cql > /tmp/init.cql
+cat /tmp/init.cql > /init.cql # avoid issues with sed and writing in /
 
 cqlsh -f /init.cql cassandra.default.svc.cluster.local

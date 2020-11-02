@@ -54,6 +54,8 @@ rules:
       - events
       - pods
       - services
+      - persistentvolumes
+      - persistentvolumeclaims
   - apiGroups:
       - ""
     verbs:
@@ -136,9 +138,13 @@ spec:
       serviceAccountName: pithos
       nodeSelector:
         pithos-role: node
+      securityContext:
+          runAsUser: -1
       containers:
       - image: pithos:latest
         name: pithos
+        securityContext:
+            runAsUser: 1000 # pithos needs rw access to the JRE cacerts file
         ports:
           - containerPort: 18080
             name: pithos
@@ -162,6 +168,8 @@ spec:
           timeoutSeconds: 32
       - image: pithos-proxy:latest
         name: proxy
+        securityContext:
+            runAsUser: 101 # nginx user hard-coded in the container
         ports:
           - containerPort: 18443
             name: https
