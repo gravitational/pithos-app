@@ -91,11 +91,15 @@ metadata:
   labels:
     app: pithos
     product: pithos
+    pithos-role: cassandra
 spec:
   clusterIP: None
   ports:
     - port: 9042
       name: cql
+    - port: 9273
+      targetPort: 9273
+      name: metrics
   selector:
     app: pithos
     pithos-role: cassandra
@@ -229,33 +233,15 @@ spec:
           env:
             - name: CRON_SCHEDULE
               value: "15 2 * * *"
-            - name: INFLUXDB_TELEGRAF_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: telegraf-influxdb-creds
-                  key: username
-            - name: INFLUXDB_TELEGRAF_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: telegraf-influxdb-creds
-                  key: password
         - image: cassandra:latest
           securityContext:
             runAsUser: -1
           name: cassandra-metrics
           command: ["/usr/bin/dumb-init", "/usr/sbin/start-telegraf.sh"]
           imagePullPolicy: Always
-          env:
-            - name: INFLUXDB_TELEGRAF_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: telegraf-influxdb-creds
-                  key: username
-            - name: INFLUXDB_TELEGRAF_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: telegraf-influxdb-creds
-                  key: password
+          ports:
+            - containerPort: 9273
+              name: metrics
       volumes:
         - name: config
           configMap:
@@ -1559,3 +1545,20 @@ data:
       </root>
       <logger name="com.thinkaurelius.thrift" level="ERROR"/>
     </configuration>
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    app: pithos
+    component: service-monitor
+  name: cassandra
+  namespace: default
+spec:
+  endpoints:
+  - interval: 60s
+    port: metrics
+  selector:
+    matchLabels:
+      app: pithos
+      pithos-role: cassandra
