@@ -27,7 +27,6 @@ apt-get update
 apt-get install -y \
     openjdk-8-jre-headless \
     libjemalloc1 \
-    cron \
     curl \
     gawk \
     python \
@@ -65,6 +64,14 @@ chown -R telegraf: /etc/telegraf
 
 echo "Downloading jmxterm..."
 curl -L https://sourceforge.net/projects/cyclops-group/files/jmxterm/1.0.0/jmxterm-1.0.0-uber.jar/download -o /jmxterm.jar
+
+echo "Downloading supercronic..."
+SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/download/v0.1.11/supercronic-linux-amd64
+SUPERCRONIC_SHA1SUM=a2e2d47078a8dafc5949491e5ea7267cc721d67c
+
+curl -fsSL "$SUPERCRONIC_URL" -o /usr/local/bin/supercronic
+echo "${SUPERCRONIC_SHA1SUM}"  /usr/local/bin/supercronic | sha1sum -c -
+chmod +x /usr/local/bin/supercronic
 
 rm -rf \
     $CASSANDRA_HOME/*.txt \
@@ -116,14 +123,6 @@ rm -rf \
     /usr/lib/jvm/java-8-openjdk-amd64/man \
     /var/lib/apt/lists/*
 
-touch /etc/cron.d/cassandra /var/run/crond.pid
-
-chown cassandra /init.cql /etc/cron.d/cassandra /var/run/crond.pid
-chmod 666 /var/run/crond.pid
-
-setcap cap_setuid=ep $(which cron)
-setcap cap_setgid=ep $(which cron)
-chmod ug+s $(which cron)
+chown cassandra /init.cql
 
 setcap cap_ipc_lock=+ep /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
-

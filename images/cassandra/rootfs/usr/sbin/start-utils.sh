@@ -4,7 +4,6 @@ if [ "x$CRON_SCHEDULE" = "x" ]; then
     CRON_SCHEDULE='0 0 * * *'
 fi
 
-echo -e "PATH=$PATH\n$CRON_SCHEDULE cassandra sleep $((RANDOM%30))m && nodetool -p 7199 -h localhost repair >> /var/log/cron.log 2>&1" > /etc/cron.d/cassandra
+echo -e "$CRON_SCHEDULE cassandra sleep $((RANDOM%30))m && nodetool -p 7199 -h localhost repair" > /tmp/cassandra.cron
 
-# watch /var/log/cron.log restarting if necessary
-cron && tail -f /var/log/cron.log
+supercronic /tmp/cassandra.cron

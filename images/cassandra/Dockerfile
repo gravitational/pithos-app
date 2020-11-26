@@ -19,6 +19,7 @@ ENV TERM=xterm \
 
 ADD rootfs/ /
 COPY --from=builder /usr/src/app/target/*jar-with-dependencies.jar /kubernetes-cassandra.jar
+
 RUN /build.sh && rm /build.sh
 RUN mkfifo --mode 0666 /var/log/cron.log
 
