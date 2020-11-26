@@ -24,6 +24,7 @@ RUN /build.sh && rm /build.sh
 RUN mkfifo --mode 0666 /var/log/cron.log
 
 VOLUME ["/$CASSANDRA_DATA"]
+USER cassandra
 
 # 7000: intra-node communication
 # 7001: TLS intra-node communication

@@ -166,8 +166,6 @@ spec:
           name: cassandra
           imagePullPolicy: Always
           securityContext:
-            # 1000 is the cassandra user UID inside the cassandra container
-            runAsUser: 1000
             readOnlyRootFilesystem: false
             capabilities:
               add:
@@ -225,8 +223,6 @@ spec:
             - name: cassandra-ssl
               mountPath: /etc/ssl/cassandra
         - image: cassandra:latest
-          securityContext:
-            runAsUser: -1
           name: cassandra-utils
           command: ["/usr/bin/dumb-init", "/usr/sbin/start-utils.sh"]
           imagePullPolicy: Always
@@ -234,8 +230,6 @@ spec:
             - name: CRON_SCHEDULE
               value: "15 2 * * *"
         - image: cassandra:latest
-          securityContext:
-            runAsUser: -1
           name: cassandra-metrics
           command: ["/usr/bin/dumb-init", "/usr/sbin/start-telegraf.sh"]
           imagePullPolicy: Always

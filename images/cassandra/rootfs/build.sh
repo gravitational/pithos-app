@@ -58,9 +58,7 @@ cp /tmp/jolokia-${JOLOKIA_VERSION}/agents/jolokia-jvm.jar /usr/local/apache-cass
 
 echo "Downloading and installing telegraf..."
 curl -L https://dl.influxdata.com/telegraf/releases/telegraf-${TELEGRAF_VERSION}_linux_amd64.tar.gz | tar -xzf - --strip-components=2 -C / ./telegraf/usr/bin/telegraf
-adduser --disabled-password --no-create-home --gecos '' --disabled-login telegraf
-chown telegraf: /usr/bin/telegraf
-chown -R telegraf: /etc/telegraf
+chown -R cassandra: /etc/telegraf
 
 echo "Downloading jmxterm..."
 curl -L https://sourceforge.net/projects/cyclops-group/files/jmxterm/1.0.0/jmxterm-1.0.0-uber.jar/download -o /jmxterm.jar
