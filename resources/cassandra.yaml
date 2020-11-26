@@ -229,6 +229,10 @@ spec:
           env:
             - name: CRON_SCHEDULE
               value: "15 2 * * *"
+          securityContext:
+            capabilities:
+              add:
+                - IPC_LOCK
         - image: cassandra:latest
           name: cassandra-metrics
           command: ["/usr/bin/dumb-init", "/usr/sbin/start-telegraf.sh"]
