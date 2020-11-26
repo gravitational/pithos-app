@@ -238,6 +238,10 @@ spec:
                 secretKeyRef:
                   name: telegraf-influxdb-creds
                   key: password
+          securityContext:
+            capabilities:
+              add:
+                - IPC_LOCK
         - image: cassandra:latest
           name: cassandra-metrics
           command: ["/usr/bin/dumb-init", "/usr/sbin/start-telegraf.sh"]
