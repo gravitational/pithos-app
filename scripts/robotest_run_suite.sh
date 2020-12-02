@@ -25,7 +25,13 @@ export TAG=pithos-$(git rev-parse --short HEAD)
 export GCL_PROJECT_ID=${GCL_PROJECT_ID:-"kubeadm-167321"}
 export GCE_REGION="northamerica-northeast1,us-west1,us-east1,us-east4,us-central1"
 export PATH=$(pwd)/bin:$PATH
-export DOCKER_RUN_FLAGS="--user $(id -u):$(id -g)"
+export DOCKER_RUN_FLAGS=${DOCKER_RUN_FLAGS:-"--rm=true --user=$(id -u):$(id -g)"}
+
+# Work around a bug in https://github.com/gravitational/robotest/blob/v2.1.0/docker/suite/run_suite.sh#L21-L30
+# which mounts a volume inside a volume, resulting in docker creating the inner mountpoint
+# owned by root:root if it does not already exist.
+INSTALLER_BINDIR="$(dirname ${INSTALLER_URL})/bin"
+mkdir -p "${INSTALLER_BINDIR}"
 
 function build_upgrade_step {
   local usage="$FUNCNAME os release storage-driver cluster-size"
