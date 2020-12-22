@@ -16,6 +16,7 @@ fi
 
 keytool -genkey \
 	-keyalg RSA \
+	-validity 3650 \
 	-alias cassandra-node \
 	-keystore keystore \
 	-storepass cassandra \
