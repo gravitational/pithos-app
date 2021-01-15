@@ -94,13 +94,16 @@ $(BINARIES_DIR):
 $(TARBALL): import $(BUILD_DIR)
 	$(GRAVITY) package export $(REPOSITORY)/$(NAME):$(VERSION) $(TARBALL) $(EXTRA_GRAVITY_OPTIONS)
 
+# Needs to be .PHONY because RUNTIME_VERSION is dynamic
+.PHONY: $(BUILD_DIR)/resources/app.yaml
+$(BUILD_DIR)/resources/app.yaml: | $(BUILD_DIR)
+	cp --archive resources build
+	sed -i "s/version: \"0.0.0+latest\"/version: \"$(RUNTIME_VERSION)\"/" build/resources/app.yaml
+	sed -i "s#gravitational.io/cluster-ssl-app:0.0.0+latest#gravitational.io/cluster-ssl-app:$(CLUSTER_SSL_APP_VERSION)#" build/resources/app.yaml
+
 .PHONY: build-app
-build-app: images | $(BUILD_DIR)
-	sed -i "s/version: \"0.0.0+latest\"/version: \"$(RUNTIME_VERSION)\"/" resources/app.yaml
-	sed -i "s#gravitational.io/cluster-ssl-app:0.0.0+latest#gravitational.io/cluster-ssl-app:$(CLUSTER_SSL_APP_VERSION)#" resources/app.yaml
-	$(TELE) build -f -o build/installer.tar $(TELE_BUILD_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) resources/app.yaml
-	sed -i "s/version: \"$(RUNTIME_VERSION)\"/version: \"0.0.0+latest\"/" resources/app.yaml
-	sed -i "s#gravitational.io/cluster-ssl-app:$(CLUSTER_SSL_APP_VERSION)#gravitational.io/cluster-ssl-app:0.0.0+latest#" resources/app.yaml
+build-app: images $(BUILD_DIR)/resources/app.yaml | $(BUILD_DIR)
+	$(TELE) build -f -o build/installer.tar $(TELE_BUILD_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) build/resources/app.yaml
 
 .PHONY: build-pithosctl
 build-pithosctl: $(BUILD_DIR)
