@@ -9,7 +9,7 @@ source $(dirname $0)/utils.sh
 declare -A UPGRADE_MAP
 
 # TODO (Sergei): enable upgrades from recommended tags
-UPGRADE_MAP[$(recommended_upgrade_tag $(branch 1.12.x))]="ubuntu:18" # this branch
+UPGRADE_MAP[1.12.13]="ubuntu:18" # this branch
 
 # via intermediate upgrade
 UPGRADE_MAP[1.12.5]="centos:7"
