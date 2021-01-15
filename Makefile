@@ -140,3 +140,7 @@ clean:
 .PHONY: push
 push:
 	$(TELE) push -f $(EXTRA_GRAVITY_OPTIONS) $(BUILD_DIR)/installer.tar
+
+.PHONY: get-version
+get-version:
+	@echo $(VERSION)
