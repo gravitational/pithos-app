@@ -8,7 +8,6 @@ declare -A UPGRADE_MAP
 # gravity version -> list of OS releases to exercise on
 UPGRADE_MAP[1.10.36]="redhat:7"
 
-readonly OPS_APIKEY=${API_KEY:?API key for distribution Ops Center required}
 readonly APP_BUILDDIR=$TOP_DIR/build
 readonly ROBOTEST_SCRIPT=$(mktemp -d)/runsuite.sh
 
