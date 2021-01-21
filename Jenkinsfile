@@ -35,7 +35,7 @@ properties([
            defaultValue: '1',
            description: 'How many times to repeat each test.'),
     string(name: 'ROBOTEST_VERSION',
-           defaultValue: '2.1.1',
+           defaultValue: '2.2.0',
            description: 'Robotest tag to use.'),
     string(name: 'OPS_URL',
            defaultValue: 'https://ci-ops.gravitational.io',
