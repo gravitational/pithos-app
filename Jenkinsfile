@@ -38,7 +38,7 @@ properties([
            defaultValue: '1',
            description: 'How many times to repeat each test.'),
     string(name: 'ROBOTEST_VERSION',
-           defaultValue: 'stable-gce',
+           defaultValue: '2.2.1',
            description: 'Robotest tag to use.'),
     booleanParam(name: 'ROBOTEST_RUN_UPGRADE',
            defaultValue: false,

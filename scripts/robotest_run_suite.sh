@@ -13,7 +13,7 @@ readonly ROBOTEST_SCRIPT=$(mktemp -d)/runsuite.sh
 
 # number of environment variables are expected to be set
 # see https://github.com/gravitational/robotest/blob/master/suite/README.md
-export ROBOTEST_VERSION=${ROBOTEST_VERSION:-stable-gce}
+export ROBOTEST_VERSION=${ROBOTEST_VERSION:-2.2.1}
 export ROBOTEST_REPO=quay.io/gravitational/robotest-suite:$ROBOTEST_VERSION
 export WAIT_FOR_INSTALLER=true
 export INSTALLER_URL=$(pwd)/build/installer.tar
@@ -40,7 +40,7 @@ function build_upgrade_step {
   local cluster_size=${4:?$usage}
   local suite=''
   suite+=$(cat <<EOF
- upgrade3lts={${cluster_size},"os":"${os}","storage_driver":"${storage_driver}","from":"/installer_${release}.tar"}
+ upgrade={${cluster_size},"os":"${os}","storage_driver":"${storage_driver}","from":"/installer_${release}.tar"}
 EOF
 )
   echo $suite
@@ -81,6 +81,7 @@ function build_volume_mounts {
 
 export EXTRA_VOLUME_MOUNTS=$(build_volume_mounts)
 
+suite=""
 suite="$(build_install_suite)"
 suite="$suite $(build_upgrade_suite)"
 
