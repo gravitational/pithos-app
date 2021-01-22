@@ -1,4 +1,8 @@
-export VERSION ?= $(shell ./version.sh)
+ifeq ($(origin VERSION), undefined)
+# avoid ?= lazily evaluating version.sh (and thus rerunning the shell command several times)
+VERSION := $(shell ./version.sh)
+endif
+
 REPOSITORY := gravitational.io
 NAME := pithos-app
 OPS_URL ?= https://opscenter.localhost.localdomain:33009
@@ -6,7 +10,7 @@ TELE ?= $(shell which tele)
 GRAVITY ?= $(shell which gravity)
 RUNTIME_VERSION ?= $(shell $(TELE) version | awk '/^[vV]ersion:/ {print $$2}')
 INTERMEDIATE_RUNTIME_VERSION ?=
-GRAVITY_VERSION ?= 5.5.21
+GRAVITY_VERSION ?= 7.0.23
 CLUSTER_SSL_APP_VERSION ?= "0.0.0+latest"
 
 SRCDIR=/go/src/github.com/gravitational/pithos-app
@@ -90,13 +94,16 @@ $(BINARIES_DIR):
 $(TARBALL): import $(BUILD_DIR)
 	$(GRAVITY) package export $(REPOSITORY)/$(NAME):$(VERSION) $(TARBALL) $(EXTRA_GRAVITY_OPTIONS)
 
+# Needs to be .PHONY because RUNTIME_VERSION is dynamic
+.PHONY: $(BUILD_DIR)/resources/app.yaml
+$(BUILD_DIR)/resources/app.yaml: | $(BUILD_DIR)
+	cp --archive resources build
+	sed -i "s/version: \"0.0.0+latest\"/version: \"$(RUNTIME_VERSION)\"/" build/resources/app.yaml
+	sed -i "s#gravitational.io/cluster-ssl-app:0.0.0+latest#gravitational.io/cluster-ssl-app:$(CLUSTER_SSL_APP_VERSION)#" build/resources/app.yaml
+
 .PHONY: build-app
-build-app: images | $(BUILD_DIR)
-	sed -i "s/version: \"0.0.0+latest\"/version: \"$(RUNTIME_VERSION)\"/" resources/app.yaml
-	sed -i "s#gravitational.io/cluster-ssl-app:0.0.0+latest#gravitational.io/cluster-ssl-app:$(CLUSTER_SSL_APP_VERSION)#" resources/app.yaml
-	$(TELE) build -f -o build/installer.tar $(TELE_BUILD_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) resources/app.yaml
-	sed -i "s/version: \"$(RUNTIME_VERSION)\"/version: \"0.0.0+latest\"/" resources/app.yaml
-	sed -i "s#gravitational.io/cluster-ssl-app:$(CLUSTER_SSL_APP_VERSION)#gravitational.io/cluster-ssl-app:0.0.0+latest#" resources/app.yaml
+build-app: images $(BUILD_DIR)/resources/app.yaml | $(BUILD_DIR)
+	$(TELE) build -f -o build/installer.tar $(TELE_BUILD_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) build/resources/app.yaml
 
 .PHONY: build-pithosctl
 build-pithosctl: $(BUILD_DIR)
@@ -133,3 +140,7 @@ clean:
 .PHONY: push
 push:
 	$(TELE) push -f $(EXTRA_GRAVITY_OPTIONS) $(BUILD_DIR)/installer.tar
+
+.PHONY: get-version
+get-version:
+	@echo $(VERSION)
