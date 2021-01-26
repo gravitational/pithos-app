@@ -49,10 +49,40 @@ steps:
       # add binaries downloaded in "download binaries" step to path
       - export PATH=$PATH:$(pwd)/bin
       - export EXTRA_GRAVITY_OPTIONS=--state-dir=$STATEDIR
+      - export INTERMEDIATE_RUNTIME_VERSION=6.1.43
       - make build-app
     volumes:
       - name: dockersock
         path: /var/run
+  - name: robotest
+    image: docker:git
+    when: # do not run robotest on PRs from forks, as GCP provisioning creds would be leaked
+      repo:
+      - gravitational/pithos-app
+    environment:
+      GCP_ROBOTEST_CREDENTIALS:
+        from_secret: GCP_ROBOTEST_CREDENTIALS
+      AWS_ACCESS_KEY_ID:
+        from_secret: AWS_S3_RO_ACCESS_KEY_ID
+      AWS_SECRET_ACCESS_KEY:
+        from_secret: AWS_S3_RO_SECRET_ACCESS_KEY
+      # These files need to be in a volume that the docker service has access to
+      # We choose /tmp to accommodate https://github.com/gravitational/robotest/blob/3774f8641439b19c4e0e598db8f87c52ea0e4817/docker/suite/run_suite.sh#L106
+      SSH_KEY: /tmp/secrets/robotest
+      SSH_PUB: /tmp/secrets/robotest.pub
+      GOOGLE_APPLICATION_CREDENTIALS: /tmp/secrets/gcp.json
+    commands:
+      - apk add --no-cache make bash aws-cli
+      - mkdir -p $(dirname $SSH_KEY)
+      - ssh-keygen -t ed25519 -N '' -f $SSH_KEY
+      - echo "$GCP_ROBOTEST_CREDENTIALS" > $GOOGLE_APPLICATION_CREDENTIALS
+      - make robotest-run-suite
+    volumes:
+      - name: dockersock
+        path: /var/run
+      - name: dockertmp
+        path: /tmp
+
 
 services:
   - name: run docker daemon
@@ -61,12 +91,16 @@ services:
     volumes:
       - name: dockersock
         path: /var/run
+      - name: dockertmp
+        path: /tmp
 
 volumes:
   - name: dockersock
     temp: {}
+  - name: dockertmp
+    temp: {}
 ---
 kind: signature
-hmac: a8e8a65ff76b3b29c82147758b930c97614c295df9fd9f9ffb059e0e88314e63
+hmac: 04c85f9f78dbe23a7b30a011bfda8fe6f8a485593cd7b24f6c403d3ce6ba2fe5
 
 ...

@@ -11,7 +11,7 @@ readonly ROBOTEST_SCRIPT=$(mktemp -d)/runsuite.sh
 
 # a number of environment variables are expected to be set
 # see https://github.com/gravitational/robotest/blob/v2.0.0/suite/README.md
-export ROBOTEST_VERSION=${ROBOTEST_VERSION:-uid-gid}
+export ROBOTEST_VERSION=${ROBOTEST_VERSION:-2.2.0}
 export ROBOTEST_REPO=quay.io/gravitational/robotest-suite:$ROBOTEST_VERSION
 export INSTALLER_URL=$(pwd)/build/installer.tar
 export GRAVITY_URL=$(pwd)/bin/gravity
@@ -55,7 +55,9 @@ export EXTRA_VOLUME_MOUNTS=$(build_volume_mounts)
 mkdir -p $UPGRADE_FROM_DIR
 for release in ${!UPGRADE_MAP[@]}; do
   if [ ! -f $UPGRADE_FROM_DIR/$(tag_to_tarball ${release}) ]; then
-      aws s3 cp s3://builds.gravitational.io/pithos/$(tag_to_tarball ${release}) $UPGRADE_FROM_DIR/$(tag_to_tarball ${release})
+      # aws s3 cp has incredibly verbose progress, disable progress for the sake of concise CI logs
+      [[ -z ${CI:-} ]] || S3_FLAGS=--no-progress
+      aws s3 cp ${S3_FLAGS:-} s3://builds.gravitational.io/pithos/$(tag_to_tarball ${release}) $UPGRADE_FROM_DIR/$(tag_to_tarball ${release})
   fi
 done
 
