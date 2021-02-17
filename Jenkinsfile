@@ -37,17 +37,11 @@ properties([
     string(name: 'ROBOTEST_VERSION',
            defaultValue: '2.2.1',
            description: 'Robotest tag to use.'),
-    string(name: 'OPS_URL',
-           defaultValue: 'https://ci-ops.gravitational.io',
-           description: 'Ops Center URL to download dependencies from'),
-    string(name: 'OPS_CENTER_CREDENTIALS',
-           defaultValue: 'CI_OPS_API_KEY',
-           description: 'Jenkins\' key containing the Ops Center Credentials'),
     string(name: 'GRAVITY_VERSION',
-           defaultValue: '7.0.23',
+           defaultValue: '7.0.30',
            description: 'gravity/tele binaries version'),
     string(name: 'CLUSTER_SSL_APP_VERSION',
-           defaultValue: '0.8.3',
+           defaultValue: '0.8.4',
            description: 'cluster-ssl-app version'),
     string(name: 'INTERMEDIATE_RUNTIME_VERSION',
            defaultValue: '6.1.43',
@@ -61,10 +55,6 @@ properties([
     booleanParam(name: 'ADD_GRAVITY_VERSION',
                  defaultValue: false,
                  description: 'Appends "-${GRAVITY_VERSION}" to the tag to be published'),
-    booleanParam(name: 'IMPORT_APP',
-                 defaultValue: false,
-                 description: 'Import application to ops center'
-    ),
   ]),
 ])
 
@@ -75,7 +65,7 @@ node {
         $class: 'GitSCM',
         branches: [[name: "${params.TAG}"]],
         doGenerateSubmoduleConfigurations: scm.doGenerateSubmoduleConfigurations,
-        extensions: scm.extensions,
+        extensions: scm.extensions + [[$class: 'CloneOption', noTags: false, reference: '', shallow: false]],
         submoduleCfg: [],
         userRemoteConfigs: scm.userRemoteConfigs,
       ])
@@ -90,32 +80,29 @@ node {
 
     APP_VERSION = sh(script: 'make what-version', returnStdout: true).trim()
     APP_VERSION = params.ADD_GRAVITY_VERSION ? "${APP_VERSION}-${GRAVITY_VERSION}" : APP_VERSION
-    TELE_STATE_DIR = "${pwd()}/state/${APP_VERSION}"
+    STATEDIR = "${pwd()}/state/${APP_VERSION}"
     BINARIES_DIR = "${pwd()}/bin"
-    EXTRA_GRAVITY_OPTIONS = "--state-dir=${TELE_STATE_DIR} ${params.EXTRA_GRAVITY_OPTIONS}"
     MAKE_ENV = [
-      "EXTRA_GRAVITY_OPTIONS=${EXTRA_GRAVITY_OPTIONS}",
+      "STATEDIR=${STATEDIR}",
       "PATH+GRAVITY=${BINARIES_DIR}",
       "VERSION=${APP_VERSION}"
     ]
 
-    stage('download gravity/tele binaries for login') {
+    stage('download gravity/tele binaries') {
       withEnv(MAKE_ENV + ["BINARIES_DIR=${BINARIES_DIR}"]) {
         sh 'make download-binaries'
       }
     }
 
+    stage('populate state directory with gravity and cluster-ssl packages') {
+      withEnv(MAKE_ENV + ["BINARIES_DIR=${BINARIES_DIR}"]) {
+        sh 'make install-dependent-packages'
+      }
+    }
+
     stage('build-app') {
-      withCredentials([
-        string(credentialsId: params.OPS_CENTER_CREDENTIALS, variable: 'API_KEY'),
-      ]) {
-        withEnv(MAKE_ENV) {
-          sh """
-  rm -rf ${TELE_STATE_DIR} && mkdir -p ${TELE_STATE_DIR}
-  tele logout
-  tele login ${EXTRA_GRAVITY_OPTIONS} -o ${OPS_URL} --token=${API_KEY}
-  make build-app"""
-        }
+      withEnv(MAKE_ENV) {
+        sh 'make build-app'
       }
     }
 
@@ -140,20 +127,6 @@ node {
         }
       } else {
         echo 'skipped system tests'
-      }
-    }
-
-    stage('push') {
-      if (params.IMPORT_APP) {
-        withCredentials([
-          string(credentialsId: params.OPS_CENTER_CREDENTIALS, variable: 'API_KEY'),
-        ]) {
-          withEnv(MAKE_ENV) {
-            sh 'make push'
-          }
-        }
-      } else {
-        echo 'skipped application import'
       }
     }
   }

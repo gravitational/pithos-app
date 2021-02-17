@@ -5,13 +5,14 @@ endif
 
 REPOSITORY := gravitational.io
 NAME := pithos-app
-OPS_URL ?= https://opscenter.localhost.localdomain:33009
+OPS_URL ?=
 TELE ?= $(shell which tele)
 GRAVITY ?= $(shell which gravity)
-RUNTIME_VERSION ?= $(shell $(TELE) version | awk '/^[vV]ersion:/ {print $$2}')
 INTERMEDIATE_RUNTIME_VERSION ?=
-GRAVITY_VERSION ?= 7.0.23
-CLUSTER_SSL_APP_VERSION ?= "0.0.0+latest"
+GRAVITY_VERSION ?= 7.0.30
+CLUSTER_SSL_APP_VERSION ?= 0.8.4
+CLUSTER_SSL_APP_URL ?= https://github.com/gravitational/cluster-ssl-app/releases/download/${CLUSTER_SSL_APP_VERSION}/cluster-ssl-app-${CLUSTER_SSL_APP_VERSION}.tar.gz
+STATEDIR ?= state
 
 SRCDIR=/go/src/github.com/gravitational/pithos-app
 DOCKERFLAGS=--rm=true -u $$(id -u):$$(id -g) -e GOCACHE=/tmp/.cache -v $(PWD):$(SRCDIR) -v $(GOPATH)/pkg:/gopath/pkg -w $(SRCDIR)
@@ -22,6 +23,11 @@ TELE_BUILD_EXTRA_OPTIONS ?=
 # if variable is not empty add an extra parameter to tele build
 ifneq ($(INTERMEDIATE_RUNTIME_VERSION),)
 	TELE_BUILD_EXTRA_OPTIONS +=  --upgrade-via=$(INTERMEDIATE_RUNTIME_VERSION)
+endif
+
+# add state directory to the commands if STATEDIR variable not empty
+ifneq ($(STATEDIR),)
+	EXTRA_GRAVITY_OPTIONS +=  --state-dir=$(STATEDIR)
 endif
 
 CONTAINERS := pithos-bootstrap:$(VERSION) \
@@ -53,8 +59,11 @@ IMPORT_OPTIONS := --vendor \
 		--ignore="alerts.yaml" \
 		$(IMPORT_IMAGE_FLAGS)
 
-TELE_BUILD_OPTIONS := --repository=$(OPS_URL) \
-		--name=$(NAME) \
+ifneq ($(OPS_URL),)
+	TELE_BUILD_EXTRA_OPTIONS +=  --repository=$(OPS_URL)
+endif
+
+TELE_BUILD_OPTIONS := --name=$(NAME) \
 		--version=$(VERSION) \
 		--glob=**/*.yaml \
 		--ignore="pithos-cfg/*.yaml" \
@@ -91,18 +100,21 @@ $(BUILD_DIR):
 $(BINARIES_DIR):
 	mkdir -p $(BINARIES_DIR)
 
+$(STATEDIR):
+	mkdir -p $(STATEDIR)
+
 $(TARBALL): import $(BUILD_DIR)
 	$(GRAVITY) package export $(REPOSITORY)/$(NAME):$(VERSION) $(TARBALL) $(EXTRA_GRAVITY_OPTIONS)
 
-# Needs to be .PHONY because RUNTIME_VERSION is dynamic
+# .PHONY because VERSION is dynamic
 .PHONY: $(BUILD_DIR)/resources/app.yaml
 $(BUILD_DIR)/resources/app.yaml: | $(BUILD_DIR)
 	cp --archive resources build
-	sed -i "s/version: \"0.0.0+latest\"/version: \"$(RUNTIME_VERSION)\"/" build/resources/app.yaml
 	sed -i "s#gravitational.io/cluster-ssl-app:0.0.0+latest#gravitational.io/cluster-ssl-app:$(CLUSTER_SSL_APP_VERSION)#" build/resources/app.yaml
 
 .PHONY: build-app
 build-app: images $(BUILD_DIR)/resources/app.yaml | $(BUILD_DIR)
+	$(GRAVITY) $(EXTRA_GRAVITY_OPTIONS) package list
 	$(TELE) build -f -o build/installer.tar $(TELE_BUILD_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) build/resources/app.yaml
 
 .PHONY: build-pithosctl
@@ -130,12 +142,22 @@ download-binaries: $(BINARIES_DIR)
 		chmod +x $(BINARIES_DIR)/$$name; \
 	done
 
+.PHONY: install-dependent-packages
+install-dependent-packages: clean-state-dir $(STATEDIR) $(BUILD_DIR)
+	$(TELE) pull gravity:$(GRAVITY_VERSION) $(EXTRA_GRAVITY_OPTIONS) -o $(BUILD_DIR)/gravity.tar --force
+	tar xf $(BUILD_DIR)/gravity.tar -C $(STATEDIR) gravity.db packages
+	curl -L $(CLUSTER_SSL_APP_URL) -o $(BUILD_DIR)/cluster-ssl-app.tar.gz
+	$(GRAVITY) $(EXTRA_GRAVITY_OPTIONS) app import $(BUILD_DIR)/cluster-ssl-app.tar.gz
+
 .PHONY: clean
-clean:
+clean: clean-state-dir
 	$(MAKE) -C images clean
 	-rm -rf images/{bootstrap,pithosctl,hook}/bin
 	-rm -rf $(BUILD_DIR)
 	-rm -rf wd_suite
+
+clean-state-dir:
+	-rm -rf $(STATEDIR)
 
 .PHONY: push
 push:

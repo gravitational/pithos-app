@@ -4,5 +4,5 @@ build
 registry
 pithos.jar
 bin
-state
+/state
 wd_suite
