@@ -97,6 +97,8 @@ node {
     stage('populate state directory with gravity and cluster-ssl packages') {
       withEnv(MAKE_ENV + ["BINARIES_DIR=${BINARIES_DIR}"]) {
         sh 'make install-dependent-packages'
+      }
+    }
 
     stage('build-app') {
       withEnv(MAKE_ENV) {
