@@ -13,7 +13,7 @@ properties([
     string(name: 'TAG',
            defaultValue: env.BRANCH_NAME,
            description: 'Git tag to build'),
-    choice(choices: ["run", "skip"].join("\n"),
+    booleanParam(defaultValue: false,
            description: 'Run or skip robotest system wide tests.',
            name: 'RUN_ROBOTEST'),
     choice(choices: ["true", "false"].join("\n"),
@@ -55,7 +55,13 @@ properties([
     booleanParam(name: 'ADD_GRAVITY_VERSION',
                  defaultValue: false,
                  description: 'Appends "-${GRAVITY_VERSION}" to the tag to be published'),
-  ]),
+    booleanParam(name: 'BUILD_GRAVITY_APP',
+                 defaultValue: false,
+                 description: 'Generate a Gravity App tarball'),
+    booleanParam(name: 'BUILD_CLUSTER_IMAGE',
+                 defaultValue: true,
+                 description: 'Generate a Gravity Cluster Image(Self-sufficient tarball)'),
+    ]),
 ])
 
 node {
@@ -101,13 +107,25 @@ node {
     }
 
     stage('build-app') {
-      withEnv(MAKE_ENV) {
-        sh 'make build-app'
+      if (params.BUILD_CLUSTER_IMAGE) {
+        withEnv(MAKE_ENV) {
+          sh 'make build-app'
+        }
+      } else {
+        echo 'skipped build of gravity cluster image'
+      }
+    }
+
+    stage('build gravity app') {
+      if (params.BUILD_GRAVITY_APP) {
+        sh ''
+      } else {
+        echo 'skipped build of gravity application'
       }
     }
 
     stage('test') {
-      if (params.RUN_ROBOTEST == 'run') {
+      if (params.RUN_ROBOTEST) {
         throttle(['robotest']) {
             withCredentials([
               [$class: 'FileBinding', credentialsId:'ROBOTEST_LOG_GOOGLE_APPLICATION_CREDENTIALS', variable: 'GOOGLE_APPLICATION_CREDENTIALS'],
