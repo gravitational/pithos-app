@@ -101,7 +101,7 @@ $(STATEDIR):
 	mkdir -p $(STATEDIR)
 
 .PHONY: export
-export: $(TARBALL)
+export: import $(TARBALL)
 
 $(TARBALL):
 	$(GRAVITY) package export $(REPOSITORY)/$(NAME):$(VERSION) $(TARBALL) $(EXTRA_GRAVITY_OPTIONS)
