@@ -73,6 +73,7 @@ TELE_BUILD_OPTIONS := --name=$(NAME) \
 
 BUILD_DIR := build
 BINARIES_DIR := bin
+TARBALL := build/application.tar
 
 .PHONY: all
 all: clean images
@@ -86,13 +87,9 @@ images:
 	$(MAKE) -C images VERSION=$(VERSION)
 
 .PHONY: import
-import: images
-	sed -i "s/version: \"0.0.0+latest\"/version: \"$(RUNTIME_VERSION)\"/" resources/app.yaml
-	sed -i "s#gravitational.io/cluster-ssl-app:0.0.0+latest#gravitational.io/cluster-ssl-app:$(CLUSTER_SSL_APP_VERSION)#" resources/app.yaml
+import: images | $(BUILD_DIR)
 	$(GRAVITY) app delete --ops-url=$(OPS_URL) $(REPOSITORY)/$(NAME):$(VERSION) --force $(EXTRA_GRAVITY_OPTIONS)
 	$(GRAVITY) app import $(IMPORT_OPTIONS) $(EXTRA_GRAVITY_OPTIONS) .
-	sed -i "s/version: \"$(RUNTIME_VERSION)\"/version: \"0.0.0+latest\"/" resources/app.yaml
-	sed -i "s#gravitational.io/cluster-ssl-app:$(CLUSTER_SSL_APP_VERSION)#gravitational.io/cluster-ssl-app:0.0.0+latest#" resources/app.yaml
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
@@ -103,7 +100,10 @@ $(BINARIES_DIR):
 $(STATEDIR):
 	mkdir -p $(STATEDIR)
 
-$(TARBALL): import $(BUILD_DIR)
+.PHONY: export
+export: import $(TARBALL)
+
+$(TARBALL):
 	$(GRAVITY) package export $(REPOSITORY)/$(NAME):$(VERSION) $(TARBALL) $(EXTRA_GRAVITY_OPTIONS)
 
 # .PHONY because VERSION is dynamic
