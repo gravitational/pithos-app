@@ -73,7 +73,7 @@ TELE_BUILD_OPTIONS := --name=$(NAME) \
 
 BUILD_DIR := build
 BINARIES_DIR := bin
-TARBALL := build/pithos-app.tar
+TARBALL := build/application.tar
 
 .PHONY: all
 all: clean images
