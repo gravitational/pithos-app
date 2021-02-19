@@ -118,7 +118,9 @@ node {
 
     stage('build gravity app') {
       if (params.BUILD_GRAVITY_APP) {
-        sh 'make export'
+        withEnv(MAKE_ENV) {
+          sh 'make export'
+        }
       } else {
         echo 'skipped build of gravity application'
       }
