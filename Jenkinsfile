@@ -120,6 +120,7 @@ node {
       if (params.BUILD_GRAVITY_APP) {
         withEnv(MAKE_ENV) {
           sh 'make export'
+          archiveArtifacts "build/application.tar"
         }
       } else {
         echo 'skipped build of gravity application'
