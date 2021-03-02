@@ -9,8 +9,7 @@ spec:
       name: pithos-initialize
     spec:
       securityContext:
-          runAsUser: 1000 # needs to be the same UID as cassandra
-      restartPolicy: OnFailure
+        runAsUser: 0
       containers:
         - image: cassandra:latest
           name: pithos-initialize
