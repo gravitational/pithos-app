@@ -139,7 +139,8 @@ spec:
       nodeSelector:
         pithos-role: node
       securityContext:
-          runAsUser: -1
+        # hardcoded pithos user ID in the docker container
+        runAsUser: 1000
       containers:
       - image: pithos:latest
         name: pithos
