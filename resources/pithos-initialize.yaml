@@ -10,7 +10,7 @@ spec:
     spec:
       restartPolicy: OnFailure
       securityContext:
-          runAsUser: -1
+          runAsUser: 0
       containers:
         - image: cassandra:latest
           name: pithos-initialize
