@@ -1,5 +1,8 @@
 # pithos-app
 
+Pithos Application is [Pithos](https://github.com/exoscale/pithos) packaged for deployment
+in a [Gravity](https://github.com/gravitational/gravity) cluster.
+
 ## Provides
 
 Once deployed or installed, this app will provide:
@@ -9,6 +12,7 @@ Once deployed or installed, this app will provide:
 Requires client compatibility with V2 signatures, and ability to specify custom endpoints.
 
 ## Building
+
 ### Building images
 Execute `all` make target(could be omiited as it is default target).
 ```sh
